@@ -15,7 +15,7 @@ export default function Home() {
       <section className="mx-auto flex min-h-screen w-full max-w-7xl flex-col justify-between px-6 py-10 sm:px-10 lg:px-14">
         <div className="flex items-center justify-between text-sm uppercase tracking-[0.3em] text-white/70">
           <p>Lens Archive</p>
-          <p>Portfolio showcase platform</p>
+          <p>作品展示与约拍平台</p>
         </div>
 
         <div className="grid gap-16 py-16 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.8fr)] lg:items-end">
@@ -49,7 +49,7 @@ export default function Home() {
           </div>
 
           <div className="rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
-            <p className="text-sm uppercase tracking-[0.3em] text-cyan-200/80">Featured Pathways</p>
+            <p className="text-sm uppercase tracking-[0.3em] text-cyan-200/80">精选入口</p>
             <div className="mt-6 space-y-4">
               {homePageFeaturedPaths.map((item) => (
                 <Link

@@ -27,10 +27,10 @@ test("studio page renders the authenticated role landing view", async () => {
   expect(
     screen.getByRole("heading", {
       level: 1,
-      name: /photographer studio/i,
+      name: /摄影师工作台/,
     })
   ).toBeDefined();
-  expect(screen.getByRole("link", { name: /open inbox/i }).getAttribute("href")).toBe("/inbox");
+  expect(screen.getByRole("link", { name: /打开收件箱/ }).getAttribute("href")).toBe("/inbox");
 });
 
 test("studio page redirects unauthenticated visitors to login", async () => {

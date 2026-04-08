@@ -1526,4 +1526,211 @@
 - **偏差/缺口：** finalize 未再混入新实现。
 - **建议：** finalize skill 可补充“在一次 reroute 后重新恢复为权威 closeout pack”的示例。
 
+### 2026-04-08 12:12 — 中文化需求触发 increment
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-increment\SKILL.md`
+- **触发原因：** 用户新增“这个网站需要是中文的，请修改，修改完成后在浏览器里测试”的要求，属于已交付范围上的用户可见语言与验收约束变更。
+- **执行摘要：**
+  - 读取当前 `task-progress.md`、第二轮首页发现增强规格/设计/任务与发布说明，确认当前工作流已完成。
+  - 判定本次变化为真实 increment，而不是 hotfix：它改变了全站用户可见语言基线、浏览器验收口径和既有完成声明。
+  - 新增 `docs/reviews/increment-site-chinese-localization.md`，并将 `task-progress.md` 回退到“增量变更分析”，`Current Active Task` 清为 `pending reselection`，下一步写为 `ahe-specify`。
+- **偏差/缺口：** 当前只完成影响分析，尚未开始新的规格产出。
+- **建议：** increment skill 可补充“全站语言切换”这类横切式 UX 约束变更的示例。
+
+### 2026-04-08 12:18 — 起草全站中文化规格
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-specify\SKILL.md`
+- **触发原因：** increment 已明确唯一回流节点为 `ahe-specify`，需要为“网站全站中文化 + 浏览器验证”起草新的可评审规格。
+- **执行摘要：**
+  - 读取当前变更记录、`task-progress.md`、已有首页发现增强规格以及代码中现存英文 UI 线索。
+  - 新建 `docs/specs/2026-04-08-site-chinese-localization-srs.md`，收敛首页、公开浏览、认证/工作台、交互反馈与 metadata 中文化范围。
+  - 补充浏览器验证要求，并将 `task-progress.md` 更新为“规格草稿待评审”，下一步写为 `ahe-spec-review`。
+- **偏差/缺口：** 规格尚未经过 reviewer subagent 评审。
+- **建议：** specify skill 可增加“语言本地化 / UI 文案统一”场景下的范围识别示例。
+
+### 2026-04-08 — 全站中文化 SRS：`ahe-spec-review`
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-spec-review\SKILL.md`
+- **触发原因：** reviewer subagent 受父会话委派，对 `2026-04-08-site-chinese-localization-srs.md` 执行正式规格评审门禁。
+- **执行摘要：**
+  - 读取 `ahe-spec-review` SKILL、目标 SRS、`task-progress.md` 与 `docs/reviews/increment-site-chinese-localization.md`，按 checklist 审查范围、可验收性、非功能与开放问题。
+  - 将评审结论落盘至 `docs/reviews/spec-review-site-chinese-localization.md`（结论：通过；发现项均为 minor）。
+  - 更新 `task-progress.md`：`Current Stage` 为规格待人类确认，`Current Review Record` 指向本次 spec review，`Next Action Or Recommended Skill` 为 `ahe-design`（与 Status 中「须先人类批准」配套）。
+  - 本节点未修改规格正文、未进入 `ahe-design` 或实现。
+- **偏差/缺口：** `task-progress` 中 `Next Action` 字面上为 `ahe-design`，与 SKILL 默认 JSON 字段 `规格真人确认` 表述不同；已通过 `Current Status` 强调须先完成规格人类批准。
+- **建议：** 可在 `task-progress` 模板中增加「下一技能」与「当前门禁（含人类确认）」分栏，减少与 `ahe-spec-review` Output Contract 的歧义。
+
+### 2026-04-08 12:31 — 起草全站中文化设计
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-design\SKILL.md`
+- **触发原因：** 用户已确认“全站中文化”规格，当前需要把文案落点、copy 收口方式、模块边界与浏览器验证路径整理成可评审设计。
+- **执行摘要：**
+  - 读取 `task-progress.md`、已确认规格、规格评审记录，以及根布局、首页、首页发现、认证入口与公开主页等关键实现上下文。
+  - 新建 `docs/designs/2026-04-08-site-chinese-localization-design.md`，比较“散改字符串”“按现有边界收口 copy”“直接接 i18n”三种候选方案。
+  - 选定“按现有边界集中管理 copy，并保留页面局部常量”的方案，并同步 `task-progress.md` 到“设计草稿待评审”，下一步写为 `ahe-design-review`。
+- **偏差/缺口：** 设计尚未经过 reviewer subagent 评审。
+- **建议：** design skill 可增加“横切式 UI 文案改造”场景下的模块清单模板。
+
+### 2026-04-08 — 全站中文化设计：`ahe-design-review`
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-design-review\SKILL.md`
+- **触发原因：** reviewer subagent 受父会话委派，对 `2026-04-08-site-chinese-localization-design.md` 执行正式设计评审门禁。
+- **执行摘要：**
+  - 读取 `ahe-design-review` SKILL、目标设计、已批准规格（及 `spec-review-site-chinese-localization.md`、`task-progress.md`）、`web/AGENTS.md` 必要约定。
+  - 按 checklist 审查需求追溯、方案对比（A/B/C）、模块边界、术语与 NFR 落地、测试与浏览器验证策略。
+  - 将评审结论落盘至 `docs/reviews/design-review-site-chinese-localization.md`（结论：通过；含 important 级「术语双选须在确认/任务首条收敛」与若干 minor）。
+  - 更新 `task-progress.md`：`Current Stage` / `Current Status` / `Current Review Record` / `Next Action Or Recommended Skill`（`ahe-tasks`，与 Status 中须先完成设计真人确认配套）、`Pending Reviews And Gates`。
+  - 未拆任务、未改实现代码。
+- **偏差/缺口：** `Next Action` 字面上为 `ahe-tasks`，与 SKILL 默认 JSON 字段「设计真人确认」表述不同；已通过 `Current Status` 强调须先人类批准设计。
+- **建议：** 同规格评审记录：可在 `task-progress` 模板中区分「下一技能」与「当前待人类门禁」，减少与 `ahe-design-review` Output Contract 的歧义。
+
+### 2026-04-08 12:47 — 起草全站中文化任务计划
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-tasks\SKILL.md`
+- **触发原因：** 用户已确认设计，当前需要把中文化实施拆成可执行、可验证、可进入实现入口的任务单元。
+- **执行摘要：**
+  - 读取 `ahe-tasks` / `ahe-tasks-review` 技能、`task-progress.md`、设计评审记录，并扫描 `web/src/app` 与 `web/src/features` 中主要英文 UI 落点。
+  - 新建 `docs/tasks/2026-04-08-site-chinese-localization-tasks.md`，按“中文基线与首页入口 -> 公开浏览链路 -> 认证与登录后页面 -> 回归与浏览器验证”拆成 `T18` ~ `T21`。
+  - 同步将规格与设计状态改为 `已批准`，固定术语为“工作台 / 主页”，并把 `task-progress.md` 更新为“任务计划草稿待评审”，下一步写为 `ahe-tasks-review`。
+- **偏差/缺口：** 任务计划尚未经过 reviewer subagent 评审。
+- **建议：** tasks skill 可提供“横切式文案改造 / 本地化”常见任务分层样例，帮助更快生成工件影响图与路径型任务。
+
+### 2026-04-08 — 全站中文化任务计划：`ahe-tasks-review`
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-tasks-review\SKILL.md`
+- **触发原因：** reviewer subagent 受父会话委派，对 `docs/tasks/2026-04-08-site-chinese-localization-tasks.md` 执行正式任务计划评审门禁（对照已批准 SRS/设计与 `task-progress.md`）。
+- **执行摘要：**
+  - 读取 `ahe-tasks-review` SKILL、任务计划、规格、设计、`task-progress.md`、`web/AGENTS.md`（Next.js 本地文档约定）。
+  - 按 checklist 审查上游追溯、拆分粒度、依赖顺序、验证/测试种子与实现入口；核对 `web` 内 `opportunities` 相关测试文件是否存在。
+  - 将评审结论落盘至 `docs/reviews/tasks-review-site-chinese-localization.md`（结论：**需修改**；`important`：`T19` 验证命令遗漏列表页测试、`T20` 验证命令未枚举路径；若干 `minor`）。
+  - 更新 `task-progress.md`：`Current Stage` / `Current Status` / `Current Review Record` / `Next Action Or Recommended Skill` 指向回修（`ahe-tasks`），明确不锁定权威 `Current Active Task`、回修通过后仍建议首任务为 `T18`。
+  - 追加本条目至 `docs/skill_record.md`。
+  - 未修改任务计划正文、未进入实现或 `ahe-test-driven-dev`。
+- **偏差/缺口：** 无；与 SKILL「reviewer 不锁定 Current Active Task」一致。
+- **建议：** 任务计划模板可为「横切文案」类任务增加「验证命令须覆盖本任务所列全部已有 `*.test.*`」自检行。
+
+### 2026-04-08 12:56 — 回修全站中文化任务计划
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-tasks\SKILL.md`
+- **触发原因：** `ahe-tasks-review` 返回 `需修改`，需要按 findings 回修任务计划后再次送审。
+- **执行摘要：**
+  - 读取 `docs/reviews/tasks-review-site-chinese-localization.md`、`task-progress.md` 与现有 `web/src/app/**/*.test.tsx` 清单。
+  - 更新 `docs/tasks/2026-04-08-site-chinese-localization-tasks.md`：补齐 `T19` 的 `src/app/opportunities/page.test.tsx`、把 `T20` 验证方式展开为显式测试文件列表，并澄清规格/设计文档修改仅属状态同步、`adapters.ts` 只在首页术语牵引下按需触及。
+  - 将 `task-progress.md` 更新为“任务计划草稿待复审”，下一步重新写回 `ahe-tasks-review`。
+- **偏差/缺口：** 回修后尚未完成二次 reviewer 复审。
+- **建议：** tasks skill 可在回修场景中强调“先核对现存测试文件，再写验证命令”这一自检步骤。
+
+### 2026-04-08 — 全站中文化任务计划：`ahe-tasks-review`（复审）
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-tasks-review\SKILL.md`
+- **触发原因：** reviewer subagent 受父会话委派，在回修后对 `docs/tasks/2026-04-08-site-chinese-localization-tasks.md` 再次执行正式任务计划评审（对照已批准 SRS/设计、`task-progress.md`、`web/AGENTS.md`）。
+- **执行摘要：**
+  - 读取 SKILL、回修后任务计划、规格、设计、既有 review 记录与 `task-progress.md`。
+  - 对照首轮 **需修改** 项核对回修：`T19` 验证命令已含 `opportunities/page.test.tsx`；`T20` 已枚举登录/注册/studio/收件箱等测试路径；§3 与 `T18`/`T21` 已澄清规格/设计改动边界及 `adapters.ts` 按需触及条件。
+  - 抽样核对 `web` 内任务所列 `*.test.tsx` 路径与仓库文件一致。
+  - 将权威评审结论更新落盘至 `docs/reviews/tasks-review-site-chinese-localization.md`（结论：**通过**；minor：任务计划文书状态/文末引导语待真人确认时同步、横切任务实现纪律提醒）。
+  - 更新 `task-progress.md` 至「任务计划待人类确认」：`Next Action` 指向确认后的 `ahe-test-driven-dev` 并写明确认前不得实现；不锁定权威 `Current Active Task`，在 Status 中建议首任务 `T18`。
+  - 本条目追加至 `docs/skill_record.md`。
+  - 未修改任务计划正文、未进入实现。
+- **偏差/缺口：** `task-progress` 中 `Next Action` 写为确认后的 `ahe-test-driven-dev`，与 SKILL JSON 字段默认「下一技能=任务真人确认」字面不同；已通过 `Current Status` / `Pending Reviews And Gates` 显式保留人类确认门禁。
+- **建议：** 同设计评审相关记录：可在进度模板中区分「下一实现技能（经门禁后）」与「当前待人类门禁」。
+
+### 2026-04-08 13:07 — 进入 T18 实现入口
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-driven-dev\SKILL.md`
+- **触发原因：** 用户已确认全站中文化任务计划，当前正式锁定首个活跃任务 `T18` 进入实现。
+- **执行摘要：**
+  - 读取 `ahe-test-driven-dev`、已批准任务计划、任务计划 review、`task-progress.md`，并将权威 `Current Active Task` 锁定为 `T18`。
+  - 读取 `web/AGENTS.md` 约束与 Next.js 本地 metadata 文档，确认 `layout.tsx` 静态 `metadata` 用法与本轮根布局中文化边界。
+  - 按用户此前“后续测试设计直接视为确认”的授权，将 T18 的测试设计视为已确认，准备进入首页相关中文断言的 fail-first。
+- **偏差/缺口：** RED / GREEN 证据尚未产生，当前处于测试改写前。
+- **建议：** `ahe-test-driven-dev` skill 可补充“用户已预先授权后续测试设计自动确认”这一场景下的记录模板。
+
+### 2026-04-08 13:18 — 完成 T18 fail-first 实现
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-driven-dev\SKILL.md`
+- **触发原因：** 在已锁定 `T18` 后，执行首页中文基线的有效 TDD。
+- **执行摘要：**
+  - 先将 `page.test.tsx`、`page.discovery-regression.test.tsx`、`home-discovery-section.test.tsx` 改为中文断言，并补充 `layout.tsx` 的 `lang` / metadata 中文断言。
+  - 运行 `npm run test -- src/app/page.test.tsx src/app/page.discovery-regression.test.tsx src/features/home-discovery/home-discovery-section.test.tsx` 获取 RED：首页与发现分区仍为英文、根布局仍为英文 `lang` / metadata。
+  - 以最小实现更新 `layout.tsx`、`page.tsx`、`sample-data.ts`、`resolver.ts`、`home-discovery-section.tsx`、`adapters.ts`，再运行同一命令得到 GREEN（`3` 文件、`8` 测试通过）。
+  - 新建 `docs/verification/implementation-T18.md`，写回实现交接块，并将 `task-progress.md` 下一步切到 `ahe-bug-patterns`。
+- **偏差/缺口：** 当前仅完成 `T18` 的任务级测试与本地 lints 检查，尚未进入全量回归与浏览器验证。
+- **建议：** `ahe-test-driven-dev` skill 可在前端本地化任务中补一个“metadata / lang 也应纳入 fail-first”示例。
+
+### 2026-04-08 13:25 — T18 缺陷模式排查
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-bug-patterns\SKILL.md`
+- **触发原因：** `T18` 实现已完成，按 full profile 质量链进入首个质量节点。
+- **执行摘要：**
+  - 读取 `docs/verification/implementation-T18.md`、`task-progress.md`、已改动实现与测试文件，围绕首页中文化的高风险模式做结构化排查。
+  - 识别并记录三个主要 defect families：多来源首页文案漂移、`lang` / metadata 与页面文案不同步、adapter 派生标签残留英文。
+  - 结论写入 `docs/reviews/bug-patterns-T18.md`，判定当前风险已被首页 fail-first 测试和实现吸收，可进入 `ahe-test-review`。
+  - 同步 `task-progress.md` 的阶段、当前记录与下一步技能。
+- **偏差/缺口：** 未阻塞 `T18`，但公开页与登录后页仍有计划内英文字段待后续任务处理。
+- **建议：** bug-patterns skill 可增加“本地化/文案迁移”模式族示例，尤其是 `lang`、metadata 与 adapter 派生字段三类常见漏点。
+
+### 2026-04-08 — T18：`ahe-test-review`
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-review\SKILL.md`
+- **触发原因：** reviewer subagent 受父会话委派，在 `ahe-bug-patterns` 通过后对 `T18` 测试资产执行正式测试评审（对照实现交接块、`bug-patterns-T18`、SRS/设计/任务计划与 `task-progress.md`）。
+- **执行摘要：**
+  - 读取 SKILL、`docs/verification/implementation-T18.md`、`docs/reviews/bug-patterns-T18.md`、三份目标测试文件、`web/AGENTS.md`、规格/设计/任务计划与 `task-progress.md`。
+  - 按 checklist 审查 fail-first 可信性、行为与验收映射、`bug-patterns` 风险承接、测试设计与 mock 边界；在 `web` 目录复跑任务计划所列 Vitest 命令，确认 `3` 文件 `8` 测试 GREEN。
+  - 正式结论落盘 `docs/reviews/test-review-T18.md`（结论：**通过**；`minor`：`page.test.tsx` 中 `readFileSync` 与结构断言的实现耦合、discovery 回归 mock 与集成路径分工需在代码评审中知悉）。
+  - 更新 `task-progress.md`：`Current Stage` / `Current Status` / `Current Review Record` / `Pending Reviews And Gates` / `Next Action Or Recommended Skill` 指向 `ahe-code-review`。
+  - 未修改实现或测试源码。
+- **偏差/缺口：** 无阻塞；全量 test/lint/build 与浏览器验证仍属 `T21`。
+- **建议：** 与 `ahe-code-review` 衔接时可优先审视 `layout.tsx` metadata 与首页数据流边界是否与测试断言意图一致。
+
+### 2026-04-08 — T18：`ahe-code-review`
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-code-review\SKILL.md`
+- **触发原因：** reviewer subagent 受父会话委派，在 `ahe-test-review` 通过后对 `T18` 实现代码执行正式代码评审（对照实现交接块、`test-review-T18`、`bug-patterns-T18`、SRS/设计/任务计划与 `task-progress.md`）。
+- **执行摘要：**
+  - 读取 SKILL、实现交接块、测试评审与缺陷模式记录、规格/设计/任务锚点、`web/AGENTS.md`、`task-progress.md`。
+  - 审阅 `layout.tsx`、`page.tsx`、`sample-data.ts`（首页相关）、`resolver.ts`、`home-discovery-section.tsx`、`adapters.ts`；在 `web` 目录复跑任务计划所列 Vitest 命令，确认 `3` 文件 `8` 测试 GREEN（Vitest v4.1.2）。
+  - 正式结论落盘 `docs/reviews/code-review-T18.md`（结论：**通过**；`minor`：`sample-data` 深字段与部分 meta 仍英文化属计划内后续任务；测试层 `readFile` / mock 边界；交接块 Next 可能滞后）。
+  - 更新 `task-progress.md`：`Current Stage` / `Current Status` / `Current Review Record` / `Pending Reviews And Gates` / `Next Action Or Recommended Skill` 指向 `ahe-traceability-review`；在 `Evidence Index` 追加 `T18` 已实现 review 与交接块路径。
+  - 未修改实现或测试源码。
+- **偏差/缺口：** 无阻塞；全量 test/lint/build 与浏览器验证仍属 `T21`。
+- **建议：** 追溯评审时显式核对 `implementation-T18.md` 与主链 `Next Action` 是否一致，避免重复进入已完成节点。
+
+### 2026-04-08 — T18：`ahe-traceability-review`
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-traceability-review\SKILL.md`
+- **触发原因：** reviewer subagent 受父会话委派，在 `ahe-code-review` 通过后对 `T18` 执行正式追溯性评审（对照实现交接块、bug/test/code 评审记录、SRS/设计/任务计划与 `task-progress.md`）。
+- **执行摘要：**
+  - 读取 SKILL、实现交接块、`bug-patterns-T18` / `test-review-T18` / `code-review-T18`、站点中文化规格/设计/任务计划、`task-progress.md`。
+  - 按链路矩阵核对：规格→设计→任务→实现→测试/验证；识别实现交接块文末 `Pending`/`Next` 与主链进度不一致为文档层缺口（非语义断链）。
+  - 正式结论落盘 `docs/reviews/traceability-review-T18.md`（结论：**通过**；下一步：`ahe-regression-gate`）。
+  - 更新 `task-progress.md`：`Current Stage` / `Current Status` / `Current Review Record` / `Pending Reviews And Gates` / `Next Action Or Recommended Skill` / `Evidence Index` 指向回归门禁与追溯评审记录。
+  - 未修改实现代码或测试源码。
+- **偏差/缺口：** 技能要求读取 `AGENTS.md`；仓库根目录无该文件，沿用上游已消费的 `web/AGENTS.md` 约定。
+- **建议：** 主链在进入 `ahe-regression-gate` 时同步刷新 `implementation-T18.md` 文末状态字段，避免与 `task-progress.md` 双源漂移。
+
+### 2026-04-08 13:41 — T18 回归门禁
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-regression-gate\SKILL.md`
+- **触发原因：** `T18` 已完成 traceability review，需要基于 fresh evidence 确认首页中文基线未破坏相关模块与构建入口。
+- **执行摘要：**
+  - 结合 `docs/verification/implementation-T18.md` 与 `docs/reviews/traceability-review-T18.md` 定义本轮回归面：首页、home-discovery 模块、`layout.tsx` 的 `lang` / metadata，以及 lint / build 入口。
+  - 先补齐 `home-discovery` 相关旧英文单测（`adapters.test.ts`、`resolver.test.ts`）到中文基线，再运行首页 / discovery 模块测试、`npm run lint`、`npm run build`。
+  - fresh evidence 结果为：`6` 个测试文件、`16` 个测试通过，`lint` 通过，Next.js 生产构建通过。
+  - 新建 `docs/verification/regression-T18.md`，并把 `task-progress.md` 下一步切到 `ahe-completion-gate`。
+- **偏差/缺口：** 浏览器验证与公开页 / 登录后页中文化仍在 `T19` ~ `T21` 计划范围内，不属于当前 `T18` regression gate 覆盖面。
+- **建议：** regression-gate skill 可补充 PowerShell 下串行执行多命令的示例，避免 `&&` 语法差异造成非代码噪音。
+
+### 2026-04-08 13:49 — T18 完成门禁与收尾
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-completion-gate\SKILL.md` + `d:\workspace\ins-app\.cursor\skills\ahe\ahe-finalize\SKILL.md`
+- **触发原因：** `T18` 已通过 regression gate，需要确认任务完成范围并把状态收口到可继续推进 `T19` 的项目状态。
+- **执行摘要：**
+  - 重新执行与 regression gate 同强度的完成验证命令，得到 fresh evidence：`6` 个测试文件、`16` 个测试通过，`lint` / `build` 通过。
+  - 新建 `docs/verification/completion-T18.md`，明确本轮只宣告 `T18` 的首页与根布局中文基线完成，不覆盖 `T19` / `T20` / `T21`。
+  - 新建 `docs/verification/finalize-T18.md`，同步 `RELEASE_NOTES.md`、`task-progress.md`、证据矩阵与下一活跃任务。
+  - 将 `task-progress.md` 切换到 `T19`，`Completed Tasks` 追加 `T18`，下一步恢复为 `ahe-test-driven-dev`。
+- **偏差/缺口：** 本轮收尾只针对任务级 `T18`，不是整个“全站中文化”增量的最终 closeout。
+- **建议：** finalize skill 可增加“单任务完成后直接衔接下一任务”的 closeout pack 示例。
+
 <!-- 新记录请追加在「历史记录」章节上方紧接本注释之上，或按时间倒序追加在章节最前 -->

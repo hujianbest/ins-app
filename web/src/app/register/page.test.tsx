@@ -9,12 +9,12 @@ test("register page presents single-role account creation choices", () => {
   expect(
     screen.getByRole("heading", {
       level: 1,
-      name: /choose your creator role/i,
+      name: /选择你的创作者身份/,
     })
   ).toBeDefined();
-  expect(screen.getByText(/^photographer$/i)).toBeDefined();
-  expect(screen.getByText(/^model$/i)).toBeDefined();
-  expect(screen.getByRole("button", { name: /create photographer account/i })).toBeDefined();
-  expect(screen.getByRole("button", { name: /create model account/i })).toBeDefined();
-  expect(screen.getByRole("link", { name: /sign in/i }).getAttribute("href")).toBe("/login");
+  expect(screen.getByText(/^摄影师$/)).toBeDefined();
+  expect(screen.getByText(/^模特$/)).toBeDefined();
+  expect(screen.getByRole("button", { name: /创建摄影师账号/ })).toBeDefined();
+  expect(screen.getByRole("button", { name: /创建模特账号/ })).toBeDefined();
+  expect(screen.getByRole("link", { name: /登录/ }).getAttribute("href")).toBe("/login");
 });

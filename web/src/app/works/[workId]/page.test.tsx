@@ -36,9 +36,9 @@ test("work detail page renders the work content and owner summary", async () => 
   ).toBeDefined();
   expect(screen.getByText(works[0].description)).toBeDefined();
   expect(screen.getByText(works[0].ownerName)).toBeDefined();
-  expect(screen.getByRole("button", { name: /liked/i })).toBeDefined();
-  expect(screen.getByRole("button", { name: /send message about this work/i })).toBeDefined();
-  expect(screen.getByRole("link", { name: /back to profile/i }).getAttribute("href")).toBe(
+  expect(screen.getByRole("button", { name: /已点赞/ })).toBeDefined();
+  expect(screen.getByRole("button", { name: /发送关于这组作品的私信/ })).toBeDefined();
+  expect(screen.getByRole("link", { name: /返回主页/ }).getAttribute("href")).toBe(
     "/photographers/sample-photographer"
   );
 });
@@ -53,7 +53,7 @@ test("work detail page asks guests to log in before liking", async () => {
 
   render(page);
 
-  expect(screen.getByRole("link", { name: /log in to like this work/i }).getAttribute("href")).toBe(
+  expect(screen.getByRole("link", { name: /登录后点赞这组作品/ }).getAttribute("href")).toBe(
     "/login"
   );
 });

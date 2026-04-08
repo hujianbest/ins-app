@@ -19,21 +19,21 @@ export default async function StudioWorksPage() {
       <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-6 py-10 sm:px-10 lg:px-14">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-3">
-            <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">Studio works</p>
-            <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl">Manage works</h1>
+            <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">工作台作品</p>
+            <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl">管理作品</h1>
             <p className="max-w-3xl text-lg leading-8 text-slate-300">
-              Review the pieces currently attached to your public profile and prepare the next additions to your showcase.
+              查看当前挂载在公开主页上的作品，并为展示区准备下一批新增内容。
             </p>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/studio" className="text-sm uppercase tracking-[0.28em] text-cyan-200 transition hover:text-white">
-              Back to studio
+              返回工作台
             </Link>
             <button
               type="button"
               className="inline-flex rounded-full bg-white px-6 py-3 text-sm font-medium text-slate-950 transition hover:bg-cyan-100"
             >
-              Add new work
+              添加新作品
             </button>
           </div>
         </div>
@@ -54,13 +54,13 @@ export default async function StudioWorksPage() {
                   type="button"
                   className="rounded-full border border-white/15 px-4 py-2 text-sm text-white transition hover:border-cyan-200/50 hover:text-cyan-200"
                 >
-                  Edit
+                  编辑
                 </button>
                 <button
                   type="button"
                   className="rounded-full border border-white/15 px-4 py-2 text-sm text-white transition hover:border-cyan-200/50 hover:text-cyan-200"
                 >
-                  Preview
+                  预览
                 </button>
               </div>
             </article>

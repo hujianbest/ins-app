@@ -19,15 +19,15 @@ afterEach(() => {
 test.each([
   {
     emptyKind: "works",
-    emptyStateCopy: /new work highlights are coming soon/i,
+    emptyStateCopy: /更多作品精选即将上线/i,
   },
   {
     emptyKind: "profiles",
-    emptyStateCopy: /new profile picks are coming soon/i,
+    emptyStateCopy: /更多主页精选即将上线/i,
   },
   {
     emptyKind: "opportunities",
-    emptyStateCopy: /new booking calls are coming soon/i,
+    emptyStateCopy: /更多约拍诉求即将上线/i,
   },
 ])(
   "home page keeps the hero and empty discovery shell visible when $emptyKind section has no items",
@@ -35,8 +35,8 @@ test.each([
     resolveHomeDiscoverySectionsMock.mockReturnValue([
       {
         kind: "works",
-        title: "Featured works",
-        description: "Recent work highlights.",
+        title: "精选作品",
+        description: "从社区最新作品里挑出的优先浏览内容。",
         items:
           emptyKind === "works"
             ? []
@@ -44,16 +44,16 @@ test.each([
                 {
                   id: "work-1",
                   href: "/works/work-1",
-                  badge: "Editorial portrait",
-                  title: "Test Work",
-                  description: "A highlighted work card.",
+                  badge: "编辑人像",
+                  title: "测试作品",
+                  description: "一张用于回归验证的精选作品卡片。",
                 },
               ],
       },
       {
         kind: "profiles",
-        title: "Featured profiles",
-        description: "Meet creators ready for collaboration.",
+        title: "精选主页",
+        description: "认识准备开启合作的摄影师与模特。",
         items:
           emptyKind === "profiles"
             ? []
@@ -61,16 +61,16 @@ test.each([
                 {
                   id: "profile-1",
                   href: "/photographers/test-profile",
-                  badge: "Photographer",
-                  title: "Test Profile",
-                  description: "A creator ready for collaboration.",
+                  badge: "摄影师",
+                  title: "测试主页",
+                  description: "一个用于验证首页跳转的创作者主页。",
                 },
               ],
       },
       {
         kind: "opportunities",
-        title: "Featured opportunities",
-        description: "Browse booking calls.",
+        title: "精选诉求",
+        description: "浏览最新发布的约拍诉求与合作请求。",
         items:
           emptyKind === "opportunities"
             ? []
@@ -79,8 +79,8 @@ test.each([
                   id: "post-1",
                   href: "/opportunities/post-1",
                   badge: "Shanghai",
-                  title: "Test Opportunity",
-                  description: "A live booking request.",
+                  title: "测试诉求",
+                  description: "一条用于回归验证的在线约拍诉求。",
                 },
               ],
       },
@@ -92,17 +92,17 @@ test.each([
     expect(screen.getByText(emptyStateCopy)).toBeDefined();
 
     if (emptyKind !== "works") {
-      expect(screen.getByText("Test Work").closest("a")?.getAttribute("href")).toBe("/works/work-1");
+      expect(screen.getByText("测试作品").closest("a")?.getAttribute("href")).toBe("/works/work-1");
     }
 
     if (emptyKind !== "profiles") {
-      expect(screen.getByText("Test Profile").closest("a")?.getAttribute("href")).toBe(
+      expect(screen.getByText("测试主页").closest("a")?.getAttribute("href")).toBe(
         "/photographers/test-profile"
       );
     }
 
     if (emptyKind !== "opportunities") {
-      expect(screen.getByText("Test Opportunity").closest("a")?.getAttribute("href")).toBe(
+      expect(screen.getByText("测试诉求").closest("a")?.getAttribute("href")).toBe(
         "/opportunities/post-1"
       );
     }

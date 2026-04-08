@@ -7,6 +7,10 @@ import { toggleWorkLikeAction } from "@/features/engagement/actions";
 import { isWorkLiked } from "@/features/engagement/state";
 import { getWorkById, works } from "@/features/showcase/sample-data";
 
+function getRoleLabel(role: "photographer" | "model") {
+  return role === "photographer" ? "摄影师" : "模特";
+}
+
 export function generateStaticParams() {
   return works.map((work) => ({ workId: work.id }));
 }
@@ -30,9 +34,9 @@ export default async function WorkDetailPage({
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(103,232,249,0.14),_transparent_20%),linear-gradient(180deg,_#050816_0%,_#0f172a_56%,_#111827_100%)] text-white">
       <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-6 py-10 sm:px-10 lg:px-14">
         <div className="flex flex-wrap items-center justify-between gap-4 text-sm uppercase tracking-[0.3em] text-white/60">
-          <p>{work.ownerRole} work</p>
+          <p>{getRoleLabel(work.ownerRole)}作品</p>
           <Link href={`/${work.ownerRole}s/${work.ownerSlug}`} className="transition hover:text-cyan-200">
-            Back to profile
+            返回主页
           </Link>
         </div>
 
@@ -46,35 +50,35 @@ export default async function WorkDetailPage({
 
             <div className="grid gap-4 text-sm text-slate-300 sm:grid-cols-2">
               <div className="rounded-3xl border border-white/10 bg-white/6 p-5 backdrop-blur">
-                <p className="text-xs uppercase tracking-[0.28em] text-white/50">Profile</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-white/50">主页</p>
                 <p className="mt-3 text-base text-white">{work.ownerName}</p>
               </div>
               <div className="rounded-3xl border border-white/10 bg-white/6 p-5 backdrop-blur">
-                <p className="text-xs uppercase tracking-[0.28em] text-white/50">Like</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-white/50">点赞</p>
                 {sessionRole ? (
                   <form action={toggleWorkLikeAction.bind(null, work.id, `/works/${work.id}`)}>
                     <button
                       type="submit"
                       className="mt-3 inline-flex rounded-full border border-cyan-200/40 px-4 py-2 text-base text-cyan-200 transition hover:border-white/60 hover:text-white"
                     >
-                      {liked ? "Liked" : "Like this work"}
+                      {liked ? "已点赞" : "点赞这组作品"}
                     </button>
                   </form>
                 ) : (
                   <Link href="/login" className="mt-3 inline-flex text-base text-cyan-200 transition hover:text-white">
-                    Log in to like this work
+                    登录后点赞这组作品
                   </Link>
                 )}
               </div>
               <div className="rounded-3xl border border-white/10 bg-white/6 p-5 backdrop-blur">
-                <p className="text-xs uppercase tracking-[0.28em] text-white/50">Private contact</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-white/50">私信联系</p>
                 {sessionRole ? (
                   <form action={startContactThreadAction.bind(null, work.ownerRole, work.ownerSlug, "work", work.id)}>
                     <button
                       type="submit"
                       className="mt-3 inline-flex rounded-full border border-cyan-200/40 px-4 py-2 text-base text-cyan-200 transition hover:border-white/60 hover:text-white"
                     >
-                      Send message about this work
+                      发送关于这组作品的私信
                     </button>
                   </form>
                 ) : (
@@ -88,13 +92,13 @@ export default async function WorkDetailPage({
 
           <div className="rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
             <div className="flex aspect-[4/5] items-end rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,_rgba(103,232,249,0.12),_rgba(15,23,42,0.92))] p-6">
-              <p className="text-sm uppercase tracking-[0.35em] text-cyan-100/80">Work detail composition</p>
+              <p className="text-sm uppercase tracking-[0.35em] text-cyan-100/80">作品详情视觉</p>
             </div>
           </div>
         </div>
 
         <section className="rounded-[2rem] border border-white/10 bg-black/20 p-6">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/50">Detail note</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-white/50">作品说明</p>
           <p className="mt-4 max-w-4xl text-base leading-8 text-slate-300">{work.detailNote}</p>
         </section>
       </section>

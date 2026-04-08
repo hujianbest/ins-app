@@ -10,21 +10,21 @@ export const authRoles: Array<{
 }> = [
   {
     role: "photographer",
-    title: "Photographer",
+    title: "摄影师",
     description:
-      "Sign in to manage your portfolio, prepare client-facing work, and publish booking requests from a single studio.",
-    loginLabel: "Continue as photographer",
-    registerLabel: "Create photographer account",
-    studioTitle: "Photographer Studio",
+      "登录后即可在同一个工作台里管理作品集、准备面向客户的展示内容，并发布约拍诉求。",
+    loginLabel: "以摄影师身份继续",
+    registerLabel: "创建摄影师账号",
+    studioTitle: "摄影师工作台",
   },
   {
     role: "model",
-    title: "Model",
+    title: "模特",
     description:
-      "Sign in to shape your public profile, manage showcase content, and respond to collaboration opportunities.",
-    loginLabel: "Continue as model",
-    registerLabel: "Create model account",
-    studioTitle: "Model Studio",
+      "登录后即可完善公开主页、管理展示内容，并及时回应合作邀约与约拍诉求。",
+    loginLabel: "以模特身份继续",
+    registerLabel: "创建模特账号",
+    studioTitle: "模特工作台",
   },
 ];
 

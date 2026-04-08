@@ -6,21 +6,21 @@ import { HomeDiscoverySection } from "./home-discovery-section";
 test.each([
   {
     kind: "works" as const,
-    title: "Featured works",
-    description: "Recent work highlights.",
-    emptyStateCopy: /new work highlights are coming soon/i,
+    title: "精选作品",
+    description: "从社区最新作品里挑出的优先浏览内容。",
+    emptyStateCopy: /更多作品精选即将上线/i,
   },
   {
     kind: "profiles" as const,
-    title: "Featured profiles",
-    description: "Meet creators ready for collaboration.",
-    emptyStateCopy: /new profile picks are coming soon/i,
+    title: "精选主页",
+    description: "认识准备开启合作的摄影师与模特。",
+    emptyStateCopy: /更多主页精选即将上线/i,
   },
   {
     kind: "opportunities" as const,
-    title: "Featured opportunities",
-    description: "Browse booking calls.",
-    emptyStateCopy: /new booking calls are coming soon/i,
+    title: "精选诉求",
+    description: "浏览最新发布的约拍诉求与合作请求。",
+    emptyStateCopy: /更多约拍诉求即将上线/i,
   },
 ])("home discovery section keeps its shell and empty-state copy for $kind", ({
   kind,

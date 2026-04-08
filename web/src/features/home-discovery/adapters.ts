@@ -6,6 +6,10 @@ import type {
 
 import type { HomeDiscoveryCard } from "./types";
 
+function getRoleLabel(role: PublicProfile["role"] | PublicWork["ownerRole"] | PublicOpportunityPost["ownerRole"]) {
+  return role === "photographer" ? "摄影师" : "模特";
+}
+
 function getProfileHref(profile: PublicProfile) {
   return profile.role === "photographer"
     ? `/photographers/${profile.slug}`
@@ -19,7 +23,7 @@ export function adaptWorkToHomeDiscoveryCard(work: PublicWork): HomeDiscoveryCar
     badge: work.category,
     title: work.title,
     description: work.description,
-    meta: `${work.ownerName} · ${work.ownerRole}`,
+    meta: `${work.ownerName} · ${getRoleLabel(work.ownerRole)}`,
   };
 }
 
@@ -27,7 +31,7 @@ export function adaptProfileToHomeDiscoveryCard(profile: PublicProfile): HomeDis
   return {
     id: `${profile.role}:${profile.slug}`,
     href: getProfileHref(profile),
-    badge: profile.role === "photographer" ? "Photographer" : "Model",
+    badge: getRoleLabel(profile.role),
     title: profile.name,
     description: profile.tagline,
     meta: profile.city,

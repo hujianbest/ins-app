@@ -19,20 +19,20 @@ export default async function StudioProfilePage() {
       <section className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-10 sm:px-10 lg:px-14">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-3">
-            <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">Studio profile</p>
-            <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl">Edit profile</h1>
+            <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">工作台主页</p>
+            <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl">编辑主页</h1>
             <p className="max-w-3xl text-lg leading-8 text-slate-300">
-              Refine your public identity, keep the city and positioning up to date, and prepare the profile surface that visitors will see first.
+              完善你的公开身份信息，及时更新城市与定位，并打磨访客首先看到的主页内容。
             </p>
           </div>
           <Link href="/studio" className="text-sm uppercase tracking-[0.28em] text-cyan-200 transition hover:text-white">
-            Back to studio
+            返回工作台
           </Link>
         </div>
 
         <form className="grid gap-6 rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-[0.28em] text-white/50">Display name</span>
+            <span className="text-xs uppercase tracking-[0.28em] text-white/50">展示名称</span>
             <input
               defaultValue={profile?.name}
               className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-base text-white outline-none"
@@ -41,14 +41,14 @@ export default async function StudioProfilePage() {
 
           <div className="grid gap-6 md:grid-cols-2">
             <label className="space-y-2">
-              <span className="text-xs uppercase tracking-[0.28em] text-white/50">City</span>
+              <span className="text-xs uppercase tracking-[0.28em] text-white/50">城市</span>
               <input
                 defaultValue={profile?.city}
                 className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-base text-white outline-none"
               />
             </label>
             <label className="space-y-2">
-              <span className="text-xs uppercase tracking-[0.28em] text-white/50">Tagline</span>
+              <span className="text-xs uppercase tracking-[0.28em] text-white/50">一句话介绍</span>
               <input
                 defaultValue={profile?.tagline}
                 className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-base text-white outline-none"
@@ -57,7 +57,7 @@ export default async function StudioProfilePage() {
           </div>
 
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-[0.28em] text-white/50">Bio</span>
+            <span className="text-xs uppercase tracking-[0.28em] text-white/50">简介</span>
             <textarea
               defaultValue={profile?.bio}
               rows={6}
@@ -69,7 +69,7 @@ export default async function StudioProfilePage() {
             type="button"
             className="inline-flex w-fit rounded-full bg-white px-6 py-3 text-sm font-medium text-slate-950 transition hover:bg-cyan-100"
           >
-            Save profile changes
+            保存主页更改
           </button>
         </form>
       </section>

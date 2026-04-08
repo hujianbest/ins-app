@@ -9,10 +9,10 @@ test("login page renders entry options for both creator roles", () => {
   expect(
     screen.getByRole("heading", {
       level: 1,
-      name: /welcome back/i,
+      name: /欢迎回来/,
     })
   ).toBeDefined();
-  expect(screen.getByRole("button", { name: /continue as photographer/i })).toBeDefined();
-  expect(screen.getByRole("button", { name: /continue as model/i })).toBeDefined();
-  expect(screen.getByRole("link", { name: /create account/i }).getAttribute("href")).toBe("/register");
+  expect(screen.getByRole("button", { name: /以摄影师身份继续/ })).toBeDefined();
+  expect(screen.getByRole("button", { name: /以模特身份继续/ })).toBeDefined();
+  expect(screen.getByRole("link", { name: /创建账号/ }).getAttribute("href")).toBe("/register");
 });

@@ -23,12 +23,12 @@ test("home page renders the branded hero, feature entry points, and discovery se
     })
   ).toBeDefined();
 
-  expect(screen.getByText(/featured pathways/i)).toBeDefined();
+  expect(screen.getByText(/精选入口/)).toBeDefined();
   expect(screen.getByText(homePageFeaturedPaths[0].title)).toBeDefined();
   expect(screen.getByText(homePageFeaturedPaths[1].title)).toBeDefined();
-  expect(screen.getByRole("heading", { level: 2, name: /featured works/i })).toBeDefined();
-  expect(screen.getByRole("heading", { level: 2, name: /featured profiles/i })).toBeDefined();
-  expect(screen.getByRole("heading", { level: 2, name: /featured opportunities/i })).toBeDefined();
+  expect(screen.getByRole("heading", { level: 2, name: /精选作品/ })).toBeDefined();
+  expect(screen.getByRole("heading", { level: 2, name: /精选主页/ })).toBeDefined();
+  expect(screen.getByRole("heading", { level: 2, name: /精选诉求/ })).toBeDefined();
   expect(screen.getByText(works[0].title).closest("a")?.getAttribute("href")).toBe(
     `/works/${works[0].id}`
   );
@@ -44,7 +44,10 @@ test("home page renders the branded hero, feature entry points, and discovery se
 
 test("home page reads featured content from the shared sample data module", () => {
   const pageSource = readFileSync(path.join(process.cwd(), "src/app/page.tsx"), "utf8");
+  const layoutSource = readFileSync(path.join(process.cwd(), "src/app/layout.tsx"), "utf8");
 
   expect(pageSource).not.toContain("const featuredPaths = [");
   expect(pageSource).toContain("homePageFeaturedPaths");
+  expect(layoutSource).toContain('lang="zh-CN"');
+  expect(layoutSource).toContain("面向摄影师与模特的沉浸式作品展示与约拍平台。");
 });

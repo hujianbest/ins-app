@@ -21,14 +21,14 @@ export default async function InboxPage() {
       <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-6 py-10 sm:px-10 lg:px-14">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-3">
-            <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">Inbox</p>
-            <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl">{roleCopy?.title} messages</h1>
+            <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">收件箱</p>
+            <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl">{roleCopy?.title}消息</h1>
             <p className="max-w-3xl text-lg leading-8 text-slate-300">
-              Review inquiries that started from profiles, works, and booking requests without leaving the studio flow.
+              直接在工作台流程内查看来自主页、作品和约拍诉求的咨询，不必离开当前身份上下文。
             </p>
           </div>
           <Link href="/studio" className="text-sm uppercase tracking-[0.28em] text-cyan-200 transition hover:text-white">
-            Back to studio
+            返回工作台
           </Link>
         </div>
 
@@ -43,13 +43,13 @@ export default async function InboxPage() {
                 <h2 className="mt-3 text-2xl font-medium text-white">{thread.participantName}</h2>
                 <p className="mt-3 text-sm leading-7 text-slate-300">{thread.preview}</p>
                 <Link href={thread.sourceHref} className="mt-4 inline-flex text-base text-cyan-200 transition hover:text-white">
-                  View source
+                  查看来源
                 </Link>
               </article>
             ))
           ) : (
             <section className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
-              <p className="text-lg text-slate-300">No conversations yet.</p>
+              <p className="text-lg text-slate-300">暂时还没有对话。</p>
             </section>
           )}
         </div>

@@ -27,13 +27,13 @@ test("studio opportunities page renders request management fields for the signed
   expect(
     screen.getByRole("heading", {
       level: 1,
-      name: /manage opportunities/i,
+      name: /管理诉求/,
     })
   ).toBeDefined();
-  expect(screen.getByDisplayValue(/^Shanghai$/)).toBeDefined();
-  expect(screen.getByDisplayValue(/^2026-04-20 evening$/)).toBeDefined();
-  expect(screen.getByRole("button", { name: /publish request/i })).toBeDefined();
-  expect(screen.getByText(/shanghai editorial casting/i)).toBeDefined();
+  expect(screen.getByDisplayValue(/^上海$/)).toBeDefined();
+  expect(screen.getByDisplayValue(/^2026-04-20 晚间$/)).toBeDefined();
+  expect(screen.getByRole("button", { name: /发布诉求/ })).toBeDefined();
+  expect(screen.getByText(/上海编辑拍摄招募/)).toBeDefined();
 });
 
 test("studio opportunities page redirects unauthenticated visitors to login", async () => {

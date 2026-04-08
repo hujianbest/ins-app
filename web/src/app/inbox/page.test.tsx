@@ -28,8 +28,8 @@ test("inbox page renders contact threads for the signed-in role", async () => {
     {
       id: "model:photographer:work:neon-portrait-study",
       participantName: "Avery Vale",
-      sourceLabel: "Work: Neon Portrait Study",
-      preview: "New inquiry started from this work.",
+      sourceLabel: "作品：霓虹人像研究",
+      preview: "有新的咨询从这组作品发起。",
       sourceHref: "/works/neon-portrait-study",
     },
   ]);
@@ -41,11 +41,11 @@ test("inbox page renders contact threads for the signed-in role", async () => {
   expect(
     screen.getByRole("heading", {
       level: 1,
-      name: /photographer messages/i,
+      name: /摄影师消息/,
     })
   ).toBeDefined();
-  expect(screen.getByText(/new inquiry started from this work/i)).toBeDefined();
-  expect(screen.getByRole("link", { name: /view source/i }).getAttribute("href")).toBe(
+  expect(screen.getByText(/有新的咨询从这组作品发起/)).toBeDefined();
+  expect(screen.getByRole("link", { name: /查看来源/ }).getAttribute("href")).toBe(
     "/works/neon-portrait-study"
   );
 });

@@ -27,10 +27,10 @@ test("studio works page renders the signed-in creator work list", async () => {
   expect(
     screen.getByRole("heading", {
       level: 1,
-      name: /manage works/i,
+      name: /管理作品/,
     })
   ).toBeDefined();
-  expect(screen.getByText(/neon portrait study/i)).toBeDefined();
-  expect(screen.getByText(/monochrome street session/i)).toBeDefined();
-  expect(screen.getByRole("button", { name: /add new work/i })).toBeDefined();
+  expect(screen.getByText(/霓虹人像研究/)).toBeDefined();
+  expect(screen.getByText(/黑白街头片段/)).toBeDefined();
+  expect(screen.getByRole("button", { name: /添加新作品/ })).toBeDefined();
 });

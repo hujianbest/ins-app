@@ -1,0 +1,39 @@
+## 实现交接块
+
+- Task ID: `T18`
+- 回流来源: 主链实现
+- 触碰工件:
+  - `web/src/app/layout.tsx`
+  - `web/src/app/page.tsx`
+  - `web/src/features/showcase/sample-data.ts`
+  - `web/src/features/home-discovery/resolver.ts`
+  - `web/src/features/home-discovery/home-discovery-section.tsx`
+  - `web/src/features/home-discovery/adapters.ts`
+  - `web/src/app/page.test.tsx`
+  - `web/src/app/page.discovery-regression.test.tsx`
+  - `web/src/features/home-discovery/home-discovery-section.test.tsx`
+- 测试设计确认证据:
+  - 依据已批准任务计划 `docs/tasks/2026-04-08-site-chinese-localization-tasks.md` 中 `T18` 的测试设计种子。
+  - 用户已在此前会话中授权“后续测试设计直接视为确认”，本轮沿用该授权进入 T18 的 fail-first。
+- RED 证据:
+  - 命令: `npm run test -- src/app/page.test.tsx src/app/page.discovery-regression.test.tsx src/features/home-discovery/home-discovery-section.test.tsx`
+  - 失败摘要: 首页测试仍渲染英文 `Featured Pathways` / `Featured works` 等分区文案；`home-discovery-section` 空态仍为 `New ... are coming soon.`；`layout.tsx` 仍为 `lang="en"` 且 metadata 描述为英文。
+  - 为什么这是预期失败: T18 的目标正是建立根布局与首页中文文案基线，因此在改实现前，中文断言失败符合预期。
+- GREEN 证据:
+  - 命令: `npm run test -- src/app/page.test.tsx src/app/page.discovery-regression.test.tsx src/features/home-discovery/home-discovery-section.test.tsx`
+  - 通过摘要: `3` 个测试文件、`8` 个测试全部通过。
+  - 关键结果: 根布局已切到 `zh-CN` 与中文 metadata；首页精选入口、发现分区标题、空态文案与首页直接展示的卡片基础文案已切换为中文。
+- 与任务计划测试种子的差异:
+  - 无实质差异；实现时额外把首页 discovery 卡片的角色 badge / meta 也一并中文化，以避免首页仍残留英文。
+- 剩余风险 / 未覆盖项:
+  - `sample-data.ts` 中仍有公开页与登录后页面会展示的英文字段，预计在 `T19` / `T20` 继续收口。
+  - 当前仅验证了首页与首页发现相关测试，尚未执行全量 `test/lint/build` 或浏览器验证。
+- Pending Reviews And Gates:
+  - `ahe-bug-patterns`
+  - `ahe-test-review`
+  - `ahe-code-review`
+  - `ahe-traceability-review`
+  - `ahe-regression-gate`
+  - `ahe-completion-gate`
+- Next Action Or Recommended Skill:
+  - `ahe-bug-patterns`

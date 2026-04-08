@@ -33,6 +33,8 @@ test("profile adapter maps photographer and model profiles to distinct public ro
   expect(modelCard.href).toBe(`/models/${modelProfiles[0].slug}`);
   expect(photographerCard.title).toBe(photographerProfiles[0].name);
   expect(modelCard.title).toBe(modelProfiles[0].name);
+  expect(photographerCard.badge).toBe("摄影师");
+  expect(modelCard.badge).toBe("模特");
 });
 
 test("opportunity adapter maps a public opportunity into a detail-first discovery card", () => {

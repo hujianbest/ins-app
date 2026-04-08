@@ -27,13 +27,13 @@ test("studio profile page renders editable creator profile fields", async () => 
   expect(
     screen.getByRole("heading", {
       level: 1,
-      name: /edit profile/i,
+      name: /编辑主页/,
     })
   ).toBeDefined();
   expect(screen.getByDisplayValue(/avery vale/i)).toBeDefined();
-  expect(screen.getByDisplayValue(/shanghai/i)).toBeDefined();
-  expect(screen.getByDisplayValue(/fashion and portrait photographer/i)).toBeDefined();
-  expect(screen.getByRole("button", { name: /save profile changes/i })).toBeDefined();
+  expect(screen.getByDisplayValue(/^上海$/)).toBeDefined();
+  expect(screen.getByDisplayValue(/电影感合作项目/)).toBeDefined();
+  expect(screen.getByRole("button", { name: /保存主页更改/ })).toBeDefined();
 });
 
 test("studio profile page redirects unauthenticated visitors to login", async () => {

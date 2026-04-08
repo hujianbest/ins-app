@@ -2,6 +2,7 @@
 
 ## 2026-04-05
 
+- Localized the homepage baseline into Chinese, including the root `lang`, homepage discovery copy, and homepage-facing card labels, so the site now starts from a Chinese-first entry experience.
 - Added the first branded homepage for the photography showcase site, replacing the default Next.js starter screen with a full-screen hero and curated entry points for portfolios and opportunities.
 - Updated the site-wide metadata and global visual tokens so the experience now carries a consistent Lens Archive brand baseline beyond the homepage alone.
 - Added public photographer and model profile pages with role-specific showcase sections, contact entry points, and static sample routes for the first browsing flow.

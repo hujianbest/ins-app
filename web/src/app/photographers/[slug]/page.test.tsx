@@ -35,10 +35,10 @@ test("photographer profile page renders the public showcase for a known slug", a
     })
   ).toBeDefined();
   expect(screen.getByText(photographerProfiles[0].bio)).toBeDefined();
-  expect(screen.getByText(/featured frames/i)).toBeDefined();
-  expect(screen.getByRole("button", { name: /saved to favorites/i })).toBeDefined();
-  expect(screen.getByRole("button", { name: /send message about this profile/i })).toBeDefined();
+  expect(screen.getByText(photographerProfiles[0].sectionTitle)).toBeDefined();
+  expect(screen.getByRole("button", { name: /已加入收藏/ })).toBeDefined();
+  expect(screen.getByRole("button", { name: /发送关于这份主页的私信/ })).toBeDefined();
   expect(
-    screen.getByRole("link", { name: /neon portrait study/i }).getAttribute("href")
+    screen.getByRole("link", { name: /霓虹人像研究/ }).getAttribute("href")
   ).toBe("/works/neon-portrait-study");
 });

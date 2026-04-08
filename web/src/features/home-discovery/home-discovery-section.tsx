@@ -7,9 +7,9 @@ type HomeDiscoverySectionProps = {
 };
 
 const emptyStateCopyByKind: Record<HomeDiscoverySectionViewModel["kind"], string> = {
-  works: "New work highlights are coming soon.",
-  profiles: "New profile picks are coming soon.",
-  opportunities: "New booking calls are coming soon.",
+  works: "更多作品精选即将上线。",
+  profiles: "更多主页精选即将上线。",
+  opportunities: "更多约拍诉求即将上线。",
 };
 
 export function HomeDiscoverySection({ section }: HomeDiscoverySectionProps) {
@@ -19,9 +19,7 @@ export function HomeDiscoverySection({ section }: HomeDiscoverySectionProps) {
       className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur"
     >
       <div className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.3em] text-cyan-200/80">
-          Home discovery
-        </p>
+        <p className="text-xs uppercase tracking-[0.3em] text-cyan-200/80">首页发现</p>
         <h2 id={`home-discovery-${section.kind}`} className="text-2xl font-medium text-white">
           {section.title}
         </h2>

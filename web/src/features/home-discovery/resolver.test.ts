@@ -66,7 +66,7 @@ test("opportunity resolver returns an empty section when no public opportunities
 
   expect(section.kind).toBe("opportunities");
   expect(section.items).toEqual([]);
-  expect(section.title).toMatch(/opportunities/i);
+  expect(section.title).toBe("精选诉求");
 });
 
 test("opportunity resolver uses the newest available update or publish time for fallback sorting", () => {

@@ -11,7 +11,7 @@ test("opportunities page renders the public list of active booking requests", ()
   expect(
     screen.getByRole("heading", {
       level: 1,
-      name: /active opportunities/i,
+      name: /当前诉求/,
     })
   ).toBeDefined();
   expect(screen.getByText(opportunityPosts[0].title)).toBeDefined();

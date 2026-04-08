@@ -33,16 +33,16 @@ const maxSectionItems = 3;
 
 const sectionCopy = {
   works: {
-    title: "Featured works",
-    description: "A curated first look at recent visual stories from the community.",
+    title: "精选作品",
+    description: "从社区最新作品里挑出的优先浏览内容。",
   },
   profiles: {
-    title: "Featured profiles",
-    description: "Meet photographers and models ready for the next collaboration.",
+    title: "精选主页",
+    description: "认识准备开启合作的摄影师与模特。",
   },
   opportunities: {
-    title: "Featured opportunities",
-    description: "Browse fresh booking calls and collaborative requests.",
+    title: "精选诉求",
+    description: "浏览最新发布的约拍诉求与合作请求。",
   },
 } as const;
 

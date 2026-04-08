@@ -35,12 +35,12 @@ test("model profile page renders the public showcase for a known slug", async ()
     })
   ).toBeDefined();
   expect(screen.getByText(modelProfiles[0].bio)).toBeDefined();
-  expect(screen.getByText(/editorial highlights/i)).toBeDefined();
-  expect(screen.getByRole("link", { name: /contact model/i })).toBeDefined();
-  expect(screen.getByRole("link", { name: /log in to save this profile/i }).getAttribute("href")).toBe(
+  expect(screen.getByText(modelProfiles[0].sectionTitle)).toBeDefined();
+  expect(screen.getByRole("link", { name: /联系模特/ })).toBeDefined();
+  expect(screen.getByRole("link", { name: /登录后收藏这份主页/ }).getAttribute("href")).toBe(
     "/login"
   );
-  expect(screen.getByRole("link", { name: /soft light editorial/i }).getAttribute("href")).toBe(
+  expect(screen.getByRole("link", { name: /柔光编辑片/ }).getAttribute("href")).toBe(
     "/works/soft-light-editorial"
   );
 });
