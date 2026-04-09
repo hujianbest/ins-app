@@ -14,3 +14,15 @@
 - Added login-gated work likes and profile favorites backed by demo cookies, so signed-in visitors can toggle engagement state while guests are routed through the login entry point.
 - Added in-site contact actions plus a protected `inbox`, so signed-in users can start message threads from profiles, works, and opportunities and then review those threads inside the app.
 - Added homepage discovery sections for featured works, profiles, and opportunities, so visitors can move from the cinematic hero into curated public content without losing the landing page visual hierarchy.
+
+## 2026-04-08
+
+- Added the first community domain and repository contract baseline behind the scenes, including draft-safe public work filtering, explicit `home` / `discover` curation guards, and test-backed in-memory repository bundle fixtures that prepare the app for upcoming SQLite-backed community flows.
+
+## 2026-04-09
+
+- Added a shared session and access-control baseline for the community workflow, so photographer and model accounts now resolve through the same `SessionContext`, `CreatorCapabilityPolicy`, and `StudioGuard` instead of scattered `studio`-page checks.
+- Unified the existing `studio` landing, profile, works, and opportunities routes behind the shared guard while preserving compatibility for neighboring login-gated surfaces that still consume `getSessionRole()`.
+- Migrated the homepage, `/discover`, creator profiles, work details, `studio/profile`, and `studio/works` onto repository-backed community read/write paths, including draft-safe public visibility, publish/revert flows, and server-action-based creator editing.
+- Added the first community relationship and interaction loops, so signed-in members can now follow creators into the discover `关注中` feed and leave validated latest-first comments on public work detail pages.
+- Preserved model pages, opportunities, and contact threads as secondary collaboration paths while keeping the homepage narrative centered on the community discovery flow, and closed the migration with fresh `test + lint + build` evidence.

@@ -1,30 +1,33 @@
 import { expect, test, vi } from "vitest";
 
-test("resolveHomeDiscoverySections follows the configured section order", async () => {
+test("resolveHomeDiscoverySections follows the configured section order for the discover surface", async () => {
   vi.resetModules();
 
   vi.doMock("./config", () => ({
-    homeDiscoverySectionOrder: ["profiles", "works", "opportunities"],
-    worksDiscoverySlotConfig: {
-      kind: "works",
-      featuredIds: [],
-    },
-    profileDiscoverySlotConfig: {
-      kind: "profiles",
-      featuredProfiles: [],
-    },
-    opportunitiesDiscoverySlotConfig: {
-      kind: "opportunities",
-      featuredIds: [],
-    },
+    homeSurfaceSectionOrder: ["latest", "featured"],
+    discoverSurfaceSectionOrder: ["following", "featured", "latest"],
+    homeDiscoveryFeaturedSlots: [],
   }));
 
   const { resolveHomeDiscoverySections } = await import("./resolver");
+  const { createInMemoryCommunityRepositoryBundle } = await import(
+    "@/features/community/test-support"
+  );
 
-  expect(resolveHomeDiscoverySections().map((section) => section.kind)).toEqual([
-    "profiles",
-    "works",
-    "opportunities",
+  const sections = await resolveHomeDiscoverySections({
+    surface: "discover",
+    accountId: null,
+    bundle: createInMemoryCommunityRepositoryBundle({
+      profiles: [],
+      works: [],
+      curation: [],
+    }),
+  });
+
+  expect(sections.map((section) => section.kind)).toEqual([
+    "following",
+    "featured",
+    "latest",
   ]);
 
   vi.doUnmock("./config");

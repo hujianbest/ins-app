@@ -18,92 +18,98 @@ afterEach(() => {
 
 test.each([
   {
-    emptyKind: "works",
-    emptyStateCopy: /更多作品精选即将上线/i,
+    emptyKind: "featured",
+    emptyStateCopy: /精选内容整理中/i,
   },
   {
-    emptyKind: "profiles",
-    emptyStateCopy: /更多主页精选即将上线/i,
+    emptyKind: "latest",
+    emptyStateCopy: /最新内容整理中/i,
   },
   {
-    emptyKind: "opportunities",
-    emptyStateCopy: /更多约拍诉求即将上线/i,
+    emptyKind: "following",
+    emptyStateCopy: /登录后查看关注中的创作者更新/i,
   },
 ])(
   "home page keeps the hero and empty discovery shell visible when $emptyKind section has no items",
-  ({ emptyKind, emptyStateCopy }) => {
-    resolveHomeDiscoverySectionsMock.mockReturnValue([
+  async ({ emptyKind, emptyStateCopy }) => {
+    resolveHomeDiscoverySectionsMock.mockResolvedValue([
       {
-        kind: "works",
-        title: "精选作品",
-        description: "从社区最新作品里挑出的优先浏览内容。",
+        kind: "featured",
+        title: "精选推荐",
+        description: "优先展示社区精选作品与创作者。",
+        emptyStateCopy: "精选内容整理中。",
         items:
-          emptyKind === "works"
+          emptyKind === "featured"
             ? []
             : [
                 {
-                  id: "work-1",
-                  href: "/works/work-1",
+                  id: "featured-work-1",
+                  href: "/works/featured-work-1",
                   badge: "编辑人像",
-                  title: "测试作品",
+                  title: "测试精选",
                   description: "一张用于回归验证的精选作品卡片。",
                 },
               ],
       },
       {
-        kind: "profiles",
-        title: "精选主页",
-        description: "认识准备开启合作的摄影师与模特。",
+        kind: "latest",
+        title: "最新发布",
+        description: "按最新公开发布时间浏览社区内容。",
+        emptyStateCopy: "最新内容整理中。",
         items:
-          emptyKind === "profiles"
+          emptyKind === "latest"
             ? []
             : [
                 {
-                  id: "profile-1",
-                  href: "/photographers/test-profile",
-                  badge: "摄影师",
-                  title: "测试主页",
-                  description: "一个用于验证首页跳转的创作者主页。",
+                  id: "latest-work-1",
+                  href: "/works/latest-work-1",
+                  badge: "街头摄影",
+                  title: "测试最新",
+                  description: "一个用于验证最新分区的公开作品。",
                 },
               ],
       },
       {
-        kind: "opportunities",
-        title: "精选诉求",
-        description: "浏览最新发布的约拍诉求与合作请求。",
+        kind: "following",
+        title: "关注中",
+        description: "关注创作者后，这里会显示他们的最新公开内容。",
+        emptyStateCopy: "登录后查看关注中的创作者更新。",
         items:
-          emptyKind === "opportunities"
+          emptyKind === "following"
             ? []
             : [
                 {
-                  id: "post-1",
-                  href: "/opportunities/post-1",
-                  badge: "Shanghai",
-                  title: "测试诉求",
-                  description: "一条用于回归验证的在线约拍诉求。",
+                  id: "following-work-1",
+                  href: "/works/following-work-1",
+                  badge: "摄影师",
+                  title: "关注中的更新",
+                  description: "一条用于验证关注中分区的作品。",
                 },
               ],
       },
     ]);
 
-    render(<Home />);
+    const page = await Home();
+    render(page);
 
-    expect(screen.getByRole("heading", { level: 1, name: /lens archive/i })).toBeDefined();
+    expect(screen.getByRole("heading", { level: 1, name: /摄影社区发现首页/i })).toBeDefined();
     expect(screen.getByText(emptyStateCopy)).toBeDefined();
 
-    if (emptyKind !== "works") {
-      expect(screen.getByText("测试作品").closest("a")?.getAttribute("href")).toBe("/works/work-1");
-    }
-
-    if (emptyKind !== "profiles") {
-      expect(screen.getByText("测试主页").closest("a")?.getAttribute("href")).toBe(
-        "/photographers/test-profile"
+    if (emptyKind !== "featured") {
+      expect(screen.getByText("测试精选").closest("a")?.getAttribute("href")).toBe(
+        "/works/featured-work-1"
       );
     }
 
-    if (emptyKind !== "opportunities") {
-      expect(screen.getByText("测试诉求").closest("a")?.getAttribute("href")).toBe(
-        "/opportunities/post-1"
+    if (emptyKind !== "latest") {
+      expect(screen.getByText("测试最新").closest("a")?.getAttribute("href")).toBe(
+        "/works/latest-work-1"
+      );
+    }
+
+    if (emptyKind !== "following") {
+      expect(screen.getByText("关注中的更新").closest("a")?.getAttribute("href")).toBe(
+        "/works/following-work-1"
       );
     }
   }

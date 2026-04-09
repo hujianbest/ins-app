@@ -1733,4 +1733,678 @@
 - **偏差/缺口：** 本轮收尾只针对任务级 `T18`，不是整个“全站中文化”增量的最终 closeout。
 - **建议：** finalize skill 可增加“单任务完成后直接衔接下一任务”的 closeout pack 示例。
 
+### 2026-04-08 — 摄影社区平台增量分析
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-increment\SKILL.md`
+- **触发原因：** 用户决定不再继续沿旧“作品展 / 中文化实现链”直接推进，而是把产品主线切换为新的“摄影社区平台”方案。
+- **执行摘要：**
+  - 对比已批准的旧规格 / 设计 / 任务链与新的社区版设计草案，识别这是范围与主线变化，而不是实现缺陷。
+  - 结合用户确认的边界，固定本轮变化为“轻量社区 MVP + 保留模特 / 约拍诉求为次级模块”。
+  - 新建 `docs/reviews/increment-photography-community-platform.md`，显式标记旧 `T19` 失效、当前需回流到 `ahe-specify`。
+- **偏差/缺口：** 当前仅完成增量影响分析，尚未走社区版规格评审。
+- **建议：** increment skill 可补充“从已有垂直站点切换为社区平台”的主线变更样例。
+
+### 2026-04-08 — 起草摄影社区平台规格
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-specify\SKILL.md`
+- **触发原因：** increment 已明确唯一回流节点为 `ahe-specify`，需要为“摄影社区平台”起草新的可评审规格。
+- **执行摘要：**
+  - 读取 `ahe-specify`、当前 `task-progress.md`、旧“作品展与约拍平台”规格以及社区版设计草案。
+  - 用结构化问题确认两个关键边界：首期按轻量 MVP 收敛；现有“模特 + 约拍诉求”保留为次级模块。
+  - 新建 `docs/specs/2026-04-08-photography-community-platform-srs.md`，收敛首页、发现、创作者主页、作品发布 / 详情、关注 / 评论与次级合作模块保留规则。
+  - 更新 `task-progress.md` 为“规格草稿待评审”，并把 `Next Action Or Recommended Skill` 写为 `ahe-spec-review`。
+- **偏差/缺口：** 规格草稿尚未经过 reviewer subagent 的正式 `ahe-spec-review`。
+- **建议：** specify skill 可增加“从作品展示站切换到社区产品”的保守收敛示例。
+
+### 2026-04-08 — 摄影社区平台 SRS：`ahe-spec-review`
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-spec-review\SKILL.md`
+- **触发原因：** reviewer subagent 受父会话委派，对 `docs/specs/2026-04-08-photography-community-platform-srs.md` 执行正式规格评审门禁。
+- **执行摘要：**
+  - 读取 `ahe-spec-review`、社区版 SRS、`task-progress.md`、`docs/reviews/increment-photography-community-platform.md` 与 `web/AGENTS.md`，按 checklist 审查范围、可验收性、开放问题闭合度与设计准备度。
+  - reviewer 结论为 `需修改`：主线方向成立，但角色与发布资格、评论边界、人工精选维护方式、部分 NFR 可验收性仍不足以作为稳定设计输入。
+  - 新建 `docs/reviews/spec-review-photography-community-platform.md`，并将 `task-progress.md` 切换到 `规格回修中（ahe-specify）`，下一步回到 `ahe-specify`。
+- **偏差/缺口：** 结论为回修，当前未进入 `规格真人确认`，也未进入 `ahe-design`。
+- **建议：** spec-review skill 可补充“从垂直展示站转为社区平台”场景下，对角色模型与最小治理策略的典型审查清单。
+
+### 2026-04-08 — 回修摄影社区平台规格
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-specify\SKILL.md`
+- **触发原因：** `ahe-spec-review` 返回 `需修改`，需要按 findings 回修社区版 SRS 后再次送审。
+- **执行摘要：**
+  - 回修 `docs/specs/2026-04-08-photography-community-platform-srs.md`，补齐主身份与创作者资格、评论边界与失败路径、人工精选维护能力，以及可验收的 NFR 表述。
+  - 补充范围 / 范围外内容与术语定义，使“模特 + 约拍诉求为次级模块”的定位与现有账号模型保持一致。
+  - 更新 `task-progress.md` 为“规格草稿待评审”，并把下一步重新切回 `ahe-spec-review`。
+- **偏差/缺口：** 本轮仅回修规格，不修改设计草案或任务计划。
+- **建议：** specify skill 可补充“评论最小治理策略 + 无审核后台”这种社区型 MVP 的常见规格模板片段。
+
+### 2026-04-08 — 摄影社区平台 SRS 复审通过
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-spec-review\SKILL.md`
+- **触发原因：** 社区版 SRS 已按上一轮 findings 完成回修，需要重新判断是否具备进入真人确认的质量。
+- **执行摘要：**
+  - 派发 reviewer subagent 对修订版 `docs/specs/2026-04-08-photography-community-platform-srs.md` 复审，重点核对首轮 `important` 缺口是否闭合。
+  - reviewer 结论为 `通过`；剩余问题均为 `minor`，不阻塞把 SRS 作为 `ahe-design` 的稳定输入。
+  - 更新 `docs/reviews/spec-review-photography-community-platform.md` 为复审通过结论，并将 `task-progress.md` 切换到“规格待人类确认”，下一技能写为 `ahe-design`（但状态中明确须先完成真人确认）。
+- **偏差/缺口：** 当前仍停在规格阶段，未进入设计，也未把规格状态改写为已批准。
+- **建议：** spec-review skill 可补充“复审通过后如何在 `task-progress` 中同时表达『下一技能为 ahe-design』与『仍需先做真人确认』”的显式示例。
+
+### 2026-04-08 — 起草摄影社区平台设计
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-design\SKILL.md`
+- **触发原因：** 用户已完成人类确认，社区版 SRS 已被批准；当前需要把 HOW 层方案收敛成可交 `ahe-design-review` 的设计稿。
+- **执行摘要：**
+  - 读取已批准 SRS、现有设计草稿、`task-progress.md`、`web/AGENTS.md` 以及当前 `web` 的技术栈与展示模型。
+  - 将原本过宽的“摄影社区方案”重写为“轻量社区 MVP 实现设计”，收口到首页社区化、`/discover`、创作者主页、作品草稿 / 发布、关注 / 评论、人工精选与次级合作模块保留。
+  - 对比三类候选方案后，选定“在现有 Next.js 单体中渐进演进”的方案，并补齐模块边界、关键数据实体、数据流、接口契约与测试策略。
+  - 更新 `task-progress.md` 为“设计草稿待评审”，下一步切到 `ahe-design-review`。
+- **偏差/缺口：** 当前只完成设计草稿，尚未进入 `ahe-design-review`，也未发起人类确认设计。
+- **建议：** design skill 可补充“从旧垂直展示站收敛为社区 MVP”的设计重写示例，尤其是如何显式处理旧主线保留为次级模块。
+
+### 2026-04-08 — 评审摄影社区平台设计（首轮）
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-design-review\SKILL.md`
+- **触发原因：** 社区版设计草稿已完成，需要判断是否已具备进入设计真人确认与后续 `ahe-tasks` 的质量门槛。
+- **执行摘要：**
+  - 派发独立 reviewer subagent 对已批准 SRS、设计稿、`task-progress.md`、`web/AGENTS.md` 与最少技术上下文做正式设计评审。
+  - reviewer 首轮结论为 `需修改`，指出三条重要问题：`FR-001` 追溯表中的权限边界未在正文和图中固化；repository 的首期持久化选择与迁移顺序不明确；`Next.js 16` 单体内的 RSC / Server Actions / 会话边界没有写成稳定契约。
+  - 父会话将结论先写入 `docs/reviews/design-review-photography-community-platform.md`，准备回到 `ahe-design` 回修。
+- **偏差/缺口：** 设计尚未到达设计真人确认门槛。
+- **建议：** design-review skill 可补充“若父会话计划在同一轮内立即回修并复审，review 记录推荐如何表达首轮 findings 与最终 closure”的示例。
+
+### 2026-04-08 — 回修摄影社区平台设计
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-design\SKILL.md`
+- **触发原因：** 首轮 `ahe-design-review` 返回 `需修改`，要求补齐权限边界、持久化方案、Next.js 运行时契约与实现排序约束。
+- **执行摘要：**
+  - 将 `FR-001` 对齐到 `AccessControl`、`StudioGuard`、`CreatorCapabilityPolicy`，并在架构图与模块边界章节中显式落位。
+  - 新增“运行时与持久化策略”与“实现排序约束”，明确公共读取走 Server Components、写路径走 Server Actions、会话进入 `AccessControl`，以及首期动态数据采用单体内嵌关系型存储、人工精选沿用 `web/src/features/home-discovery/config.ts`。
+  - 收敛追溯表术语、补齐 `FR-005` 对已发布作品回修后可见性的契约，并把人工精选无效条目的回退行为写入接口契约。
+- **偏差/缺口：** 仍需重新执行独立 `ahe-design-review` 验证本轮回修是否已足够。
+- **建议：** design skill 可增加一条“追溯表里的模块命名必须与正文 / 图保持严格同名”的显式自检条目。
+
+### 2026-04-08 — 摄影社区平台设计复审通过
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-design-review\SKILL.md`
+- **触发原因：** 设计已按首轮 findings 回修，需要确认是否可进入设计真人确认。
+- **执行摘要：**
+  - 复审确认首轮三条重要问题已关闭：权限边界已对齐、repository 与迁移顺序已明确、`Next.js 16` 的 RSC / Server Actions / Session 合同已写成稳定设计。
+  - reviewer 最终结论为 `通过`，仅保留少量 `minor` 级备注，如 SQLite 部署假设、`FR-002` 追溯表粒度和评论策略命名一致性。
+  - 父会话据此将 `docs/reviews/design-review-photography-community-platform.md` 改写为最终结论，并把 `task-progress.md` 切到“设计待人类确认”，下一技能指向 `ahe-tasks`（需先经人类确认）。
+- **偏差/缺口：** 当前设计尚未获得人类批准，因此仍不能进入 `ahe-tasks`。
+- **建议：** design-review skill 可增加一个更明确的“通过但仍待人类确认”状态写回示例，便于父会话统一 `task-progress` 字段口径。
+
+### 2026-04-08 — 起草摄影社区平台任务计划
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-tasks\SKILL.md`
+- **触发原因：** 用户已完成人类确认，社区版设计正式获批；当前需要把批准的规格与设计转化为可评审任务计划。
+- **执行摘要：**
+  - 读取已批准的社区版 SRS、设计、design review、`task-progress.md`、`web/AGENTS.md`，并补读现有任务计划样式、关键页面与 feature 入口，提取任务拆解信号和工件边界。
+  - 将新主线任务计划落盘到 `docs/tasks/2026-04-08-photography-community-platform-tasks.md`，并为避免与已暂停的中文化链 `T19` ~ `T21` 冲突，从 `T22` 继续编号。
+  - 任务拆解覆盖四个里程碑：社区领域与运行时基线、公共浏览与社区发现面、创作者写路径与社区互动、次级合作模块保留与回归收口。
+  - 明确了 repository / SQLite / `AccessControl` / `/discover` / `studio` 写路径 / follow graph / comment service 的任务顺序、测试设计种子与唯一 `Current Active Task` 选择规则。
+  - 更新 `task-progress.md` 为“任务计划待评审”，下一步切到 `ahe-tasks-review`。
+- **偏差/缺口：** 当前只完成任务计划草稿，尚未进入 `ahe-tasks-review`，也未进行任务真人确认。
+- **建议：** tasks skill 可补充一个“当旧工作项存在已暂停但编号已占用任务时，如何在新主线中继续编号”的显式示例。
+
+### 2026-04-08 — 评审摄影社区平台任务计划（首轮）
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-tasks-review\SKILL.md`
+- **触发原因：** 社区版任务计划草稿已完成，需要判断它是否足以进入任务真人确认与后续 `ahe-test-driven-dev`。
+- **执行摘要：**
+  - 派发独立 reviewer subagent，对已批准 SRS、已批准设计、任务计划、`task-progress.md`、`web/AGENTS.md` 与最少项目上下文做正式任务评审。
+  - reviewer 首轮结论为 `需修改`，指出三条重要问题：`NFR-001` / `NFR-005` 未在追溯表中显式落任务；原 `T27` 同时覆盖 `studio/profile` 与 `studio/works`，粒度偏大；`T22` 需要先固定“最小作品字段集沿用当前 `showcase` 基线”的执行规则。
+  - 父会话将首轮结论写入 `docs/reviews/tasks-review-photography-community-platform.md`，并把 `task-progress.md` 切到“任务计划回修中（ahe-tasks）”。
+- **偏差/缺口：** 任务计划尚未达到任务真人确认门槛。
+- **建议：** tasks-review skill 可补充一个“非功能需求未进入任务追溯表时应如何判定重要性”的显式例子。
+
+### 2026-04-08 — 回修摄影社区平台任务计划
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-tasks\SKILL.md`
+- **触发原因：** 首轮 `ahe-tasks-review` 返回 `需修改`，要求补齐 NFR 追溯、收紧任务粒度并固定最小作品字段集规则。
+- **执行摘要：**
+  - 在任务追溯表中补入 `NFR-001`、`NFR-002`、`NFR-003`、`NFR-005`，并补齐 `CreatorProfile` / `WorkPublishing` 等设计章节锚点。
+  - 将原 `T27` 拆分为 `T27`（`studio/profile` 资料维护写路径）和 `T28`（`studio/works` 草稿 / 发布写路径），相应顺延关注、评论、次级模块与回归任务编号到 `T32`。
+  - 在 `T22` 中显式固定“沿用现有 `showcase` 最小字段集”的执行规则，并把验证命令统一改为“在 `web` 目录执行 + 引号路径参数”的写法，适配当前 Windows / PowerShell 环境。
+  - 补充 SQLite 风险表述、图片上传未就绪时的 `coverAsset` 假设、以及并行边界说明。
+- **偏差/缺口：** 仍需重新执行独立 `ahe-tasks-review` 验证回修结果。
+- **建议：** tasks skill 可增加一条显式自检：当 reviewer 认为某任务过大时，优先拆任务而不是只补更多描述。
+
+### 2026-04-08 — 摄影社区平台任务计划复审通过
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-tasks-review\SKILL.md`
+- **触发原因：** 任务计划已按首轮 findings 回修，需要确认是否可进入任务真人确认。
+- **执行摘要：**
+  - 复审确认首轮三条重要问题已关闭：非功能需求追溯已补齐、原 `T27` 已拆成两条写路径、`T22` 已固定最小作品字段基线。
+  - reviewer 最终结论为 `通过`，仅保留少量 `minor` 级提醒，如并行分支执行策略、`T26` / `T31` 的任务面仍相对较大但在可接受范围内。
+  - 父会话顺手补齐了 reviewer 提到的几条低成本 minor 追溯项，然后将 `docs/reviews/tasks-review-photography-community-platform.md` 改写为最终结论，并把 `task-progress.md` 切到“任务计划待人类确认”，下一技能指向 `ahe-test-driven-dev`（需先经人类确认）。
+- **偏差/缺口：** 当前任务计划尚未获得人类批准，因此仍不能进入 `ahe-test-driven-dev`，也不能把 `T22` 写成权威版 `Current Active Task`。
+- **建议：** tasks-review skill 可增加一个更明确的“通过但仍待任务真人确认”状态写回示例，便于父会话统一 `task-progress` 字段口径。
+
+### 2026-04-08 — 实现摄影社区平台 `T22`
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-driven-dev\SKILL.md`
+- **触发原因：** 用户已完成人类确认并要求开始执行；社区版任务计划已批准，建议首个活跃任务为 `T22`。
+- **执行摘要：**
+  - 将任务计划状态切到已批准，并在 `task-progress.md` 中锁定唯一活跃任务为 `T22`。
+  - 读取 `T22` 的任务定义、规格 / 设计锚点与 `web/AGENTS.md`；由于 `task-progress.md` 已记录“用户已授权后续测试设计直接视为确认”，本轮将 `T22` 的测试设计视为已确认后进入 fail-first。
+  - 先新增 `web/src/features/community/contracts.test.ts`，围绕三件事写失败测试：稳定创作者 ID、公开读取不得泄漏草稿、合法 curation surface 只允许 `home / discover`。
+  - 运行 `npm run test -- "src/features/community/contracts.test.ts"` 获得有效 RED：Vitest 报 `./contracts` 模块不存在，直接对应当前任务缺口。
+  - 新增 `web/src/features/community/types.ts` 与 `web/src/features/community/contracts.ts`，定义社区核心记录类型、repository 契约、纯函数种子快照与公开读取过滤规则。
+  - 回跑 `npm run test -- "src/features/community/contracts.test.ts"`，`3` 条测试全部转绿；随后执行 `npm run build`，Next.js 16 构建成功。
+  - 将 fresh evidence 与 canonical 下一步写入 `docs/verification/implementation-T22.md`，并把 `task-progress.md` 更新为“`T22` 已实现待 `ahe-bug-patterns`”。
+- **偏差/缺口：** 当前只完成 `T22` 的实现入口与 fresh evidence，尚未经过 `ahe-bug-patterns`、`ahe-test-review`、`ahe-code-review`、`ahe-traceability-review`、`ahe-regression-gate` 与 `ahe-completion-gate`。
+- **建议：** tdd skill 可补充一个“当项目 `AGENTS.md` 要求读取本地 Next.js docs 但当前工作区尚未安装 `node_modules` 时，如何在实现记录中表达该限制”的显式示例。
+
+### 2026-04-08 — 排查摄影社区平台 `T22` 缺陷模式
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-bug-patterns\SKILL.md`
+- **触发原因：** `T22` 已完成主链实现，需要进入正式质量链的首个专项风险排查。
+- **执行摘要：**
+  - 读取 `docs/verification/implementation-T22.md`、`web/src/features/community/*`、既有 `bug-patterns` 记录和 `task-progress.md`，建立本轮缺陷模式证据基线。
+  - 识别两类重要风险：`sectionKind` 单复数口径与 `home-discovery` 漂移、以及过宽默认值可能导致发布态泄漏。
+  - 回到代码内完成低成本收口：引入 `CommunitySectionKind`、新增 `isCommunitySectionKind()` / `isCommunityTargetType()` 测试，并将默认 `published` 收窄为 showcase seed 专用映射。
+  - 回跑 `contracts.test.ts` 与 `npm run build` 后，将最终结论落盘到 `docs/reviews/bug-patterns-T22.md`，把 `task-progress.md` 切到待 `ahe-test-review`。
+- **偏差/缺口：** 当前只完成专项风险排查，不替代后续测试质量或实现质量判断。
+- **建议：** bug-patterns skill 可补一个“当风险在同轮排查中已被立即吸收时，如何在最终记录中表达‘命中但已收敛’”的示例。
+
+### 2026-04-08 — 首轮评审摄影社区平台 `T22` 测试
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-review\SKILL.md`
+- **触发原因：** `T22` 已通过 `ahe-bug-patterns`，需要判断当前测试资产是否足以进入 `ahe-code-review`。
+- **执行摘要：**
+  - 派发 reviewer subagent，消费 `implementation-T22.md`、`bug-patterns-T22.md`、社区契约代码与测试、规格 / 设计 / 任务锚点、`task-progress.md`。
+  - reviewer 结论为 `需修改`：指出当前测试虽然覆盖 seed snapshot、公开草稿过滤和 guard，但尚未对 `CommunityRepositoryBundle` 与 repository 契约做最小 smoke test。
+  - 父会话将 findings 写入 `docs/reviews/test-review-T22.md`，并把 `task-progress.md` 切回 `ahe-test-driven-dev`。
+- **偏差/缺口：** 当前测试评审未通过，主链需要回流补测试后再复审。
+- **建议：** test-review skill 可补一个“TypeScript interface 已存在但仍需要 bundle 级 smoke test 时”的标准判例。
+
+### 2026-04-08 — 回流修订摄影社区平台 `T22` 测试
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-driven-dev\SKILL.md`
+- **触发原因：** 首轮 `ahe-test-review` 返回 `需修改`，要求补齐 repository / bundle 契约级 smoke test。
+- **执行摘要：**
+  - 继续沿用 `task-progress.md` 中“后续测试设计直接视为确认”的授权，只在 `T22` 范围内补测试，不扩大实现范围。
+  - 先在 `contracts.test.ts` 中新增 repository / bundle 契约 smoke test，并故意引用缺失的 `./test-support`，运行测试获得有效 RED。
+  - 新增 `web/src/features/community/test-support.ts` 作为测试专用 in-memory repository bundle 支撑层，并收敛了原有样本顺序耦合断言。
+  - 回跑 `npm run test -- "src/features/community/contracts.test.ts"` 与 `npm run build`，更新 `implementation-T22.md` 为最新回流 handoff，并把 `task-progress.md` 切回待重新 `ahe-test-review`。
+- **偏差/缺口：** 本轮只补测试支撑层与契约 smoke test，尚未重新消费 `ahe-test-review`。
+- **建议：** tdd skill 可增加一个“review 回流只补测试、不改生产逻辑时如何记录 fresh RED / GREEN”的示例。
+
+### 2026-04-08 — 摄影社区平台 `T22` 测试复审通过
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-review\SKILL.md`
+- **触发原因：** `T22` 已按首轮 findings 回修，需要确认测试是否已足以进入 `ahe-code-review`。
+- **执行摘要：**
+  - 再次派发 reviewer subagent，消费更新后的 `implementation-T22.md`、`contracts.test.ts`、`test-support.ts` 和上游 `bug-patterns` 记录。
+  - reviewer 结论改为 `通过`，确认 repository / bundle 契约 smoke test 已补齐，虽然仍保留少量非阻塞测试覆盖缺口。
+  - 父会话将 `docs/reviews/test-review-T22.md` 改写为最终通过版，并把 `task-progress.md` 切到待 `ahe-code-review`。
+- **偏差/缺口：** 当前测试结论可进入代码评审，但并不等于后续任务可跳过更具体的 adapter / integration 测试。
+- **建议：** test-review skill 可补一个“同一路径复审通过时，如何覆盖旧 review 记录而非另起并行文件”的规范示例。
+
+### 2026-04-08 — 评审摄影社区平台 `T22` 实现代码
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-code-review\SKILL.md`
+- **触发原因：** `T22` 已通过测试评审，需要判断当前实现是否足以进入 `ahe-traceability-review`。
+- **执行摘要：**
+  - 派发 reviewer subagent，消费 `implementation-T22.md`、`bug-patterns-T22.md`、`test-review-T22.md`、社区契约代码与测试、规格 / 设计 / 任务锚点。
+  - reviewer 结论为 `通过`，确认当前实现与 `T22` 范围一致；唯一重要修正是同步 `implementation-T22.md` 中过时的 pending / next action 字段。
+  - 父会话写入 `docs/reviews/code-review-T22.md`，同步更新 `implementation-T22.md` 与 `task-progress.md` 到待 `ahe-traceability-review`。
+- **偏差/缺口：** 当前代码评审通过，但仍保留真实 SQLite adapter、权限边界和共享常量真源等后续任务风险。
+- **建议：** code-review skill 可增加一个“工件状态字段落后于主链状态时，如何区分为实现缺陷还是追溯噪音”的示例。
+
+### 2026-04-08 — 评审摄影社区平台 `T22` 追溯链路
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-traceability-review\SKILL.md`
+- **触发原因：** `T22` 已通过代码评审，需要判断规格、设计、任务、实现、测试与验证证据是否已重新闭环。
+- **执行摘要：**
+  - 派发 reviewer subagent，联合消费 `implementation-T22.md`、`bug-patterns-T22.md`、`test-review-T22.md`、`code-review-T22.md`、SRS、设计、任务计划与 `task-progress.md`。
+  - reviewer 结论为 `通过`，确认 `T22` 仍严格停留在领域模型 / repository 契约 / 契约测试切片，未静默扩张到 SQLite、权限或页面接线层。
+  - 父会话根据 findings 去掉 `implementation-T22.md` 中未实际修改的 `home-discovery/types.ts`，再写入 `docs/reviews/traceability-review-T22.md` 并把 `task-progress.md` 切到待 `ahe-regression-gate`。
+- **偏差/缺口：** 当前追溯通过，但仍提示后续需持续关注 `sectionKind` 真源收敛与 `status` 语义边界。
+- **建议：** traceability-review skill 可补一个“交接块误列未触碰文件时如何评估严重度”的显式判例。
+
+### 2026-04-08 — 执行摄影社区平台 `T22` 回归门禁
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-regression-gate\SKILL.md`
+- **触发原因：** `T22` 已通过 `ahe-traceability-review`，需要用 fresh evidence 确认相邻模块与构建入口未被破坏。
+- **执行摘要：**
+  - 按 full profile 定义本轮回归面：`community` 契约测试、首页发现相邻公开入口测试，以及整站生产构建。
+  - 在当前最新代码状态直接运行 `npm run test -- "src/features/community/contracts.test.ts"`、`npm run test -- "src/app/page.discovery-regression.test.tsx"` 与 `npm run build`，结果全部通过。
+  - 将证据落盘到 `docs/verification/regression-T22.md`，把 `task-progress.md` 切到待 `ahe-completion-gate`。
+- **偏差/缺口：** 当前回归门禁只覆盖当前任务影响面的最小必要范围，不替代后续 SQLite / 权限 / 写路径任务的更广回归。
+- **建议：** regression-gate skill 可增加一个“相邻模块只是概念耦合而非直接 import 依赖时，如何定义最小回归面”的示例。
+
+### 2026-04-08 — 执行摄影社区平台 `T22` 完成门禁
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-completion-gate\SKILL.md`
+- **触发原因：** `T22` 已通过回归门禁，需要判断当前任务是否允许正式宣告完成并进入 finalize。
+- **执行摘要：**
+  - 固定 full profile 所需的上游证据矩阵：`bug-patterns`、`test-review`、`code-review`、`traceability-review`、`regression-T22` 与 `implementation-T22`。
+  - 为直接支撑完成声明，再次运行 `npm run test -- "src/features/community"` 与 `npm run build`，获得当前代码状态下的新鲜完成证据。
+  - 将门禁结果落盘到 `docs/verification/completion-T22.md`，并把 `task-progress.md` 切到待 `ahe-finalize`。
+- **偏差/缺口：** 当前完成门禁只证明 `T22` 可宣告完成，不等于后续社区主线任务也可视为已完成。
+- **建议：** completion-gate skill 可补一个“当 regression gate 已覆盖更广面、completion gate 只需收窄到当前任务声明时”的示例。
+
+### 2026-04-08 — 收尾摄影社区平台 `T22`
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-finalize\SKILL.md`
+- **触发原因：** `T22` 已通过 completion gate，需要同步项目状态、证据位置、发布说明与下一活跃任务。
+- **执行摘要：**
+  - 读取 `completion-T22.md`、`regression-T22.md`、上游 review 记录、`task-progress.md`、`RELEASE_NOTES.md` 与 `finalize-T18.md` 样式作为 closeout 参考。
+  - 在 `RELEASE_NOTES.md` 追加 2026-04-08 条目，记录社区领域契约和 draft-safe 过滤的底层里程碑。
+  - 新建 `docs/verification/finalize-T22.md` 作为 delivery / handoff pack，并把 `task-progress.md` 更新为：`T22` 进入 `Completed Tasks`、`Current Active Task` 切到 `T23`、下一推荐技能为 `ahe-test-driven-dev`。
+- **偏差/缺口：** 本轮 finalize 只做状态与文档收口，不推进 `T23` 的实现。
+- **建议：** finalize skill 可补一个“完成单个任务但整个 work item 仍继续时，`Current Active Task` / `Next Action` 应如何切到下一任务”的明确示例。
+
+### 2026-04-09 — 实现摄影社区平台 `T23`
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-driven-dev\SKILL.md`
+- **触发原因：** `T22` 已正式完成并 finalize；`task-progress.md` 已把下一活跃任务切换到 `T23`，用户要求以 auto mode 继续推进。
+- **执行摘要：**
+  - 先通过 `using-ahe-workflow` 入口判断当前是 clear-case `direct invoke`，目标节点为 `ahe-test-driven-dev`；随后读取 `task-progress.md`、`T23` 任务种子、SRS / 设计中 `FR-001` 与 `AccessControl` 相关锚点、现有 `auth` / `studio` 代码。
+  - 依据 auto mode 要求先落盘 `docs/verification/test-design-T23.md`，把测试设计、approval step、关键正反向场景与预期 RED 记录为当前任务的可回读确认输入。
+  - 新增 `web/src/features/auth/access-control.test.ts`，围绕三类行为写 fail-first：`model` 主身份保留创作者能力、非法 cookie 回落 guest、`StudioGuard` 阻断未登录访客；运行 `npm run test -- "src/features/auth" "src/app/studio/page.test.tsx"` 获得有效 RED，Vitest 报 `./access-control` 模块不存在。
+  - 实现 `SessionContext` / `AccessControl` 边界：扩展 `auth/types.ts`、`session.ts`、新增 `access-control.ts`，并在 `actions.ts` 收口 cookie 选项；随后把 `studio` 首页及 `profile` / `works` / `opportunities` 三个现有子页统一切到共享 `StudioGuard`。
+  - 回跑 `npm run test -- "src/features/auth" "src/app/studio"`，`5` 个测试文件、`9` 个测试全部通过；再执行 `npm run build`，Next.js 16 生产构建成功。
+  - 将 fresh evidence 写入 `docs/verification/implementation-T23.md`，并把 `task-progress.md` 切到“`T23` 已实现待 `ahe-bug-patterns`”。
+- **偏差/缺口：** 当前只完成 `T23` 的实现入口与 fresh evidence，尚未进入 `ahe-bug-patterns`、`ahe-test-review`、`ahe-code-review`、`ahe-traceability-review`、`ahe-regression-gate` 与 `ahe-completion-gate`。
+- **建议：** tdd skill 可补一个“当项目要求 auto approval step 且用户已预授权后，如何为测试设计落盘独立 approval record”的示例。
+
+### 2026-04-09 — 排查摄影社区平台 `T23` 缺陷模式
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-bug-patterns\SKILL.md`
+- **触发原因：** `T23` 已有实现交接块，需要在 full profile 下先做专项风险排查，再决定能否进入 `ahe-test-review`。
+- **执行摘要：**
+  - 读取 `implementation-T23.md`、`auth` 权限边界实现、相关测试与仍直接消费 `getSessionRole()` 的相邻模块。
+  - 识别三类模式：demo `accountId` 粒度过粗、权限消费双路径残留、非法 cookie fallback 失守；其中前两项记录为已知剩余风险，非法 cookie 风险已由测试承接。
+  - 写入 `docs/reviews/bug-patterns-T23.md`，结论为 `通过`，并把 `task-progress.md` 切到待 `ahe-test-review`。
+- **偏差/缺口：** 当前结论通过，但 `accountId` 与 legacy `getSessionRole()` 路径仍是后续任务必须继续证伪的风险。
+- **建议：** bug-patterns skill 可补一个“存在非阻塞 design debt 时，如何在记录中区分当前吸收方式与后续任务责任”的更明确模板。
+
+### 2026-04-09 — 评审摄影社区平台 `T23` 测试资产（首轮）
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-review\SKILL.md`
+- **触发原因：** `T23` 已通过缺陷模式排查，需要判断测试质量是否足以进入 `ahe-code-review`。
+- **执行摘要：**
+  - 派发 reviewer subagent，消费 `implementation-T23.md`、`bug-patterns-T23.md`、`test-design-T23.md`、`access-control.test.ts`、四个 `studio` 页面测试及规格 / 设计 / 任务锚点。
+  - reviewer 结论为 `需修改`：指出 `photographer` 缺少对称策略测试，`studio/works` 缺少 guest redirect 用例，当前页面 mock 无法替代真实策略分支验证。
+  - 父会话将结论落盘到 `docs/reviews/test-review-T23.md`，并把 `task-progress.md` 切回 `ahe-test-driven-dev`。
+- **偏差/缺口：** 首轮测试评审直接暴露出“共享权限层存在，但测试覆盖仍不对称”的质量链缺口。
+- **建议：** test-review skill 可补一个“实现正确但 coverage 仍不足时，如何区分测试资产回补与实现缺陷修复”的示例。
+
+### 2026-04-09 — 回流修订摄影社区平台 `T23` 测试覆盖
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-driven-dev\SKILL.md`
+- **触发原因：** `ahe-test-review` 首轮返回 `需修改`，需要在当前活跃任务范围内补齐对称测试与守卫覆盖。
+- **执行摘要：**
+  - 更新 `test-design-T23.md`，将 `photographer` 对称策略、`studio/works` guest redirect 与 `undefined` session fallback 纳入 auto approval record。
+  - 在 `access-control.test.ts` 补齐 `photographer` 正向策略测试与缺失 session fallback 测试，在 `studio/works/page.test.tsx` 补齐未登录跳转测试。
+  - 重新运行 `npm run test -- "src/features/auth" "src/app/studio"` 与 `npm run build`，获得 `12` 测试 / 0 失败和最新构建通过证据；更新 `implementation-T23.md` 并把主链切回待重新 `ahe-test-review`。
+- **偏差/缺口：** 本轮回流主要是 coverage backfill，新增测试在现有实现上直接转绿，没有新的行为级 RED。
+- **建议：** tdd skill 可增加“review 返回仅要求补测试时，如何记录 coverage-only 回流的 fresh evidence 约定”。
+
+### 2026-04-09 — 评审摄影社区平台 `T23` 测试资产（复审）
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-review\SKILL.md`
+- **触发原因：** `T23` 已完成测试覆盖回流，需要确认当前测试是否足以进入 `ahe-code-review`。
+- **执行摘要：**
+  - 再次派发 reviewer subagent，消费更新后的 `implementation-T23.md`、`test-review-T23.md`、`access-control.test.ts` 与 `studio` 页面测试。
+  - reviewer 结论改为 `通过`，确认双角色创作者能力、非法 / 缺失 session fallback 以及四个 `studio` 入口的共享守卫覆盖已经闭合。
+  - 父会话将 `docs/reviews/test-review-T23.md` 改写为最终通过版，并把 `task-progress.md` 切到待 `ahe-code-review`。
+- **偏差/缺口：** 仍保留 minor 级测试深度风险，如 `cookies()` -> `getRequestAccessControl()` 的真实集成链路暂无独立轻量测试。
+- **建议：** test-review skill 可补一个“复审通过后如何覆盖旧 `需修改` 记录并保留回流上下文”的示例。
+
+### 2026-04-09 — 评审摄影社区平台 `T23` 实现代码
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-code-review\SKILL.md`
+- **触发原因：** `T23` 已通过测试评审，需要判断当前实现是否足以进入 `ahe-traceability-review`。
+- **执行摘要：**
+  - 派发 reviewer subagent，消费 `implementation-T23.md`、`bug-patterns-T23.md`、`test-review-T23.md`、`auth` / `studio` 权限实现与规格 / 设计 / 任务锚点。
+  - reviewer 结论为 `通过`，确认当前实现与 `T23` 范围一致；主要提醒是 `AccessControl` 的实际消费面仍主要在 `studio`，其余入口迁移是后续任务而非 silent drift。
+  - 父会话写入 `docs/reviews/code-review-T23.md`，同步 `task-progress.md` 与 `implementation-T23.md` 到待 `ahe-traceability-review`，并顺手修正任务计划头部的 `当前活跃任务`。
+- **偏差/缺口：** 当前代码评审通过，但仍保留 demo `accountId` 粒度、legacy `getSessionRole()` 路径和守卫样板重复等后续可维护性风险。
+- **建议：** code-review skill 可补一个“当设计叙事比当前任务落地范围更大时，如何把剩余消费面明确归类为 traceability 关注项”的示例。
+
+### 2026-04-09 — 评审摄影社区平台 `T23` 追溯链路
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-traceability-review\SKILL.md`
+- **触发原因：** `T23` 已通过代码评审，需要确认规格、设计、任务、实现、测试与状态工件是否仍能闭合回指。
+- **执行摘要：**
+  - 派发 reviewer subagent，联合消费 `implementation-T23.md`、四份 review 记录、`test-design-T23.md`、SRS、设计、任务计划与 `task-progress.md`。
+  - reviewer 结论为 `通过`，确认把 `T23` 的“完成”解释为“建立可复用权限边界 + 接入 `studio` 路径”时，规格—设计—任务—实现—验证链条可闭合；唯一发现是 `task-progress.md` 顶部重复 `Current Review Record` 且 Session Log 滞后。
+  - 父会话先修正 `task-progress.md` 中的重复 review 指针和过期 Session Log，再写入 `docs/reviews/traceability-review-T23.md` 并把主链切到待 `ahe-regression-gate`。
+- **偏差/缺口：** 当前追溯通过，但仍要求在后续任务中继续显式管理 legacy `getSessionRole()` 保留面与 demo `accountId` 设计债务。
+- **建议：** traceability-review skill 可增加一个“状态工件小噪音如何在 parent 会话快速修正后再落正式 review 记录”的示例。
+
+### 2026-04-09 — 执行摄影社区平台 `T23` 回归门禁
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-regression-gate\SKILL.md`
+- **触发原因：** `T23` 已通过追溯性评审，需要用 fresh evidence 确认共享权限边界与相邻模块未被破坏。
+- **执行摘要：**
+  - 按 full profile 定义本轮回归面：`auth` + `studio` 主回归面、仍消费 `getSessionRole()` 的公开页 / 收件箱 / 联系 / 互动相邻测试，以及整站生产构建。
+  - 运行 `npm run test -- "src/features/auth" "src/app/studio" "src/app/inbox/page.test.tsx" "src/app/photographers/[slug]/page.test.tsx" "src/app/models/[slug]/page.test.tsx" "src/app/works/[workId]/page.test.tsx" "src/app/opportunities/[postId]/page.test.tsx" "src/features/contact/actions.test.ts" "src/features/engagement/actions.test.ts"`，得到 `12` 个文件、`24` 个测试全部通过；再执行 `npm run build`，构建通过。
+  - 将证据落盘到 `docs/verification/regression-T23.md`，把 `task-progress.md` 切到待 `ahe-completion-gate`。
+- **偏差/缺口：** 当前回归门禁覆盖共享会话边界影响面，但不替代后续真实账号持久化与 SQLite 集成任务的回归。
+- **建议：** regression-gate skill 可补一个“当新边界同时影响主路径和 legacy 兼容路径时，如何组织回归面说明”的示例。
+
+### 2026-04-09 — 执行摄影社区平台 `T23` 完成门禁
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-completion-gate\SKILL.md`
+- **触发原因：** `T23` 已通过回归门禁，需要判断当前任务是否允许正式宣告完成并进入 finalize。
+- **执行摘要：**
+  - 固定 full profile 所需证据矩阵：`bug-patterns-T23`、`test-review-T23`、`code-review-T23`、`traceability-review-T23`、`regression-T23` 与 `implementation-T23`。
+  - 为直接支撑“`T23` 任务已完成”的更强声明，再次运行同一组 regression 测试命令与 `npm run build`，获取 fresh completion evidence。
+  - 将门禁结果落盘到 `docs/verification/completion-T23.md`，并把 `task-progress.md` 切到待 `ahe-finalize`。
+- **偏差/缺口：** 当前完成门禁只证明 `T23` 可宣告完成，不等于全站互动入口都已迁移到 `AccessControl`。
+- **建议：** completion-gate skill 可补一个“当 regression gate 与 completion gate 复用同一命令时，如何更清楚地区分两者声明范围”的示例。
+
+### 2026-04-09 — 收尾摄影社区平台 `T23`
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-finalize\SKILL.md`
+- **触发原因：** `T23` 已通过 completion gate，需要同步项目状态、证据位置、发布说明与下一活跃任务。
+- **执行摘要：**
+  - 读取 `completion-T23.md`、`regression-T23.md`、全部 `T23` review 记录、`task-progress.md`、`RELEASE_NOTES.md` 与 `finalize-T22.md` 作为 closeout 参考。
+  - 在 `RELEASE_NOTES.md` 追加 2026-04-09 条目，记录共享 session / access-control 基线与 `studio` 守卫统一接入。
+  - 新建 `docs/verification/finalize-T23.md` 作为 delivery / handoff pack；将 `task-progress.md` 更新为：`T23` 进入 `Completed Tasks`、`Current Active Task` 切到 `T24`、下一推荐技能为 `ahe-test-driven-dev`；同步 `docs/tasks/...tasks.md` 的 `当前活跃任务` 到 `T24`。
+- **偏差/缺口：** 本轮 finalize 只做状态与文档收口，不推进 `T24` 的实现。
+- **建议：** finalize skill 可补一个“连续 auto mode 完成多轮 review / gate 后，如何压缩 skill record 但仍保持可恢复性”的示例。
+
+### 2026-04-09 — 路由摄影社区平台剩余任务主链到 `T24`
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-workflow-router\SKILL.md`
+- **触发原因：** 用户要求“auto mode 完成 `docs/tasks/2026-04-08-photography-community-platform-tasks.md` 中剩下的任务”，需要先做 authoritative runtime routing，而不是直接越过当前活跃任务。
+- **执行摘要：**
+  - 读取 `task-progress.md`、任务计划与 AHE entry / router 规则，确认当前仍处于摄影社区平台主链，`Workflow Profile=full`、`Execution Mode=auto`、`Current Active Task=T24`。
+  - 归一化显式 handoff：`T23` finalize 之后的 canonical 下一步仍是 `ahe-test-driven-dev`，且只能围绕 `T24` 单任务推进，不能把 `T25+` 并行展开。
+  - 将当前主链恢复到 `T24` 的 `ahe-test-driven-dev`，并把 auto mode 作为下游实现节点的 approval-step 处理策略继续传递。
+- **偏差/缺口：** 用户目标是“完成剩余任务”，但 AHE 语义下仍必须逐个活跃任务串行推进，不能批量跳过 review / gate。
+- **建议：** workflow-router skill 可增加一个“当用户要求一次性完成剩余任务时，如何明确解释单活跃任务串行语义”的示例。
+
+### 2026-04-09 — 实现摄影社区平台 `T24` SQLite repository 与样本种子桥接
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-driven-dev\SKILL.md`
+- **触发原因：** router 已确认当前活跃任务为 `T24`，需要在 auto mode 下按单任务 TDD 建立首个 concrete repository 与 seed bridge。
+- **执行摘要：**
+  - 读取 `web/AGENTS.md`、`task-progress.md`、任务计划 `T24` 段、规格 / 设计中与 SQLite、repository、curation seed 相关的锚点，确认本轮实现边界收在 `profiles / works / curation`。
+  - 落盘 `docs/verification/test-design-T24.md` 作为 auto approval record；先新增 `web/src/features/community/sqlite.test.ts`，用缺少 `./sqlite` 模块的导入失败建立有效 RED。
+  - 升级 `web/package.json` 中的 `@types/node` 到支持 `node:sqlite` 的最新版本；实现 `web/src/features/community/sqlite.ts`，用 Node 24 内建 SQLite 提供 schema、default seed、manual seed 校验与 repository bundle；随后跑通 `npm run test -- "src/features/community"` 与 `npm run build`，并把 fresh evidence 写回 `docs/verification/implementation-T24.md` 与 `task-progress.md`。
+- **偏差/缺口：** 当前持久化基线采用 `node:sqlite`，运行时会有 experimental warning；同时 `T24` 只建立 repository-backed 真源，还没有把公开页与 `studio` 读写面切到该真源。
+- **建议：** test-driven-dev skill 可增加一个“当项目可直接使用运行时内建依赖而非新增 npm 包时，如何记录依赖决策与类型升级证据”的示例。
+
+### 2026-04-09 — 排查摄影社区平台 `T24` 缺陷模式
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-bug-patterns\SKILL.md`
+- **触发原因：** `T24` 已完成主链实现，需要在 full profile 下进入正式质量链的首个缺陷模式排查节点。
+- **执行摘要：**
+  - 读取 `implementation-T24.md`、`sqlite.ts`、`sqlite.test.ts`、规格 / 设计中与 repository、seed、curation 和 SQLite 相关的锚点，以及 `bug-patterns-T23.md` 作为记录格式参考。
+  - 识别出三类风险：默认 `:memory:` 连接导致伪持久化真源；缺少连接生命周期约束导致未来文件库锁 / 重复 seed 风险；`opportunity` 精选仍经由旁路白名单而非统一实体校验。
+  - 由于前两项直接威胁 `T24`“建立 repository-backed 真源”的任务声明，结论落为 `需修改`；记录已写入 `docs/reviews/bug-patterns-T24.md`，并把主链切回 `ahe-test-driven-dev`。
+- **偏差/缺口：** 本轮没有进入 `ahe-test-review`，因为 bug-patterns 已经表明当前实现存在会让后续测试评审失真的真源 / 生命周期问题。
+- **建议：** bug-patterns skill 可补一个“当任务目标本身就是建立持久化基线时，如何识别‘看似 repository-backed、实则每次重建’的伪真源模式”的示例。
+
+### 2026-04-09 — 回流修订摄影社区平台 `T24` SQLite 生命周期与持久化基线
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-driven-dev\SKILL.md`
+- **触发原因：** `ahe-bug-patterns` 返回 `需修改`，要求修正默认 `:memory:` 伪持久化、缺少连接生命周期出口与 seed 重入风险。
+- **执行摘要：**
+  - 更新 `test-design-T24.md`，把“同一路径二次装配不重 seed”“稳定文件路径”“显式关闭出口”纳入回流测试设计。
+  - 修改 `web/src/features/community/sqlite.ts`：默认数据库路径切到 `web/.data/community.sqlite`，只在空库时 seed，并为 bundle 暴露 `databasePath` 与 `close()`；同时加入默认 bundle 复用入口。
+  - 修改 `web/src/features/community/sqlite.test.ts`：原有测试改显式使用 `:memory:` 隔离环境，新增文件 SQLite 二次装配不重 seed 的回归测试；随后跑通 `npm run test -- "src/features/community"` 与 `npm run build`，并将 fresh evidence 写回 `implementation-T24.md` 与 `task-progress.md`。
+- **偏差/缺口：** 本轮回流的可执行 RED 主要来自 bug-patterns 暴露出的持久化 / 生命周期缺口；首次命令执行还命中过一次类型注解语法错误，但该噪音已在同轮修正，没有改变最终行为级修复边界。
+- **建议：** test-driven-dev skill 可补一个“当回流发现是生命周期 / persistence 风险而非纯功能缺失时，如何把 reviewer finding 转成最小可执行守卫测试”的示例。
+
+### 2026-04-09 — 复审摄影社区平台 `T24` 缺陷模式
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-bug-patterns\SKILL.md`
+- **触发原因：** `T24` 已完成 bug-patterns 回流修订，需要确认持久化与生命周期风险是否已被吸收，才能进入 `ahe-test-review`。
+- **执行摘要：**
+  - 重新消费更新后的 `implementation-T24.md`、`sqlite.ts`、`sqlite.test.ts` 与 `task-progress.md`，重点复核默认 SQLite 路径、空库 seed 条件、关闭出口和文件库二次装配测试。
+  - 认定 `BP-T24-001` 与 `BP-T24-002` 已由稳定文件路径、空库 seed 条件、`close()` 出口、默认 bundle 复用入口和新回归测试吸收；`BP-T24-003` 仍保留为 minor 级过渡风险。
+  - 将 `docs/reviews/bug-patterns-T24.md` 更新为 `通过`，并把主链状态推进到待 `ahe-test-review`。
+- **偏差/缺口：** 当前通过只说明 `T24` 的主要 defect families 已被识别并有足够防护，不等于后续页面 / action 已全部切到 repository 真源。
+- **建议：** bug-patterns skill 可补一个“回流复审通过时，如何区分‘已吸收的高风险模式’与‘保留的 minor 过渡风险’”的示例。
+
+### 2026-04-09 — 评审摄影社区平台 `T24` 测试资产
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-review\SKILL.md`
+- **触发原因：** `T24` 已通过 `ahe-bug-patterns`，需要确认当前测试是否足以支撑进入 `ahe-code-review`。
+- **执行摘要：**
+  - 按 router 约定派发 reviewer subagent，消费 `implementation-T24.md`、`bug-patterns-T24.md`、`test-design-T24.md`、任务 / 设计锚点与 `sqlite.test.ts`。
+  - reviewer 结论为 `通过`，确认三则测试已覆盖默认 seed bridge、草稿 / 无效精选过滤，以及文件库二次装配不重 seed；同时记录若干 minor 级缺口，如默认 bundle 单例未直接断言、`opportunity` 旁路无专门负例、`forceReseed` 无测试。
+  - 父会话读取 `docs/reviews/test-review-T24.md` 后，修正 `implementation-T24.md` 底部过期 handoff，并把主链推进到待 `ahe-code-review`。
+- **偏差/缺口：** 当前测试评审通过，但 reviewer 明确要求下一轮代码评审继续人工核对默认 bundle 单例与 `opportunity` 旁路不会被页面层误用。
+- **建议：** test-review skill 可补一个“当主要风险已被测试承接，但仍有若干非阻塞配置耦合 / 旁路负例缺口时，如何稳定写出通过版 review”的示例。
+
+### 2026-04-09 — 评审摄影社区平台 `T24` 实现代码
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-code-review\SKILL.md`
+- **触发原因：** `T24` 已通过 `ahe-test-review`，需要判断当前 SQLite adapter 实现是否足以进入 `ahe-traceability-review`。
+- **执行摘要：**
+  - 按 router 约定派发 reviewer subagent，消费 `implementation-T24.md`、`bug-patterns-T24.md`、`test-review-T24.md`、任务 / 设计锚点，以及 `sqlite.ts` / `sqlite.test.ts`。
+  - reviewer 结论为 `通过`，确认默认文件路径、空库 seed、`close()` 生命周期、草稿过滤和无效精选跳过都与 `T24` 目标一致；follow/comment 占位与页面未接 bundle 仍属于已文档化的后续任务范围。
+  - 父会话读取 `docs/reviews/code-review-T24.md` 后，将主链状态推进到待 `ahe-traceability-review`。
+- **偏差/缺口：** reviewer 保留 minor 风险：默认 bundle 单例 / 默认路径未直接测试、`forceReseed` 破坏性语义、`opportunityIds` 白名单桥接，以及 `node:sqlite` 实验性。
+- **建议：** code-review skill 可补一个“当代码实现已达任务目标，但仍有操作面 / 部署面 minor 风险时，如何稳定区分实现缺陷与后续 traceability 关注项”的示例。
+
+### 2026-04-09 — 评审摄影社区平台 `T24` 追溯链路
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-traceability-review\SKILL.md`
+- **触发原因：** `T24` 已通过 `ahe-code-review`，需要确认规格、设计、任务、实现、测试与状态工件是否仍然闭合，才能进入 `ahe-regression-gate`。
+- **执行摘要：**
+  - 按 router 约定派发 reviewer subagent，联合消费 `implementation-T24.md`、`bug-patterns-T24.md`、`test-review-T24.md`、`code-review-T24.md`、规格 / 设计 / 任务锚点、`sqlite.ts` / `sqlite.test.ts` 与 `task-progress.md`。
+  - reviewer 结论为 `通过`，确认 `T24` 只负责 SQLite adapter 与种子桥接，而公开页仍未切换到 repository 读模型已被任务计划 `T25+`、实现交接块和上游 review 明确记录，不构成 silent drift。
+  - 父会话读取 `docs/reviews/traceability-review-T24.md` 后，顺手修正 `implementation-T24.md` 尾部过期 gate 字段，并把主链推进到待 `ahe-regression-gate`。
+- **偏差/缺口：** reviewer 仅保留 minor 级追溯缺口：`implementation-T24.md` 尾部 gate 字段曾滞后，以及 `FR-007` 的运行时回退 / 日志职责仍需在 `T25/T26` 继续承接。
+- **建议：** traceability-review skill 可补一个“当当前任务只完成底层适配、而上层消费明确后移到下一任务时，如何稳定证明这不是 silent drift”的示例。
+
+### 2026-04-09 — 执行摄影社区平台 `T24` 回归门禁
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-regression-gate\SKILL.md`
+- **触发原因：** `T24` 已通过 `ahe-traceability-review`，需要用 fresh evidence 确认 SQLite adapter 与相邻模块未被破坏。
+- **执行摘要：**
+  - 以 `traceability-review-T24.md` 为输入定义本轮回归面：`community` adapter、本地 `home-discovery` 契约、首页 / 创作者页 / 作品详情公开读取面，以及整站构建。
+  - 运行 `npm run test -- "src/features/community" "src/features/home-discovery" "src/app/page.test.tsx" "src/app/photographers/[slug]/page.test.tsx" "src/app/models/[slug]/page.test.tsx" "src/app/works/[workId]/page.test.tsx"`，得到 `11` 个文件、`29` 个测试全部通过；再执行 `npm run build`，构建通过。
+  - 将 fresh evidence 写入 `docs/verification/regression-T24.md`，并把主链状态推进到待 `ahe-completion-gate`。
+- **偏差/缺口：** 本轮回归尚未覆盖未来页面 / action 直接消费默认 SQLite bundle 的运行时多实例场景，这属于 `T25+` 接入后的后续回归面。
+- **建议：** regression-gate skill 可补一个“当当前任务只完成基础设施层而尚未切换上层消费时，如何组织相邻模块回归面”的示例。
+
+### 2026-04-09 — 执行摄影社区平台 `T24` 完成门禁
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-completion-gate\SKILL.md`
+- **触发原因：** `T24` 已通过 `ahe-regression-gate`，需要判断当前任务是否允许正式宣告完成并决定下一步是重选任务还是进入 finalize。
+- **执行摘要：**
+  - 固定 full profile 所需的上游证据矩阵：`bug-patterns-T24`、`test-review-T24`、`code-review-T24`、`traceability-review-T24`、`regression-T24` 与 `implementation-T24`。
+  - 再次运行 `npm run test -- "src/features/community" "src/features/home-discovery" "src/app/page.test.tsx" "src/app/photographers/[slug]/page.test.tsx" "src/app/models/[slug]/page.test.tsx" "src/app/works/[workId]/page.test.tsx"` 与 `npm run build`，获得 fresh completion evidence。
+  - 将结果写入 `docs/verification/completion-T24.md`，并根据任务计划判断唯一 next-ready task 为 `T25`，因此把主链状态切到待 `ahe-workflow-router` 重选下一任务。
+- **偏差/缺口：** 当前通过只说明 `T24` 可正式宣告完成，不等于公开页已切到 repository 读模型；这些消费迁移仍由 `T25/T26` 承接。
+- **建议：** completion-gate skill 可补一个“当当前 task 完成后仍有明确唯一 next-ready task 时，如何压缩写明‘完成已成立，但不进入 finalize’”的示例。
+
+### 2026-04-09 — 依据 `T25` completion gate 重选下一任务
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-workflow-router\SKILL.md`
+- **触发原因：** `T25` 已通过 `ahe-completion-gate`，需要根据任务计划判断是进入 finalize 还是锁定新的 `Current Active Task`。
+- **执行摘要：**
+  - 消费 `completion-T25.md`、`task-progress.md` 与任务计划 `T26` 段，确认当前 workflow 仍有唯一 next-ready task，且 `T26` 承接首页与 `/discover` 的社区主线读模型切换。
+  - 将 `Current Active Task` 从 `T25` 切换为 `T26`，同步 `task-progress.md` 与任务计划头部的 `当前活跃任务`，并把 canonical 下一步设回 `ahe-test-driven-dev`。
+  - 不进入 `ahe-finalize`，因为当前任务计划中仍有后续 ready / pending tasks。
+- **偏差/缺口：** 当前 router 只做任务重选，不展开 `T26` 的实现细节；`T26` 仍需重新走自己的测试设计、TDD 与质量链。
+- **建议：** workflow-router skill 可补一个“连续完成多个相邻页面迁移任务时，如何在 completion gate 后稳定回到单任务串行语义”的示例。
+
+### 2026-04-09 — 执行摄影社区平台 `T25` 完成门禁并重选下一任务
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-completion-gate\SKILL.md`
+- **触发原因：** `T25` 已通过 `ahe-regression-gate`，需要判断当前任务是否允许正式宣告完成，并决定下一步是重选任务还是进入 finalize。
+- **执行摘要：**
+  - 固定 full profile 所需的上游证据矩阵：`bug-patterns-T25`、`test-review-T25`、`code-review-T25`、`traceability-review-T25`、`regression-T25` 与 `implementation-T25`。
+  - 再次运行 `npm run test -- "src/features/community" "src/app/photographers/[slug]/page.test.tsx" "src/app/models/[slug]/page.test.tsx" "src/app/works/[workId]/page.test.tsx"` 与 `npm run build`，获得 fresh completion evidence，并将结果写入 `docs/verification/completion-T25.md`。
+  - 根据任务计划判断唯一 next-ready task 为 `T26`，因此不进入 `ahe-finalize`；父会话同步将 `Current Active Task` 切换为 `T26`、更新 `task-progress.md` 与任务计划头部的 `当前活跃任务`，并把 canonical 下一步设回 `ahe-test-driven-dev`。
+- **偏差/缺口：** 当前通过只说明 `T25` 可正式宣告完成，不等于首页与 `/discover` 已切到社区主线读模型；这些范围仍由 `T26` 承接。
+- **建议：** completion-gate skill 可补一个“公开页迁移完成后立即重选下一信息架构任务，而不是进入 finalize”的完整示例。
+
+### 2026-04-09 — 执行摄影社区平台 `T25` 回归门禁
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-regression-gate\SKILL.md`
+- **触发原因：** `T25` 已通过 `ahe-traceability-review`，需要用 fresh evidence 确认公开页 repository 读模型迁移没有破坏相邻模块与整站构建。
+- **执行摘要：**
+  - 以 `traceability-review-T25.md` 为输入定义本轮回归面：`community` repository / public-read-model 读路径、三条公开页测试，以及 `next build` 的页面数据收集与构建健康。
+  - 运行 `npm run test -- "src/features/community" "src/app/photographers/[slug]/page.test.tsx" "src/app/models/[slug]/page.test.tsx" "src/app/works/[workId]/page.test.tsx"`，得到 `6` 个文件、`21` 个测试全部通过；再执行 `npm run build`，构建通过。
+  - 将 fresh evidence 写入 `docs/verification/regression-T25.md`，并把主链状态推进到待 `ahe-completion-gate`。
+- **偏差/缺口：** 当前回归仍未单独模拟首次空库并发初始化的压力场景；这部分只由实现、`timeout` 与 fresh build evidence 共同承接。
+- **建议：** regression-gate skill 可补一个“当页面层接入嵌入式数据库后，如何把构建数据收集稳定纳入 regression surface”的示例。
+
+### 2026-04-09 — 评审摄影社区平台 `T25` 追溯链路
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-traceability-review\SKILL.md`
+- **触发原因：** `T25` 已通过 `ahe-code-review`，需要确认规格、设计、任务、实现、测试与验证证据是否仍然闭合，才能进入 `ahe-regression-gate`。
+- **执行摘要：**
+  - 按 router 约定派发 reviewer subagent，联合消费 `implementation-T25.md`、`bug-patterns-T25.md`、`test-review-T25.md`、`code-review-T25.md`、测试设计、任务 / 规格 / 设计锚点与 `task-progress.md`。
+  - reviewer 结论为 `通过`，确认 `T25` 的真实范围是“创作者主页 + 作品详情切 repository”，而首页 / discover 仍由 `T26` 承接；`FR-005` 中评论入口的更完整闭环已被 `T30` 和上游 review 显式记录，不构成 silent drift。
+  - reviewer 同时指出 `task-progress.md` 的 `Pending Reviews And Gates` 未及时收紧；父会话已同步修正，并将主链状态推进到待 `ahe-regression-gate`。
+- **偏差/缺口：** 当前通过只说明 evidence-chain 已闭合，不等于回归面已验证；默认 SQLite 只读 bundle 的构建 / 相邻页面健康仍需由 fresh regression evidence 承接。
+- **建议：** traceability-review skill 可补一个“当设计一句话覆盖多个页面，而任务计划拆成 `T25/T26` 两步时，如何稳定证明这不是 silent drift”的示例。
+
+### 2026-04-09 — 评审摄影社区平台 `T25` 实现代码
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-code-review\SKILL.md`
+- **触发原因：** `T25` 已通过 `ahe-test-review`，需要判断当前 repository 读模型迁移实现是否足以进入 `ahe-traceability-review`。
+- **执行摘要：**
+  - 按 router 约定派发 reviewer subagent，消费 `implementation-T25.md`、`bug-patterns-T25.md`、`test-review-T25.md`、任务 / 规格 / 设计锚点，以及 `public-read-model.ts`、`sqlite.ts` 与三条公开页实现。
+  - reviewer 结论为 `通过`，确认三条公开路由已切到 `public-read-model`，published 过滤与 static params 口径一致，且只读 SQLite bundle 在 `finally` 中释放、足以覆盖构建并发场景。
+  - 父会话读取 `docs/reviews/code-review-T25.md` 后，将主链状态推进到待 `ahe-traceability-review`。
+- **偏差/缺口：** reviewer 保留 minor 风险：页面测试整体 mock 读模型、默认路径首次并发初始化存在理论竞态面，以及 `FR-005` 评论入口仍需在任务边界层继续解释。
+- **建议：** code-review skill 可补一个“当页面层通过 read-model 接数据库、而真实并发生命周期主要由 build 证据证明时，如何稳定界定 minor vs blocking 风险”的示例。
+
+### 2026-04-09 — 评审摄影社区平台 `T25` 测试资产
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-review\SKILL.md`
+- **触发原因：** `T25` 已通过 `ahe-bug-patterns`，需要确认当前测试是否足以支撑进入 `ahe-code-review`。
+- **执行摘要：**
+  - 按 router 约定派发 reviewer subagent，消费 `implementation-T25.md`、`bug-patterns-T25.md`、`test-design-T25.md`、任务 / 规格 / 设计锚点与新增测试文件。
+  - reviewer 结论为 `通过`，确认 fail-first 与任务相关，且 read-model 单测与页面测试共同承接了 sample-data 旁路、draft 泄漏和公开路由 static params 过滤；并记录若干 minor 级薄弱点，如 RED 含模块解析噪音、页面测试未直接覆盖默认只读 bundle 的真实集成、构建并发锁主要由 fresh build 证据承接。
+  - 父会话读取 `docs/reviews/test-review-T25.md` 后，将主链状态推进到待 `ahe-code-review`。
+- **偏差/缺口：** reviewer 明确把默认只读 bundle 生命周期与异常路径释放留给后续 `ahe-code-review` 持续盯紧，因此当前通过并不意味着实现层风险已全部收敛。
+- **建议：** test-review skill 可补一个“当页面层大量 mock 读模型、而真实数据库生命周期主要由独立单测与 build 证据承接时，如何稳定给出通过版评审”的示例。
+
+### 2026-04-09 — 实现摄影社区平台 `T25` 公开页 repository 读模型迁移
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-driven-dev\SKILL.md`
+- **触发原因：** router 已确认当前活跃任务为 `T25`，需要在 auto mode 下把创作者主页与作品详情页切换到 repository 读模型。
+- **执行摘要：**
+  - 读取 `web/AGENTS.md`、`task-progress.md`、任务计划 `T25` 段，以及规格 / 设计中与公开创作者页、作品详情、published visibility 和 repository 读取相关的锚点，先落盘 `docs/verification/test-design-T25.md`。
+  - 先新增 `web/src/features/community/public-read-model.test.ts`，并让三条公开页测试依赖新的 community 读模型边界，用缺少 `./public-read-model` 模块与页面仍直读 `sample-data` 建立有效 RED。
+  - 实现 `web/src/features/community/public-read-model.ts`，把 repository 记录转换为页面消费的 `PublicProfile` / `PublicWork`，并将 `photographers/[slug]`、`models/[slug]`、`works/[workId]` 及其 `generateStaticParams()` 切到该边界；随后为解决构建期 `database is locked`，把公开读取改成短生命周期只读 SQLite bundle 并在 `finally` 中释放，最终跑通 `npm run test -- "src/features/community/public-read-model.test.ts" "src/app/photographers/[slug]/page.test.tsx" "src/app/models/[slug]/page.test.tsx" "src/app/works/[workId]/page.test.tsx"` 与 `npm run build`，并将 fresh evidence 写回 `docs/verification/implementation-T25.md` 与 `task-progress.md`。
+- **偏差/缺口：** 本轮为完成页面迁移新增了 `public-read-model.ts` 这一 page-facing adapter；profile 页展示文案仍是 role-level copy，不是 repository 字段，后续若需要可配置展示文案还需显式扩展。
+- **建议：** test-driven-dev skill 可补一个“当底层 repository 已存在、当前任务只是把公开页切到 read-model 时，如何组织 page test + read-model test 的双层 RED”的示例。
+
+### 2026-04-09 — 排查摄影社区平台 `T25` 缺陷模式
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-bug-patterns\SKILL.md`
+- **触发原因：** `T25` 已完成主链实现，需要在 full profile 下进入正式质量链的首个缺陷模式排查节点。
+- **执行摘要：**
+  - 读取 `implementation-T25.md`、`public-read-model.ts`、三条公开页与对应测试，以及规格 / 设计中与公开读取、published visibility、repository read model 相关的锚点。
+  - 识别并复核四类风险：公开页继续旁路直读 `sample-data`、draft work 通过 detail/static params 泄漏、构建期并发读取触发 SQLite 锁 / 异常路径泄漏，以及展示文案与持久化实体分离的后续漂移风险。
+  - 认定前三项已分别由 page-boundary 迁移、draft 过滤测试以及只读 bundle 生命周期修订 + fresh build evidence 吸收，当前只保留一条 minor 级展示文案漂移风险，因此 `docs/reviews/bug-patterns-T25.md` 结论为 `通过`，并把主链推进到待 `ahe-test-review`。
+- **偏差/缺口：** 当前通过只说明 `T25` 的主要 defect families 已被识别并有足够防护，不等于首页与 `/discover` 已切到社区主线读模型；这些范围仍由 `T26` 承接。
+- **建议：** bug-patterns skill 可补一个“当页面接入嵌入式数据库后，如何把构建期并发锁与异常路径资源释放一起当成 defect family 排查”的示例。
+
+### 2026-04-09 — 依据 `T24` completion gate 重选下一任务
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-workflow-router\SKILL.md`
+- **触发原因：** `T24` 已通过 `ahe-completion-gate`，需要根据任务计划判断是进入 finalize 还是锁定新的 `Current Active Task`。
+- **执行摘要：**
+  - 消费 `completion-T24.md`、`task-progress.md` 与任务计划 `T25` 段，确认当前 workflow 仍有唯一 next-ready task，且 `T25` 仅依赖已完成的 `T24`。
+  - 将 `Current Active Task` 从 `T24` 切换为 `T25`，同步 `task-progress.md` 与任务计划头部的 `当前活跃任务`，并把 canonical 下一步设回 `ahe-test-driven-dev`。
+  - 不进入 `ahe-finalize`，因为当前任务计划中仍有后续 ready / pending tasks。
+- **偏差/缺口：** 当前 router 只做任务重选，不展开 `T25` 的实现细节；`T25` 仍需重新走自己的测试设计、TDD 与质量链。
+- **建议：** workflow-router skill 可补一个“单任务 completion gate 通过后直接锁定下一个 ready task”的完整状态工件示例。
+
+### 2026-04-09 — 依据 `T28` completion gate 重选下一任务
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-workflow-router\SKILL.md`
+- **触发原因：** `T28` 已通过 `ahe-completion-gate`，需要根据任务计划判断是进入 finalize 还是锁定新的 `Current Active Task`。
+- **执行摘要：**
+  - 消费 `completion-T28.md`、`task-progress.md` 与任务计划 `T29` 段，确认当前 workflow 仍有唯一 next-ready task，且 `T29` 仅依赖已完成的 `T25/T26/T28`。
+  - 将 `Current Active Task` 从 `T28` 切换为 `T29`，同步 `task-progress.md` 与任务计划头部的 `当前活跃任务`，并把 canonical 下一步设回 `ahe-test-driven-dev`。
+  - 不进入 `ahe-finalize`，因为当前任务计划中仍有后续 ready / pending tasks。
+- **偏差/缺口：** 当前 router 只做任务重选，不展开 `T29` 的实现细节；`T29` 仍需重新走自己的测试设计、TDD 与质量链。
+- **建议：** workflow-router skill 可补一个“连续多个任务都走 auto mode 时，如何在每次 completion gate 后稳定同步 `task-progress.md` 与任务计划”的完整状态工件示例。
+
+### 2026-04-09 — 执行摄影社区平台 `T28` 完成门禁
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-completion-gate\SKILL.md`
+- **触发原因：** `T28` 已通过 `ahe-regression-gate`，需要确认当前任务是否可以正式宣告完成并切换到下一 ready task。
+- **执行摘要：**
+  - 消费 `bug-patterns-T28.md`、`test-review-T28.md`、`code-review-T28.md`、`traceability-review-T28.md`、`regression-T28.md` 与 `implementation-T28.md`，确认 full profile 证据链已经闭合。
+  - 复用 fresh regression evidence：`npm run test -- "src/features/community/public-read-model.test.ts" "src/features/community/work-editor.test.ts" "src/features/community/work-actions.test.ts" "src/app/studio/works/page.test.tsx" "src/app/works/[workId]/page.test.tsx"` 与 `npm run build` 均通过，足以支撑 `T28` 完成声明。
+  - 将完成门禁结论写入 `docs/verification/completion-T28.md`，并判断唯一 next-ready task 为 `T29`。
+- **偏差/缺口：** 当前 completion gate 只宣告 `T28` 的作品写路径闭环已完成，不覆盖 follow graph、评论或次级合作模块。
+- **建议：** completion-gate skill 可补一个“当 action、repository 与公开读模型一起构成闭环时，如何写出不越权的完成宣告范围”的示例。
+
+### 2026-04-09 — 执行摄影社区平台 `T28` 回归门禁
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-regression-gate\SKILL.md`
+- **触发原因：** `T28` 已通过 `ahe-traceability-review`，需要用 fresh evidence 确认作品写路径迁移未破坏相邻模块与整站构建。
+- **执行摘要：**
+  - 以 `traceability-review-T28.md` 为输入定义本轮回归面：`studio/works` 页面、`work-editor` / `work-actions`、`public-read-model`、作品详情 draft 隐藏边界与 `next build`。
+  - 运行 `npm run test -- "src/features/community/public-read-model.test.ts" "src/features/community/work-editor.test.ts" "src/features/community/work-actions.test.ts" "src/app/studio/works/page.test.tsx" "src/app/works/[workId]/page.test.tsx"`，得到 `5` 个文件、`14` 个测试全部通过；再执行 `npm run build`，构建通过。
+  - 将 fresh evidence 写入 `docs/verification/regression-T28.md`，并把主链状态推进到待 `ahe-completion-gate`。
+- **偏差/缺口：** 当前回归没有单独新增 discover 页面专测，但其草稿过滤继续由共享 `published` 读模型与既有 discover 测试边界共同承接。
+- **建议：** regression-gate skill 可补一个“当 discover / home 与 public read model 共享过滤规则时，如何判断是否需要在当前任务门禁中重复拉起页面测试”的示例。
+
+### 2026-04-09 — 评审摄影社区平台 `T28` 追溯链路
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-traceability-review\SKILL.md`
+- **触发原因：** `T28` 已通过 `ahe-code-review`，需要确认规格、设计、任务、实现、测试与验证证据是否仍然闭合，才能进入 `ahe-regression-gate`。
+- **执行摘要：**
+  - 按 router 约定派发 reviewer subagent，联合消费 `implementation-T28.md`、`bug-patterns-T28.md`、`test-review-T28.md`、`code-review-T28.md`、测试设计、任务 / 规格 / 设计锚点与 `task-progress.md`。
+  - reviewer 结论为 `通过`，确认 `T28` 真实范围仍是“studio/works 草稿 / 发布写路径闭环”，没有 silent drift 到 `T29` follow graph 或 `T30` 评论闭环；公开可见性规则也与规格 / 设计一致。
+  - reviewer 同时指出 `task-progress.md` 的阶段与 pending 状态未及时同步；父会话已修正台账，并将主链状态推进到待 `ahe-regression-gate`。
+- **偏差/缺口：** 任务书中的验证命令仍偏窄，只列页面测试；实际证据链已扩展到 `work-editor`、`work-actions` 与 `public-read-model`，后续维护时需避免误读。
+- **建议：** traceability-review skill 可补一个“当任务书验证命令落后于实际更强证据链时，如何在 review 记录中稳定说明这是覆盖增强而非范围漂移”的示例。
+
+### 2026-04-09 — 评审摄影社区平台 `T28` 实现代码
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-code-review\SKILL.md`
+- **触发原因：** `T28` 已通过 `ahe-test-review`，需要判断当前作品写路径实现是否足以进入 `ahe-traceability-review`。
+- **执行摘要：**
+  - 初次 reviewer 指出一个 blocking 缺陷：`save_draft` 会让已发布作品在普通保存时错误退出公开面。父会话立即回流实现，修复 `resolveNextVisibility()`，并将已发布作品页面按钮改为“保存更改”而非“保存为草稿”，同时补上专项测试。
+  - 修复后再次派发 code reviewer，结论转为 `通过`；确认 repository 写能力、owner 校验、action 权限复核与 cache revalidate 已足以支撑 `T28` 的任务边界。
+  - 将结论写入 `docs/reviews/code-review-T28.md`，并把主链状态推进到待 `ahe-traceability-review`。
+- **偏差/缺口：** 当前 SQLite `works.save()` 仍属上层 owner 校验 + 下层全量 upsert 的分工设计，数据库纵深防御可后续增强，但不阻断当前任务。
+- **建议：** code-review skill 可补一个“当 reviewer 找到状态机 blocking 缺陷后，如何在同一任务内回流修复并重新给出放行 verdict”的示例。
+
+### 2026-04-09 — 评审摄影社区平台 `T28` 测试资产
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-review\SKILL.md`
+- **触发原因：** `T28` 已通过 `ahe-bug-patterns`，需要确认当前测试是否足以支撑进入 `ahe-code-review`。
+- **执行摘要：**
+  - 按 router 约定派发 reviewer subagent，消费 `implementation-T28.md`、`bug-patterns-T28.md`、`test-design-T28.md`、任务 / 规格 / 设计锚点与新增 works 相关测试文件。
+  - reviewer 结论为 `通过`，确认 fail-first 与任务目标直接相关，且 `work-editor.test.ts`、`work-actions.test.ts`、页面测试与 `public-read-model` 共同承接了 sample-data 旁路、草稿泄漏、action 未授权与作品详情 draft 隐藏边界。
+  - reviewer 同时记录若干 minor 级薄弱点，如 action 测试与真实 sqlite bundle 未做一条端到端串联、页面测试未显式断言 editor model 调用参数、discover 对草稿不可见主要由共享 published 过滤共同承接；父会话将这些边界写入 `docs/reviews/test-review-T28.md` 后推进到待 `ahe-code-review`。
+- **偏差/缺口：** 当前通过并不意味着 action 层和页面层所有组合矩阵都已逐一断言；实现层仍需在 code review 中继续核对状态机语义。
+- **建议：** test-review skill 可补一个“当页面测试、action 测试与 repository 单测共同覆盖一个作品状态机时，如何说明为什么这足够通过但仍有 minor 级矩阵缺口”的示例。
+
+### 2026-04-09 — 排查摄影社区平台 `T28` 缺陷模式
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-bug-patterns\SKILL.md`
+- **触发原因：** `T28` 已完成主链实现，需要在 full profile 下进入正式质量链的首个缺陷模式排查节点。
+- **执行摘要：**
+  - 读取 `implementation-T28.md`、`work-editor.ts`、`work-actions.ts`、`studio/works/page.tsx` 与 works 相关测试，以及规格 / 设计中与作品可见性、写路径与 StudioGuard 相关的锚点。
+  - 识别并复核四类风险：`studio/works` 继续旁路 `sample-data`、草稿通过公开读面泄漏、已发布作品在普通保存时意外退出公开面，以及 server action 形成 guest 旁路。
+  - 认定上述风险都已有实现与测试防护，因此 `docs/reviews/bug-patterns-T28.md` 结论为 `通过`，并把主链推进到待 `ahe-test-review`。
+- **偏差/缺口：** 当前通过只说明 `T28` 的主要 defect families 已被识别并有足够防护，不等于 follow graph、评论区或次级合作模块已准备完成；这些范围仍由 `T29+` 承接。
+- **建议：** bug-patterns skill 可补一个“当同一任务里既有状态机风险又有 action 权限风险时，如何把它们整理成结构化 defect families”的示例。
+
+### 2026-04-09 — 实现摄影社区平台 `T28` 作品草稿 / 发布写路径
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-test-driven-dev\SKILL.md`
+- **触发原因：** router 已确认当前活跃任务为 `T28`，需要在 auto mode 下把 `studio/works` 切到 repository 写路径并完成作品生命周期闭环。
+- **执行摘要：**
+  - 读取 `web/AGENTS.md`、`task-progress.md`、任务计划 `T28` 段，以及规格 / 设计中与作品可见性、studio 写路径、Server Actions 和 discover feed 边界相关的锚点，先落盘 `docs/verification/test-design-T28.md`。
+  - 先新增 `web/src/features/community/work-editor.test.ts` 并重写 `studio/works/page.test.tsx`，用缺少 `./work-editor` 模块与页面仍直读 `sample-data` 的事实建立有效 RED。
+  - 实现 `WorkRepository.save()`、`work-editor.ts`、`work-actions.ts`，并把 `web/src/app/studio/works/page.tsx` 切到 repository-backed editor model 与表单提交；随后补充 `work-actions.test.ts` 覆盖 action 权限与 revalidate。期间根据 code reviewer 回流修复“已发布作品普通保存意外回退草稿”的状态机缺陷，并把已发布作品的按钮语义收敛为“保存更改 / 回退到草稿”。最终跑通 works 相关专项测试与 `npm run build`，并将 fresh evidence 写回 `docs/verification/implementation-T28.md` 与 `task-progress.md`。
+- **偏差/缺口：** 当前 `coverAsset` 仍只是稳定引用字符串，不接上传系统；这与任务边界一致。排序对齐与数据库层 owner 纵深约束留作后续增强。
+- **建议：** test-driven-dev skill 可补一个“当作品状态机存在 `draft/published/revert` 三态且页面按钮语义也会影响实现判断时，如何组织 RED -> GREEN -> reviewer 回流修复”的示例。
+
 <!-- 新记录请追加在「历史记录」章节上方紧接本注释之上，或按时间倒序追加在章节最前 -->

@@ -1,190 +1,209 @@
-import {
-  adaptOpportunityPostToHomeDiscoveryCard,
-  adaptProfileToHomeDiscoveryCard,
-  adaptWorkToHomeDiscoveryCard,
-} from "./adapters";
-import {
-  homeDiscoverySectionOrder,
-  opportunitiesDiscoverySlotConfig,
-  profileDiscoverySlotConfig,
-  worksDiscoverySlotConfig,
-} from "./config";
-import {
-  modelProfiles,
-  opportunityPosts,
-  photographerProfiles,
-  works,
-} from "@/features/showcase/sample-data";
+import { getDefaultSqliteCommunityRepositoryBundle } from "@/features/community/sqlite";
 import type {
-  PublicOpportunityPost,
-  PublicProfile,
-  PublicWork,
-} from "@/features/showcase/types";
+  CommunityRepositoryBundle,
+  CommunityWorkRecord,
+  CreatorProfileRecord,
+} from "@/features/community/types";
 
 import type {
   HomeDiscoveryCard,
   HomeDiscoverySection,
-  OpportunityDiscoverySlotConfig,
-  ProfileDiscoverySlotConfig,
-  WorkDiscoverySlotConfig,
+  HomeDiscoverySectionKind,
+  HomeDiscoverySurface,
 } from "./types";
+import {
+  discoverSurfaceSectionOrder,
+  homeSurfaceSectionOrder,
+} from "./config";
 
-const maxSectionItems = 3;
+const maxSectionItems = 6;
 
-const sectionCopy = {
-  works: {
-    title: "精选作品",
-    description: "从社区最新作品里挑出的优先浏览内容。",
+const sectionCopy: Record<
+  HomeDiscoverySectionKind,
+  Pick<HomeDiscoverySection, "title" | "description" | "emptyStateCopy">
+> = {
+  featured: {
+    title: "精选推荐",
+    description: "优先展示社区精选作品与创作者。",
+    emptyStateCopy: "精选内容整理中。",
   },
-  profiles: {
-    title: "精选主页",
-    description: "认识准备开启合作的摄影师与模特。",
+  latest: {
+    title: "最新发布",
+    description: "按最新公开发布时间浏览社区内容。",
+    emptyStateCopy: "最新内容整理中。",
   },
-  opportunities: {
-    title: "精选诉求",
-    description: "浏览最新发布的约拍诉求与合作请求。",
+  following: {
+    title: "关注中",
+    description: "关注创作者后，这里会显示他们的最新公开内容。",
+    emptyStateCopy: "关注创作者后，这里会显示他们的最新公开内容。",
   },
-} as const;
-
-type TimeTrackedRecord = {
-  publishedAt: string;
-  updatedAt?: string;
 };
 
-function getNewestTimestamp(record: TimeTrackedRecord) {
-  return Date.parse(record.updatedAt ?? record.publishedAt);
+type ResolveHomeDiscoverySectionsOptions = {
+  surface: HomeDiscoverySurface;
+  accountId?: string | null;
+  bundle?: CommunityRepositoryBundle;
+};
+
+function getProfileHref(profile: CreatorProfileRecord) {
+  return profile.role === "photographer"
+    ? `/photographers/${profile.slug}`
+    : `/models/${profile.slug}`;
 }
 
-function buildEmptySection(kind: HomeDiscoverySection["kind"]): HomeDiscoverySection {
+function adaptProfileRecordToHomeDiscoveryCard(
+  profile: CreatorProfileRecord,
+): HomeDiscoveryCard {
+  return {
+    id: profile.id,
+    href: getProfileHref(profile),
+    badge: profile.role === "photographer" ? "摄影师" : "模特",
+    title: profile.name,
+    description: profile.tagline,
+    meta: profile.city,
+  };
+}
+
+function adaptWorkRecordToHomeDiscoveryCard(
+  work: CommunityWorkRecord,
+): HomeDiscoveryCard {
+  return {
+    id: work.id,
+    href: `/works/${work.id}`,
+    badge: work.category,
+    title: work.title,
+    description: work.description,
+    meta: `${work.ownerName} · ${
+      work.ownerRole === "photographer" ? "摄影师" : "模特"
+    }`,
+  };
+}
+
+function buildSection(
+  kind: HomeDiscoverySectionKind,
+  items: HomeDiscoveryCard[],
+  emptyStateCopy = sectionCopy[kind].emptyStateCopy,
+): HomeDiscoverySection {
   return {
     kind,
     title: sectionCopy[kind].title,
     description: sectionCopy[kind].description,
-    items: [],
+    emptyStateCopy,
+    items,
   };
 }
 
-function resolveSectionItems<TItem extends TimeTrackedRecord, TReference>({
-  items,
-  featuredReferences,
-  findFeaturedItem,
-  getKey,
-  adapt,
-}: {
-  items: TItem[];
-  featuredReferences: TReference[];
-  findFeaturedItem: (reference: TReference, items: TItem[]) => TItem | undefined;
-  getKey: (item: TItem) => string;
-  adapt: (item: TItem) => HomeDiscoveryCard;
-}) {
-  const selectedKeys = new Set<string>();
-  const featuredItems: TItem[] = [];
+function createFeaturedFallbackCards(
+  works: CommunityWorkRecord[],
+  profiles: CreatorProfileRecord[],
+): HomeDiscoveryCard[] {
+  return [
+    ...works.map(adaptWorkRecordToHomeDiscoveryCard),
+    ...profiles.map(adaptProfileRecordToHomeDiscoveryCard),
+  ];
+}
 
-  for (const reference of featuredReferences) {
-    const matchedItem = findFeaturedItem(reference, items);
+async function resolveFeaturedSection(
+  surface: HomeDiscoverySurface,
+  bundle: CommunityRepositoryBundle,
+  works: CommunityWorkRecord[],
+  profiles: CreatorProfileRecord[],
+): Promise<HomeDiscoverySection> {
+  const curatedSlots = await bundle.curation.listSlotsBySurface(surface);
+  const workById = new Map(works.map((work) => [work.id, work]));
+  const profileById = new Map(profiles.map((profile) => [profile.id, profile]));
+  const selectedIds = new Set<string>();
+  const cards: HomeDiscoveryCard[] = [];
 
-    if (!matchedItem) {
+  for (const slot of curatedSlots) {
+    if (slot.targetType === "work") {
+      const work = workById.get(slot.targetKey);
+
+      if (!work || selectedIds.has(work.id)) {
+        continue;
+      }
+
+      selectedIds.add(work.id);
+      cards.push(adaptWorkRecordToHomeDiscoveryCard(work));
       continue;
     }
 
-    const key = getKey(matchedItem);
+    if (slot.targetType === "profile") {
+      const profile = profileById.get(slot.targetKey);
 
-    if (selectedKeys.has(key)) {
-      continue;
+      if (!profile || selectedIds.has(profile.id)) {
+        continue;
+      }
+
+      selectedIds.add(profile.id);
+      cards.push(adaptProfileRecordToHomeDiscoveryCard(profile));
     }
-
-    selectedKeys.add(key);
-    featuredItems.push(matchedItem);
   }
 
-  const fallbackItems = [...items]
-    .sort((left, right) => getNewestTimestamp(right) - getNewestTimestamp(left))
-    .filter((item) => !selectedKeys.has(getKey(item)));
+  const fallbackCards = createFeaturedFallbackCards(works, profiles).filter(
+    (card) => !selectedIds.has(card.id),
+  );
 
-  return [...featuredItems, ...fallbackItems]
+  return buildSection("featured", [...cards, ...fallbackCards].slice(0, maxSectionItems));
+}
+
+function resolveLatestSection(
+  works: CommunityWorkRecord[],
+): HomeDiscoverySection {
+  return buildSection(
+    "latest",
+    works.slice(0, maxSectionItems).map(adaptWorkRecordToHomeDiscoveryCard),
+  );
+}
+
+async function resolveFollowingSection(
+  accountId: string | null | undefined,
+  bundle: CommunityRepositoryBundle,
+  works: CommunityWorkRecord[],
+): Promise<HomeDiscoverySection> {
+  if (!accountId) {
+    return buildSection(
+      "following",
+      [],
+      "登录后查看关注中的创作者更新。",
+    );
+  }
+
+  const followedProfileIds = await bundle.follows.listFollowedProfileIds(accountId);
+  const followingItems = works
+    .filter((work) => followedProfileIds.includes(work.ownerProfileId))
     .slice(0, maxSectionItems)
-    .map((item) => adapt(item));
+    .map(adaptWorkRecordToHomeDiscoveryCard);
+
+  return buildSection("following", followingItems);
 }
 
-export function resolveWorkDiscoverySection(
-  config: WorkDiscoverySlotConfig,
-  workItems: PublicWork[]
-): HomeDiscoverySection {
-  if (workItems.length === 0) {
-    return buildEmptySection("works");
-  }
-
-  return {
-    kind: "works",
-    title: sectionCopy.works.title,
-    description: sectionCopy.works.description,
-    items: resolveSectionItems({
-      items: workItems,
-      featuredReferences: config.featuredIds,
-      findFeaturedItem: (featuredId, items) => items.find((item) => item.id === featuredId),
-      getKey: (item) => item.id,
-      adapt: adaptWorkToHomeDiscoveryCard,
-    }),
-  };
+function getSectionOrder(surface: HomeDiscoverySurface) {
+  return surface === "home"
+    ? homeSurfaceSectionOrder
+    : discoverSurfaceSectionOrder;
 }
 
-export function resolveProfileDiscoverySection(
-  config: ProfileDiscoverySlotConfig,
-  profileItems: PublicProfile[]
-): HomeDiscoverySection {
-  if (profileItems.length === 0) {
-    return buildEmptySection("profiles");
-  }
+export async function resolveHomeDiscoverySections({
+  surface,
+  accountId = null,
+  bundle = getDefaultSqliteCommunityRepositoryBundle(),
+}: ResolveHomeDiscoverySectionsOptions): Promise<HomeDiscoverySection[]> {
+  const [profiles, works] = await Promise.all([
+    bundle.profiles.listPublicProfiles(),
+    bundle.works.listPublicWorks(),
+  ]);
 
-  return {
-    kind: "profiles",
-    title: sectionCopy.profiles.title,
-    description: sectionCopy.profiles.description,
-    items: resolveSectionItems({
-      items: profileItems,
-      featuredReferences: config.featuredProfiles,
-      findFeaturedItem: (featuredProfile, items) =>
-        items.find(
-          (item) =>
-            item.role === featuredProfile.role && item.slug === featuredProfile.slug
-        ),
-      getKey: (item) => `${item.role}:${item.slug}`,
-      adapt: adaptProfileToHomeDiscoveryCard,
-    }),
-  };
-}
-
-export function resolveOpportunityDiscoverySection(
-  config: OpportunityDiscoverySlotConfig,
-  postItems: PublicOpportunityPost[]
-): HomeDiscoverySection {
-  if (postItems.length === 0) {
-    return buildEmptySection("opportunities");
-  }
-
-  return {
-    kind: "opportunities",
-    title: sectionCopy.opportunities.title,
-    description: sectionCopy.opportunities.description,
-    items: resolveSectionItems({
-      items: postItems,
-      featuredReferences: config.featuredIds,
-      findFeaturedItem: (featuredId, items) => items.find((item) => item.id === featuredId),
-      getKey: (item) => item.id,
-      adapt: adaptOpportunityPostToHomeDiscoveryCard,
-    }),
-  };
-}
-
-export function resolveHomeDiscoverySections() {
-  const profileItems = [...photographerProfiles, ...modelProfiles];
-
-  const sectionResolvers: Record<HomeDiscoverySection["kind"], () => HomeDiscoverySection> = {
-    works: () => resolveWorkDiscoverySection(worksDiscoverySlotConfig, works),
-    profiles: () => resolveProfileDiscoverySection(profileDiscoverySlotConfig, profileItems),
-    opportunities: () =>
-      resolveOpportunityDiscoverySection(opportunitiesDiscoverySlotConfig, opportunityPosts),
+  const sectionResolvers: Record<
+    HomeDiscoverySectionKind,
+    () => Promise<HomeDiscoverySection>
+  > = {
+    featured: () => resolveFeaturedSection(surface, bundle, works, profiles),
+    latest: async () => resolveLatestSection(works),
+    following: () => resolveFollowingSection(accountId, bundle, works),
   };
 
-  return homeDiscoverySectionOrder.map((kind) => sectionResolvers[kind]());
+  return Promise.all(
+    getSectionOrder(surface).map((kind) => sectionResolvers[kind]()),
+  );
 }

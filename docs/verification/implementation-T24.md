@@ -1,0 +1,37 @@
+## 实现交接块
+
+- Task ID: `T24`
+- 回流来源: `ahe-bug-patterns`
+- 触碰工件:
+  - `docs/verification/test-design-T24.md`
+  - `docs/reviews/bug-patterns-T24.md`
+  - `web/package.json`
+  - `web/src/features/community/sqlite.ts`
+  - `web/src/features/community/sqlite.test.ts`
+  - `task-progress.md`
+- 测试设计确认证据:
+  - `docs/verification/test-design-T24.md` 已按 `Execution Mode=auto` 落盘本轮测试设计与 approval step。
+  - `task-progress.md` 已记录“用户已授权后续测试设计直接视为确认”，且当前轮用户显式要求“auto mode 完成剩余任务”。
+  - 本轮回流将 `ahe-bug-patterns` 命中的伪持久化与生命周期风险转成显式 persistence 场景：同一路径二次装配不得重 seed 覆盖既有 SQLite 数据。
+- RED 证据:
+  - 回流依据: `docs/reviews/bug-patterns-T24.md`
+  - 失败摘要: `ahe-bug-patterns` 已证明当前实现命中“默认 `:memory:` 导致伪持久化真源”与“连接无释放 / 无共享实例”的高风险模式；若继续进入 `ahe-test-review`，会把短生命周期演示实现误判为稳定 repository 真源。
+  - 为什么这是预期失败: `T24` 的任务声明要求社区动态状态已有 repository-backed 真源；一旦 bundle 每次重建都回到初始 seed，本轮实现就还没有真正达到该门槛，因此必须先回到 `ahe-test-driven-dev` 修正。
+- GREEN 证据:
+  - 命令: `npm run test -- "src/features/community"`
+  - 通过摘要: `2` 个测试文件、`9` 个测试全部通过。
+  - 关键结果: 新 SQLite adapter 现已补齐稳定默认文件路径、只在空库时 seed、显式 `close()` 生命周期出口，并新增文件库重建不重 seed 的回归测试；`sample-data.ts` 与 `home-discovery/config.ts` 继续仅作为初始化输入存在。
+  - 命令: `npm run build`
+  - 通过摘要: Next.js 16 生产构建成功，全部 app routes 正常生成。
+  - 关键结果: 持久化与生命周期回流修订没有破坏当前 `web` 应用构建和 TypeScript 检查。
+- 与任务计划测试种子的差异:
+  - 与种子基本一致；task-level 证明仍以 `src/features/community` 为主，但在 bug-patterns 回流后，额外把“文件库二次装配不重 seed”纳入 task-level 证明，以覆盖 repository 真源最容易失真的生命周期边界。
+  - 本轮仍未修改 `home-discovery/config.ts` 或 `sample-data.ts` 内容，而是继续把它们约束为默认初始化 seed 输入；修订点在于为 SQLite adapter 明确了稳定文件路径、空库 seed 条件和关闭出口。
+- 剩余风险 / 未覆盖项:
+  - 当前 `node:sqlite` 在 Node 24 下仍带 experimental warning；虽然类型和构建已通过，但后续任务需继续观察 API 稳定性，并在需要时切换到更明确的持久化封装层。
+  - `T24` 只完成了 repository / seed 基线，公开页与 `studio` 页面还没有切换到该 repository 读写面；这些消费迁移仍由 `T25` 及后续任务承接。
+  - 当前 custom seed 允许显式注入 `opportunityIds` 以保留次级模块精选槽位，但 `OpportunityRepository` 尚未纳入社区主线 bundle，这一落差仍需在后续 bug-patterns / `T31/T32` 明确回归。
+- Pending Reviews And Gates:
+  - `ahe-regression-gate`、`ahe-completion-gate`
+- Next Action Or Recommended Skill:
+  - `ahe-regression-gate`

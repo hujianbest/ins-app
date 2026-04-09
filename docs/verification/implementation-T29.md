@@ -1,0 +1,39 @@
+## 实现交接块
+
+- Task ID: `T29`
+- 回流来源: `ahe-test-driven-dev`
+- 触碰工件:
+  - `docs/verification/test-design-T29.md`
+  - `web/src/features/community/types.ts`
+  - `web/src/features/community/test-support.ts`
+  - `web/src/features/community/sqlite.ts`
+  - `web/src/features/social/actions.ts`
+  - `web/src/features/social/actions.test.ts`
+  - `web/src/features/social/follows.ts`
+  - `web/src/features/social/follows.test.ts`
+  - `web/src/features/showcase/profile-showcase-page.tsx`
+  - `web/src/app/photographers/[slug]/page.tsx`
+  - `web/src/app/photographers/[slug]/page.test.tsx`
+  - `web/src/app/models/[slug]/page.tsx`
+  - `web/src/app/models/[slug]/page.test.tsx`
+  - `task-progress.md`
+- 测试设计确认证据:
+  - `docs/verification/test-design-T29.md` 已按 `Execution Mode=auto` 落盘本轮测试设计与 approval step。
+  - `task-progress.md` 已记录“用户已授权后续测试设计直接视为确认”，且当前轮用户继续要求自动推进。
+- RED 证据:
+  - 命令: `npm run test -- "src/features/social/*.test.ts" "src/app/photographers/[slug]/page.test.tsx" "src/app/models/[slug]/page.test.tsx" "src/app/discover/page.test.tsx"`
+  - 失败摘要: 创作者主页测试直接暴露页面仍依赖旧的 `getSessionRole()` + 收藏链路；`features/social` 还不存在，无法承接 follow graph 写入。
+  - 为什么这是预期失败: `T29` 的核心目标正是把创作者主页切到真实关注动作，并让 discover `关注中` 消费同一 follow graph；在补实现前，旧收藏路径与缺失 social 模块构成有效 RED。
+- GREEN 证据:
+  - 命令: `npm run test -- "src/features/social/actions.test.ts" "src/features/social/follows.test.ts" "src/app/photographers/[slug]/page.test.tsx" "src/app/models/[slug]/page.test.tsx" "src/app/discover/page.test.tsx"`
+  - 通过摘要: `5` 个测试文件、`11` 个测试全部通过。
+  - 关键结果: 新增 `features/social` 的 follow action / service，`FollowRepository` 具备真实写能力；创作者主页已显示关注 / 取消关注入口，discover `关注中` 能消费同一 follow graph。
+- 与任务计划测试种子的差异:
+  - 与种子保持一致，仍以 follow / unfollow 与 discover `关注中` 为主；为了避免只靠页面按钮证明关注动作，本轮新增 `follows.test.ts` 与 `actions.test.ts`，把 follow graph 写入与 discover feed 串成一条真实闭环。
+- 剩余风险 / 未覆盖项:
+  - 当前 follow 只覆盖创作者主页入口，没有扩展到更多推荐卡片或批量关注场景；这不在本轮范围内。
+  - 当前 build 与专项测试已证明 schema 扩展可工作，但全量回归仍由后续 `T32` 承接。
+- Pending Reviews And Gates:
+  - `ahe-regression-gate`、`ahe-completion-gate`
+- Next Action Or Recommended Skill:
+  - `ahe-regression-gate`

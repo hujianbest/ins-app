@@ -2,17 +2,18 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { getAuthRoleCopy } from "@/features/auth/auth-copy";
-import { getSessionRole } from "@/features/auth/session";
+import { getRequestAccessControl } from "@/features/auth/access-control";
 
 export default async function StudioPage() {
-  const sessionRole = await getSessionRole();
+  const accessControl = await getRequestAccessControl();
+  const session = accessControl.session;
 
-  if (!sessionRole) {
-    redirect("/login");
+  if (session.status !== "authenticated" || !accessControl.studioGuard.allowed) {
+    redirect(accessControl.studioGuard.redirectTo ?? "/login");
     return null;
   }
 
-  const roleCopy = getAuthRoleCopy(sessionRole);
+  const roleCopy = getAuthRoleCopy(session.primaryRole);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(103,232,249,0.18),_transparent_24%),linear-gradient(180deg,_#050816_0%,_#0f172a_56%,_#111827_100%)] text-white">

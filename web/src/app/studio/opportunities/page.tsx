@@ -1,18 +1,19 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { getSessionRole } from "@/features/auth/session";
+import { getRequestAccessControl } from "@/features/auth/access-control";
 import { getOpportunityPostsByRole } from "@/features/showcase/sample-data";
 
 export default async function StudioOpportunitiesPage() {
-  const sessionRole = await getSessionRole();
+  const accessControl = await getRequestAccessControl();
+  const session = accessControl.session;
 
-  if (!sessionRole) {
-    redirect("/login");
+  if (session.status !== "authenticated" || !accessControl.studioGuard.allowed) {
+    redirect(accessControl.studioGuard.redirectTo ?? "/login");
     return null;
   }
 
-  const managedPosts = getOpportunityPostsByRole(sessionRole);
+  const managedPosts = getOpportunityPostsByRole(session.primaryRole);
   const draft = managedPosts[0];
 
   return (

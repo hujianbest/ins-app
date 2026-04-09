@@ -1,15 +1,15 @@
 import { notFound } from "next/navigation";
 
-import { getSessionRole } from "@/features/auth/session";
-import { isProfileFavorited } from "@/features/engagement/state";
+import { getSessionContext } from "@/features/auth/session";
 import {
-  getPhotographerProfileBySlug,
-  photographerProfiles,
-} from "@/features/showcase/sample-data";
+  getPublicProfilePageModel,
+  listPublicProfilePageParams,
+} from "@/features/community/public-read-model";
+import { isProfileFollowedByViewer } from "@/features/social/follows";
 import { ProfileShowcasePage } from "@/features/showcase/profile-showcase-page";
 
-export function generateStaticParams() {
-  return photographerProfiles.map((profile) => ({ slug: profile.slug }));
+export async function generateStaticParams() {
+  return listPublicProfilePageParams("photographer");
 }
 
 export default async function PhotographerPage({
@@ -18,20 +18,24 @@ export default async function PhotographerPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const profile = getPhotographerProfileBySlug(slug);
+  const profile = await getPublicProfilePageModel("photographer", slug);
 
   if (!profile) {
     notFound();
   }
 
-  const sessionRole = await getSessionRole();
-  const isFavorited = await isProfileFavorited(profile.slug);
+  const session = await getSessionContext();
+  const isFollowing = await isProfileFollowedByViewer(
+    session.accountId,
+    profile.role,
+    profile.slug,
+  );
 
   return (
     <ProfileShowcasePage
       profile={profile}
-      isSignedIn={Boolean(sessionRole)}
-      isFavorited={isFavorited}
+      isSignedIn={session.isAuthenticated}
+      isFollowing={isFollowing}
       returnPath={`/photographers/${profile.slug}`}
     />
   );

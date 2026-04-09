@@ -1,0 +1,39 @@
+## 实现交接块
+
+- Task ID: `T28`
+- 回流来源: `ahe-test-driven-dev`
+- 触碰工件:
+  - `docs/verification/test-design-T28.md`
+  - `web/src/app/studio/works/page.tsx`
+  - `web/src/app/studio/works/page.test.tsx`
+  - `web/src/features/community/types.ts`
+  - `web/src/features/community/sqlite.ts`
+  - `web/src/features/community/test-support.ts`
+  - `web/src/features/community/work-editor.ts`
+  - `web/src/features/community/work-editor.test.ts`
+  - `web/src/features/community/work-actions.ts`
+  - `web/src/features/community/work-actions.test.ts`
+  - `task-progress.md`
+- 测试设计确认证据:
+  - `docs/verification/test-design-T28.md` 已按 `Execution Mode=auto` 落盘本轮测试设计与 approval step。
+  - `task-progress.md` 已记录“用户已授权后续测试设计直接视为确认”，且当前轮用户继续要求自动推进。
+  - 本轮测试设计将“`studio/works` 仍直读 `sample-data`、没有真实草稿 / 发布状态写路径”固定为首批 fail-first。
+- RED 证据:
+  - 命令: `npm run test -- "src/app/studio/works/page.test.tsx" "src/features/community/work-editor.test.ts" "src/app/works/[workId]/page.test.tsx"`
+  - 失败摘要: `src/features/community/work-editor.test.ts` 无法解析 `./work-editor` 导入；同时 `studio/works/page.test.tsx` 证明页面仍渲染 `霓虹人像研究` 等 sample-data 列表，而非 repository-backed 作品编辑模型。
+  - 为什么这是预期失败: `T28` 的核心目标正是把 `studio/works` 切到 Server Actions + repository 写入；在补实现前，缺少 work editor 模块且页面仍旁路真源是有效 RED。
+- GREEN 证据:
+  - 命令: `npm run test -- "src/features/community/public-read-model.test.ts" "src/features/community/work-editor.test.ts" "src/features/community/work-actions.test.ts" "src/app/studio/works/page.test.tsx" "src/app/works/[workId]/page.test.tsx"`
+  - 通过摘要: `5` 个测试文件、`14` 个测试全部通过。
+  - 关键结果: `studio/works` 已切到 repository-backed works editor model，新增 `saveCreatorWorkForRole()` 与 `saveStudioWorkAction()`；作品可创建草稿、发布、已发布后继续保存更改保持公开，并且只有显式 `revert_to_draft` 才退出公开面。
+- 与任务计划测试种子的差异:
+  - 与种子保持一致，仍以 `studio/works` 与作品公开可见性为主；但为了避免只靠页面壳证明写路径，本轮新增 `web/src/features/community/work-editor.test.ts` 与 `work-actions.test.ts`，把作品状态机和 action 权限 / revalidate 直接固定在页面层之外。
+  - 当前未实现真实上传系统，`coverAsset` 仍是稳定引用字符串；这与任务边界一致，不构成遗漏。
+- 剩余风险 / 未覆盖项:
+  - SQLite `works.save()` 仍是按 `id` 全量 upsert，owner 归属约束主要依赖 `saveCreatorWorkForRole()` 的上层校验；当前单入口 server action 足够，但数据库纵深防御仍可后续增强。
+  - `test-support.ts` 的 `listByOwnerProfileId()` 尚未完全对齐 SQLite 的排序规则；当前 studio 页面未依赖稳定顺序，但后续若在测试中断言排序，需要同步。
+  - `node:sqlite` 仍带 experimental warning；当前 task 已用 fresh 单任务测试与 build 证明作品生命周期闭环可工作，完整全量回归仍待后续任务 `T32` 承接。
+- Pending Reviews And Gates:
+  - `ahe-regression-gate`、`ahe-completion-gate`
+- Next Action Or Recommended Skill:
+  - `ahe-regression-gate`

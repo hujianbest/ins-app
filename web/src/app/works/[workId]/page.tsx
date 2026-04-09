@@ -2,17 +2,22 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getSessionRole } from "@/features/auth/session";
+import {
+  getPublicWorkPageModel,
+  listPublicWorkPageParams,
+} from "@/features/community/public-read-model";
 import { startContactThreadAction } from "@/features/contact/actions";
 import { toggleWorkLikeAction } from "@/features/engagement/actions";
 import { isWorkLiked } from "@/features/engagement/state";
-import { getWorkById, works } from "@/features/showcase/sample-data";
+import { addWorkCommentAction } from "@/features/social/comment-actions";
+import { getWorkComments } from "@/features/social/comments";
 
 function getRoleLabel(role: "photographer" | "model") {
   return role === "photographer" ? "摄影师" : "模特";
 }
 
-export function generateStaticParams() {
-  return works.map((work) => ({ workId: work.id }));
+export async function generateStaticParams() {
+  return listPublicWorkPageParams();
 }
 
 export default async function WorkDetailPage({
@@ -21,7 +26,7 @@ export default async function WorkDetailPage({
   params: Promise<{ workId: string }>;
 }) {
   const { workId } = await params;
-  const work = getWorkById(workId);
+  const work = await getPublicWorkPageModel(workId);
 
   if (!work) {
     notFound();
@@ -29,6 +34,7 @@ export default async function WorkDetailPage({
 
   const sessionRole = await getSessionRole();
   const liked = await isWorkLiked(work.id);
+  const comments = await getWorkComments(work.id);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(103,232,249,0.14),_transparent_20%),linear-gradient(180deg,_#050816_0%,_#0f172a_56%,_#111827_100%)] text-white">
@@ -100,6 +106,59 @@ export default async function WorkDetailPage({
         <section className="rounded-[2rem] border border-white/10 bg-black/20 p-6">
           <p className="text-xs uppercase tracking-[0.3em] text-white/50">作品说明</p>
           <p className="mt-4 max-w-4xl text-base leading-8 text-slate-300">{work.detailNote}</p>
+        </section>
+
+        <section className="rounded-[2rem] border border-white/10 bg-black/20 p-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-white/50">评论</p>
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
+                已登录成员可发布 1..500 字纯文本评论，列表按最新优先展示。
+              </p>
+            </div>
+            {sessionRole ? (
+              <form action={addWorkCommentAction.bind(null, work.id, `/works/${work.id}`)} className="flex w-full max-w-xl flex-col gap-3">
+                <textarea
+                  name="body"
+                  rows={3}
+                  placeholder="写下你对这组作品的看法"
+                  className="w-full rounded-[1.5rem] border border-white/10 bg-black/20 px-4 py-3 text-base leading-7 text-white outline-none"
+                />
+                <button
+                  type="submit"
+                  className="inline-flex w-fit rounded-full border border-cyan-200/40 px-4 py-2 text-base text-cyan-200 transition hover:border-white/60 hover:text-white"
+                >
+                  发表评论
+                </button>
+              </form>
+            ) : (
+              <Link href="/login" className="inline-flex text-base text-cyan-200 transition hover:text-white">
+                登录后发表评论
+              </Link>
+            )}
+          </div>
+
+          <div className="mt-6 grid gap-4">
+            {comments.length > 0 ? (
+              comments.map((comment) => (
+                <article
+                  key={comment.id}
+                  className="rounded-[1.5rem] border border-white/10 bg-white/6 p-5"
+                >
+                  <p className="text-xs uppercase tracking-[0.28em] text-white/50">
+                    {comment.authorLabel}
+                  </p>
+                  <p className="mt-3 text-base leading-7 text-slate-200">
+                    {comment.body}
+                  </p>
+                </article>
+              ))
+            ) : (
+              <p className="text-sm leading-7 text-slate-300">
+                还没有评论，成为第一个留言的人。
+              </p>
+            )}
+          </div>
         </section>
       </section>
     </main>

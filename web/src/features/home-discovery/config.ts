@@ -1,15 +1,21 @@
 import type {
-  HomeDiscoverySectionOrder,
+  DiscoverSurfaceSectionOrder,
+  HomeSurfaceSectionOrder,
   HomeDiscoverySlotConfig,
   OpportunityDiscoverySlotConfig,
   ProfileDiscoverySlotConfig,
   WorkDiscoverySlotConfig,
 } from "./types";
 
-export const homeDiscoverySectionOrder: HomeDiscoverySectionOrder = [
-  "works",
-  "profiles",
-  "opportunities",
+export const homeSurfaceSectionOrder: HomeSurfaceSectionOrder = [
+  "featured",
+  "latest",
+];
+
+export const discoverSurfaceSectionOrder: DiscoverSurfaceSectionOrder = [
+  "featured",
+  "latest",
+  "following",
 ];
 
 export const worksDiscoverySlotConfig: WorkDiscoverySlotConfig = {

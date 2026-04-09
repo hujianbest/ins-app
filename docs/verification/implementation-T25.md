@@ -1,0 +1,42 @@
+## 实现交接块
+
+- Task ID: `T25`
+- 回流来源: `ahe-test-driven-dev`
+- 触碰工件:
+  - `docs/verification/test-design-T25.md`
+  - `web/src/features/community/public-read-model.ts`
+  - `web/src/features/community/public-read-model.test.ts`
+  - `web/src/features/community/sqlite.ts`
+  - `web/src/app/photographers/[slug]/page.tsx`
+  - `web/src/app/photographers/[slug]/page.test.tsx`
+  - `web/src/app/models/[slug]/page.tsx`
+  - `web/src/app/models/[slug]/page.test.tsx`
+  - `web/src/app/works/[workId]/page.tsx`
+  - `web/src/app/works/[workId]/page.test.tsx`
+  - `task-progress.md`
+- 测试设计确认证据:
+  - `docs/verification/test-design-T25.md` 已按 `Execution Mode=auto` 落盘本轮测试设计与 approval step。
+  - `task-progress.md` 已记录“用户已授权后续测试设计直接视为确认”，且当前轮用户显式要求“auto mode 完成剩下的任务”。
+  - 本轮测试设计将“草稿作品不得通过公开主页、详情页或静态参数泄漏”固定为首条 fail-first。
+- RED 证据:
+  - 命令: `npm run test -- "src/features/community/public-read-model.test.ts" "src/app/photographers/[slug]/page.test.tsx" "src/app/models/[slug]/page.test.tsx" "src/app/works/[workId]/page.test.tsx"`
+  - 失败摘要: `src/features/community/public-read-model.test.ts` 无法解析 `./public-read-model` 导入，Vitest 报错 `Does the file exist?`；同时三条公开页测试也证明当前页面仍直接消费 `sample-data`，没有走新的 community 读模型。
+  - 为什么这是预期失败: `T25` 的核心目标正是把公开创作者主页与作品详情页切换到 repository 读模型；在补实现前，缺少公共读模型模块与页面迁移入口是有效 RED。
+- GREEN 证据:
+  - 命令: `npm run test -- "src/features/community/public-read-model.test.ts" "src/app/photographers/[slug]/page.test.tsx" "src/app/models/[slug]/page.test.tsx" "src/app/works/[workId]/page.test.tsx"`
+  - 通过摘要: `4` 个测试文件、`12` 个测试全部通过。
+  - 关键结果: 新 `public-read-model.ts` 已把 SQLite repository 记录转换为公开页面消费的 `PublicProfile` / `PublicWork` 形状，三条公开页与 `generateStaticParams()` 均已切到该边界，且 draft works 不再出现在公开静态参数和详情读取中。
+  - 命令: `npm run build`
+  - 通过摘要: Next.js 16 生产构建成功，全部 app routes 正常生成。
+  - 关键结果: 为解决 `database is locked`，公开读模型改为“确保默认 SQLite 已初始化后，用短生命周期只读 bundle 执行查询并在 `finally` 中释放”，因此构建期的并发页面数据收集可以稳定通过。
+- 与任务计划测试种子的差异:
+  - 与种子保持一致，仍以三条公开页测试为主；但为了让“页面迁移到 repository 读模型”有独立证明，本轮新增了 `src/features/community/public-read-model.test.ts`，把 repository -> page model 转换与 draft 过滤固定在页面层之外。
+  - 额外纳入一次 `npm run build`，因为 `T25` 接入默认 SQLite bundle 后暴露出构建期并发锁问题，必须用 fresh build evidence 证明生命周期修订已生效。
+- 剩余风险 / 未覆盖项:
+  - `node:sqlite` 在 Node 24 下仍带 experimental warning；当前 task 已用 fresh build 证明它在公开读取面可工作，但后续任务仍需持续观察 API 稳定性。
+  - 公开创作者页所需的展示文案（`sectionTitle` / `heroImageLabel` 等）当前由 `public-read-model.ts` 中的 role-level copy 提供，而不是持久化实体字段；后续若要支持可配置展示文案，需在设计上显式扩展。
+  - `T25` 只完成创作者主页与作品详情页；首页与 `/discover` 切换到社区主线读模型仍由 `T26` 承接。
+- Pending Reviews And Gates:
+  - `ahe-completion-gate`
+- Next Action Or Recommended Skill:
+  - `ahe-completion-gate`

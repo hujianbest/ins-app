@@ -1,29 +1,81 @@
 import { render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 
-const { getSessionRoleMock, isProfileFavoritedMock } = vi.hoisted(() => ({
-  getSessionRoleMock: vi.fn(),
-  isProfileFavoritedMock: vi.fn(),
+import type { PublicProfile } from "@/features/showcase/types";
+
+const {
+  getSessionContextMock,
+  isProfileFollowedByViewerMock,
+  notFoundMock,
+  getPublicProfilePageModelMock,
+  listPublicProfilePageParamsMock,
+} = vi.hoisted(() => ({
+  getSessionContextMock: vi.fn(),
+  isProfileFollowedByViewerMock: vi.fn(),
+  notFoundMock: vi.fn(),
+  getPublicProfilePageModelMock: vi.fn(),
+  listPublicProfilePageParamsMock: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  notFound: notFoundMock,
 }));
 
 vi.mock("@/features/auth/session", () => ({
-  getSessionRole: getSessionRoleMock,
+  getSessionContext: getSessionContextMock,
 }));
 
-vi.mock("@/features/engagement/state", () => ({
-  isProfileFavorited: isProfileFavoritedMock,
+vi.mock("@/features/social/follows", () => ({
+  isProfileFollowedByViewer: isProfileFollowedByViewerMock,
 }));
 
-import { modelProfiles } from "@/features/showcase/sample-data";
+vi.mock("@/features/community/public-read-model", () => ({
+  getPublicProfilePageModel: getPublicProfilePageModelMock,
+  listPublicProfilePageParams: listPublicProfilePageParamsMock,
+}));
 
-import ModelPage from "./page";
+import ModelPage, { generateStaticParams } from "./page";
 
-test("model profile page renders the public showcase for a known slug", async () => {
-  getSessionRoleMock.mockResolvedValue(null);
-  isProfileFavoritedMock.mockResolvedValue(false);
+const modelProfile: PublicProfile = {
+  slug: "repo-model",
+  role: "model",
+  name: "Repo Mika",
+  city: "杭州",
+  publishedAt: "2026-04-09T09:00:00Z",
+  tagline: "repository backed model profile",
+  bio: "Repo model biography",
+  contactLabel: "联系模特",
+  sectionTitle: "编辑精选",
+  sectionDescription: "只展示已发布作品。",
+  heroImageLabel: "模特封面视觉",
+  showcaseItems: [
+    {
+      workId: "repo-model-work",
+      title: "Repo Model Work",
+      subtitle: "美妆片",
+      description: "published only",
+    },
+  ],
+};
+
+test("model page generateStaticParams uses community public profile params", async () => {
+  listPublicProfilePageParamsMock.mockResolvedValue([{ slug: "repo-model" }]);
+
+  await expect(generateStaticParams()).resolves.toEqual([{ slug: "repo-model" }]);
+});
+
+test("model profile page renders the public showcase from repository read model", async () => {
+  getSessionContextMock.mockResolvedValue({
+    status: "guest",
+    isAuthenticated: false,
+    accountId: null,
+    primaryRole: null,
+  });
+  isProfileFollowedByViewerMock.mockResolvedValue(false);
+  getPublicProfilePageModelMock.mockResolvedValue(modelProfile);
 
   const page = await ModelPage({
-    params: Promise.resolve({ slug: "sample-model" }),
+    params: Promise.resolve({ slug: "repo-model" }),
   });
 
   render(page);
@@ -31,16 +83,38 @@ test("model profile page renders the public showcase for a known slug", async ()
   expect(
     screen.getByRole("heading", {
       level: 1,
-      name: modelProfiles[0].name,
+      name: modelProfile.name,
     })
   ).toBeDefined();
-  expect(screen.getByText(modelProfiles[0].bio)).toBeDefined();
-  expect(screen.getByText(modelProfiles[0].sectionTitle)).toBeDefined();
+  expect(screen.getByText(modelProfile.bio)).toBeDefined();
+  expect(screen.getByText(modelProfile.sectionTitle)).toBeDefined();
   expect(screen.getByRole("link", { name: /联系模特/ })).toBeDefined();
-  expect(screen.getByRole("link", { name: /登录后收藏这份主页/ }).getAttribute("href")).toBe(
+  expect(screen.getByRole("link", { name: /登录后关注这位创作者/ }).getAttribute("href")).toBe(
     "/login"
   );
-  expect(screen.getByRole("link", { name: /柔光编辑片/ }).getAttribute("href")).toBe(
-    "/works/soft-light-editorial"
+  expect(screen.getByRole("link", { name: /Repo Model Work/ }).getAttribute("href")).toBe(
+    "/works/repo-model-work"
   );
+});
+
+test("model profile page uses notFound when the public read model hides the slug", async () => {
+  getSessionContextMock.mockResolvedValue({
+    status: "guest",
+    isAuthenticated: false,
+    accountId: null,
+    primaryRole: null,
+  });
+  isProfileFollowedByViewerMock.mockResolvedValue(false);
+  getPublicProfilePageModelMock.mockResolvedValue(null);
+  notFoundMock.mockImplementation(() => {
+    throw new Error("not-found");
+  });
+
+  await expect(
+    ModelPage({
+      params: Promise.resolve({ slug: "repo-model" }),
+    }),
+  ).rejects.toThrow("not-found");
+
+  expect(notFoundMock).toHaveBeenCalled();
 });

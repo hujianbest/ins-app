@@ -1,53 +1,66 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
-
 import { render, screen } from "@testing-library/react";
-import { expect, test } from "vitest";
+import { afterEach, expect, test, vi } from "vitest";
 
-import {
-  homePageFeaturedPaths,
-  opportunityPosts,
-  photographerProfiles,
-  works,
-} from "@/features/showcase/sample-data";
+const { resolveHomeDiscoverySectionsMock } = vi.hoisted(() => ({
+  resolveHomeDiscoverySectionsMock: vi.fn(),
+}));
+
+vi.mock("@/features/home-discovery/resolver", () => ({
+  resolveHomeDiscoverySections: resolveHomeDiscoverySectionsMock,
+}));
 
 import Home from "./page";
 
-test("home page renders the branded hero, feature entry points, and discovery sections", () => {
-  render(<Home />);
+afterEach(() => {
+  resolveHomeDiscoverySectionsMock.mockReset();
+});
+
+test("home page prioritizes community discovery entry points instead of the old showcase-and-opportunity pitch", async () => {
+  resolveHomeDiscoverySectionsMock.mockResolvedValue([
+    {
+      kind: "featured",
+      title: "精选推荐",
+      description: "优先展示社区精选作品与创作者。",
+      emptyStateCopy: "精选内容整理中。",
+      items: [
+        {
+          id: "featured-work",
+          href: "/works/featured-work",
+          badge: "编辑人像",
+          title: "社区精选作品",
+          description: "一条来自社区主线的精选内容。",
+        },
+      ],
+    },
+    {
+      kind: "latest",
+      title: "最新发布",
+      description: "按最新公开发布时间浏览社区内容。",
+      emptyStateCopy: "最新内容整理中。",
+      items: [],
+    },
+  ]);
+
+  const page = await Home();
+  render(page);
 
   expect(
     screen.getByRole("heading", {
       level: 1,
-      name: /lens archive/i,
+      name: /摄影社区发现首页/i,
     })
   ).toBeDefined();
-
-  expect(screen.getByText(/精选入口/)).toBeDefined();
-  expect(screen.getByText(homePageFeaturedPaths[0].title)).toBeDefined();
-  expect(screen.getByText(homePageFeaturedPaths[1].title)).toBeDefined();
-  expect(screen.getByRole("heading", { level: 2, name: /精选作品/ })).toBeDefined();
-  expect(screen.getByRole("heading", { level: 2, name: /精选主页/ })).toBeDefined();
-  expect(screen.getByRole("heading", { level: 2, name: /精选诉求/ })).toBeDefined();
-  expect(screen.getByText(works[0].title).closest("a")?.getAttribute("href")).toBe(
-    `/works/${works[0].id}`
+  expect(screen.getByRole("link", { name: /进入社区发现/i }).getAttribute("href")).toBe(
+    "/discover"
   );
-  expect(screen.getByText(photographerProfiles[0].name).closest("a")?.getAttribute("href")).toBe(
-    `/photographers/${photographerProfiles[0].slug}`
+  expect(
+    screen.getByRole("heading", { level: 3, name: "社区精选作品" }).closest("a")?.getAttribute("href")
+  ).toBe(
+    "/works/featured-work"
   );
-  expect(screen.getByText(opportunityPosts[0].title).closest("a")?.getAttribute("href")).toBe(
-    `/opportunities/${opportunityPosts[0].id}`
-  );
-  expect(screen.queryByText(/to get started, edit the page\.tsx file\./i)).toBeNull();
-  expect(screen.queryByText(/deploy now/i)).toBeNull();
-});
-
-test("home page reads featured content from the shared sample data module", () => {
-  const pageSource = readFileSync(path.join(process.cwd(), "src/app/page.tsx"), "utf8");
-  const layoutSource = readFileSync(path.join(process.cwd(), "src/app/layout.tsx"), "utf8");
-
-  expect(pageSource).not.toContain("const featuredPaths = [");
-  expect(pageSource).toContain("homePageFeaturedPaths");
-  expect(layoutSource).toContain('lang="zh-CN"');
-  expect(layoutSource).toContain("面向摄影师与模特的沉浸式作品展示与约拍平台。");
+  expect(screen.getByRole("heading", { level: 2, name: /精选推荐/ })).toBeDefined();
+  expect(screen.getByRole("heading", { level: 2, name: /最新发布/ })).toBeDefined();
+  expect(screen.getByText(/次级合作入口/)).toBeDefined();
+  expect(screen.queryByText(/作品展示与约拍平台/)).toBeNull();
+  expect(screen.queryByRole("heading", { level: 2, name: /精选诉求/ })).toBeNull();
 });

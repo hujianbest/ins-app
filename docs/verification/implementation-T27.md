@@ -1,0 +1,38 @@
+## 实现交接块
+
+- Task ID: `T27`
+- 回流来源: `ahe-test-driven-dev`
+- 触碰工件:
+  - `docs/verification/test-design-T27.md`
+  - `web/src/app/studio/profile/page.tsx`
+  - `web/src/app/studio/profile/page.test.tsx`
+  - `web/src/features/community/types.ts`
+  - `web/src/features/community/sqlite.ts`
+  - `web/src/features/community/test-support.ts`
+  - `web/src/features/community/profile-editor.ts`
+  - `web/src/features/community/profile-actions.ts`
+  - `web/src/features/community/profile-editor.test.ts`
+  - `task-progress.md`
+- 测试设计确认证据:
+  - `docs/verification/test-design-T27.md` 已按 `Execution Mode=auto` 落盘本轮测试设计与 approval step。
+  - `task-progress.md` 已记录“用户已授权后续测试设计直接视为确认”，且当前轮用户继续要求自动推进。
+  - 本轮测试设计将“`studio/profile` 仍直读 `sample-data`、没有真实保存动作”固定为首批 fail-first。
+- RED 证据:
+  - 命令: `npm run test -- "src/app/studio/profile/page.test.tsx" "src/features/community/profile-editor.test.ts" "src/app/photographers/[slug]/page.test.tsx" "src/app/models/[slug]/page.test.tsx"`
+  - 失败摘要: `src/features/community/profile-editor.test.ts` 无法解析 `./profile-editor` 导入；同时 `studio/profile/page.test.tsx` 证明页面仍渲染 `Avery Vale` 等 sample-data 资料，而非 repository-backed editor model。
+  - 为什么这是预期失败: `T27` 的核心目标正是把 `studio/profile` 切到 Server Actions + repository 写入；在补实现前，缺少 profile editor 模块且页面仍旁路真源是有效 RED。
+- GREEN 证据:
+  - 命令: `npm run test -- "src/app/studio/profile/page.test.tsx" "src/features/community/profile-editor.test.ts" "src/app/photographers/[slug]/page.test.tsx" "src/app/models/[slug]/page.test.tsx"`
+  - 通过摘要: `4` 个测试文件、`11` 个测试全部通过。
+  - 关键结果: `studio/profile` 已切到 repository-backed editor model，新增 `saveCreatorProfileForRole()` 与 `saveStudioProfileAction()`；资料保存后，同一 repository 真源下的 public profile read model 可以读到最新名称 / 城市 / tagline / bio。
+- 与任务计划测试种子的差异:
+  - 与种子保持一致，仍以 `studio/profile` 与公开主页读后可见为主；但为了避免只靠页面壳证明写路径，本轮新增 `web/src/features/community/profile-editor.test.ts`，把“写后再读 public profile”固定在页面层之外。
+  - 当前公开主页页面测试仍以 read-model 消费为主，没有把 repository 写路径直接塞进公开页 DOM 测试，这属于按层隔离而非范围缺失。
+- 剩余风险 / 未覆盖项:
+  - 当前 demo 会话只有 `primaryRole`，没有显式 `creatorProfileId`；因此 `T27` 采用“当前 role 下必须解析出唯一 creator profile”作为写入边界。后续若支持同 role 多 creator，需要引入更明确的账号 -> profile 绑定。
+  - 当前保存动作会 revalidate `/`、`/discover`、`/studio/profile` 与对应公开主页，但尚未把 profile 写入影响扩展到更复杂的运营 / 精选后台场景。
+  - `node:sqlite` 仍带 experimental warning；当前 task 已用 fresh 单任务测试证明写后可读闭环可工作，完整 build / 回归仍待后续门禁复核。
+- Pending Reviews And Gates:
+  - `ahe-regression-gate`、`ahe-completion-gate`
+- Next Action Or Recommended Skill:
+  - `ahe-regression-gate`

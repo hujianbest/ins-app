@@ -1,0 +1,48 @@
+## 实现交接块
+
+- Task ID: `T23`
+- 回流来源: `ahe-test-review`
+- 触碰工件:
+  - `docs/verification/test-design-T23.md`
+  - `docs/reviews/bug-patterns-T23.md`
+  - `docs/reviews/test-review-T23.md`
+  - `web/src/features/auth/types.ts`
+  - `web/src/features/auth/session.ts`
+  - `web/src/features/auth/actions.ts`
+  - `web/src/features/auth/access-control.ts`
+  - `web/src/features/auth/access-control.test.ts`
+  - `web/src/app/studio/page.tsx`
+  - `web/src/app/studio/page.test.tsx`
+  - `web/src/app/studio/profile/page.tsx`
+  - `web/src/app/studio/profile/page.test.tsx`
+  - `web/src/app/studio/works/page.tsx`
+  - `web/src/app/studio/works/page.test.tsx`
+  - `web/src/app/studio/opportunities/page.tsx`
+  - `web/src/app/studio/opportunities/page.test.tsx`
+  - `task-progress.md`
+- 测试设计确认证据:
+  - `docs/verification/test-design-T23.md` 已按 `Execution Mode=auto` 落盘本轮测试设计与 approval step。
+  - `task-progress.md` 已记录“用户已授权后续测试设计直接视为确认”，且当前轮用户显式要求“auto mode继续往下”。
+  - `docs/reviews/test-review-T23.md` 已将本轮回流范围收窄为：补齐 `photographer` 对称策略测试、`studio/works` guest 守卫测试，以及显式 `undefined` session fallback 用例。
+- RED 证据:
+  - 命令: `npm run test -- "src/features/auth" "src/app/studio/page.test.tsx"`
+  - 失败摘要: `src/features/auth/access-control.test.ts` 无法解析 `./access-control` 导入，Vitest 报错 `Does the file exist?`。
+  - 为什么这是预期失败: `T23` 的核心目标正是建立统一的 `SessionContext` / `AccessControl` / `StudioGuard` / `CreatorCapabilityPolicy` 边界；在补实现前，测试直接证明共享权限模块尚不存在。
+  - 回流补充: 来自 `ahe-test-review` 的后续修订属于测试覆盖补强而非新的实现缺陷；因此新增 `photographer` / `studio/works` / `undefined` fallback 用例在当前实现上直接转绿，没有额外制造新的行为级 RED。
+- GREEN 证据:
+  - 命令: `npm run test -- "src/features/auth" "src/app/studio"`
+  - 通过摘要: `5` 个测试文件、`12` 个测试全部通过。
+  - 关键结果: 新权限层现已同时验证 `photographer` 与 `model` 两类主身份的创作者资格、非法 / 缺失 cookie 回落为 guest，以及 `studio` 首页和三个现有工作台子页的共享 `StudioGuard`。
+  - 命令: `npm run build`
+  - 通过摘要: Next.js 16 生产构建成功，全部 app routes 正常生成。
+  - 关键结果: 新 `auth` 会话 / 权限边界与 `studio` 守卫收口没有破坏当前 `web` 应用构建和 TypeScript 检查。
+- 与任务计划测试种子的差异:
+  - 核心测试种子无实质偏离；在种子要求的 `src/features/auth` 与 `src/app/studio/page.test.tsx` 之外，本轮把共享 `StudioGuard` 一并接入现有 `studio/profile`、`studio/works`、`studio/opportunities`，并在复审回流后补齐了 `photographer` 对称能力测试与 `studio/works` guest 守卫测试，所以最终 task-level 证明命令扩大为 `npm run test -- "src/features/auth" "src/app/studio"`。
+- 剩余风险 / 未覆盖项:
+  - 当前 `SessionContext.accountId` 仍是基于 demo role 的稳定派生值，还未接入真实账号存储或 `CreatorProfile.accountId` 映射。
+  - `contact`、`engagement`、公开页互动入口等现有登录判断仍主要消费 `getSessionRole()`；虽然它现在已经建立在 `SessionContext` 之上，但尚未统一改为 `AccessControl` 消费路径。
+  - `web/AGENTS.md` 要求优先读取 `node_modules/next/dist/docs/` 下的本地 Next.js 文档；本轮已搜索该目录但未发现可读 docs 文件，因此沿用了现有代码库里已验证的 `cookies()` / Server Component 模式，没有额外引入新 API 约定。
+- Pending Reviews And Gates:
+  - `N/A（正式 review / gate 已完成，待 `ahe-finalize` 收口）`
+- Next Action Or Recommended Skill:
+  - `ahe-finalize`

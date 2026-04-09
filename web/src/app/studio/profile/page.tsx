@@ -1,18 +1,20 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { getSessionRole } from "@/features/auth/session";
-import { getProfileByRole } from "@/features/showcase/sample-data";
+import { getRequestAccessControl } from "@/features/auth/access-control";
+import { saveStudioProfileAction } from "@/features/community/profile-actions";
+import { getStudioProfileEditorModel } from "@/features/community/profile-editor";
 
 export default async function StudioProfilePage() {
-  const sessionRole = await getSessionRole();
+  const accessControl = await getRequestAccessControl();
+  const session = accessControl.session;
 
-  if (!sessionRole) {
-    redirect("/login");
+  if (session.status !== "authenticated" || !accessControl.studioGuard.allowed) {
+    redirect(accessControl.studioGuard.redirectTo ?? "/login");
     return null;
   }
 
-  const profile = getProfileByRole(sessionRole);
+  const profile = await getStudioProfileEditorModel(session.primaryRole);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(103,232,249,0.18),_transparent_24%),linear-gradient(180deg,_#050816_0%,_#0f172a_56%,_#111827_100%)] text-white">
@@ -30,11 +32,15 @@ export default async function StudioProfilePage() {
           </Link>
         </div>
 
-        <form className="grid gap-6 rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
+        <form
+          action={saveStudioProfileAction}
+          className="grid gap-6 rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur"
+        >
           <label className="space-y-2">
             <span className="text-xs uppercase tracking-[0.28em] text-white/50">展示名称</span>
             <input
-              defaultValue={profile?.name}
+              name="name"
+              defaultValue={profile.name}
               className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-base text-white outline-none"
             />
           </label>
@@ -43,14 +49,16 @@ export default async function StudioProfilePage() {
             <label className="space-y-2">
               <span className="text-xs uppercase tracking-[0.28em] text-white/50">城市</span>
               <input
-                defaultValue={profile?.city}
+                name="city"
+                defaultValue={profile.city}
                 className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-base text-white outline-none"
               />
             </label>
             <label className="space-y-2">
               <span className="text-xs uppercase tracking-[0.28em] text-white/50">一句话介绍</span>
               <input
-                defaultValue={profile?.tagline}
+                name="tagline"
+                defaultValue={profile.tagline}
                 className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-base text-white outline-none"
               />
             </label>
@@ -59,14 +67,15 @@ export default async function StudioProfilePage() {
           <label className="space-y-2">
             <span className="text-xs uppercase tracking-[0.28em] text-white/50">简介</span>
             <textarea
-              defaultValue={profile?.bio}
+              name="bio"
+              defaultValue={profile.bio}
               rows={6}
               className="w-full rounded-[1.5rem] border border-white/10 bg-black/20 px-4 py-3 text-base leading-7 text-white outline-none"
             />
           </label>
 
           <button
-            type="button"
+            type="submit"
             className="inline-flex w-fit rounded-full bg-white px-6 py-3 text-sm font-medium text-slate-950 transition hover:bg-cyan-100"
           >
             保存主页更改

@@ -1,0 +1,41 @@
+## 实现交接块
+
+- Task ID: `T22`
+- 回流来源: `ahe-test-review`
+- 触碰工件:
+  - `web/src/features/community/contracts.test.ts`
+  - `web/src/features/community/test-support.ts`
+  - `web/src/features/community/contracts.ts`
+  - `web/src/features/community/types.ts`
+  - `docs/reviews/bug-patterns-T22.md`
+  - `docs/reviews/test-review-T22.md`
+  - `docs/tasks/2026-04-08-photography-community-platform-tasks.md`
+  - `task-progress.md`
+- 测试设计确认证据:
+  - 依据已批准任务计划 `docs/tasks/2026-04-08-photography-community-platform-tasks.md` 中 `T22` 的测试设计种子。
+  - `task-progress.md` 已记录“用户已授权后续测试设计直接视为确认”，本轮沿用该授权进入 `ahe-test-review` 回流修订。
+  - `docs/reviews/test-review-T22.md` 已明确本轮只补 repository / bundle 契约级 smoke test，不扩大 `T22` 的实现范围。
+- RED 证据:
+  - 命令: `npm run test -- "src/features/community/contracts.test.ts"`
+  - 失败摘要: `src/features/community/contracts.test.ts` 无法解析 `./test-support` 导入，Vitest 报错 `Does the file exist?`，说明当前还缺少可被契约测试消费的 in-memory repository bundle 支撑层。
+  - 为什么这是预期失败: `ahe-test-review` 的核心发现就是 repository / bundle 契约没有测试级承接；本轮先写 smoke test，再用缺失 `test-support` 的失败证明该测试支撑层确实尚未建立。
+- GREEN 证据:
+  - 命令: `npm run test -- "src/features/community/contracts.test.ts"`
+  - 通过摘要: `1` 个测试文件、`6` 个测试全部通过。
+  - 关键结果: 当前测试除稳定 creator id、最小作品契约、公开读取过滤草稿与 `home / discover` surface 外，还新增了 repository / bundle 契约 smoke test，证明 `CreatorProfile`、`Work(draft|published)`、`FollowRelation`、`WorkComment`、`CuratedSlot` 查询语义可被统一 bundle 消费。
+  - 命令: `npm run build`
+  - 通过摘要: Next.js 16 生产构建成功，静态 / 动态路由均正常生成。
+  - 关键结果: 新增 `community/test-support.ts` 与扩展契约测试没有破坏当前 `web` 应用构建和 TypeScript 检查。
+- 与任务计划测试种子的差异:
+  - 无实质差异；在保留“最小作品字段集沿用当前 `showcase` 基线”的前提下，本轮新增 `createInMemoryCommunityRepositoryBundle()` 测试支撑层，把任务计划要求的 repository / entity 契约覆盖补齐，并将原本依赖样本顺序的断言收窄为按 `id / slug` 取值的关键字段断言。
+- 剩余风险 / 未覆盖项:
+  - 当前 repository bundle 仍是测试专用 in-memory 支撑层，尚未实现 SQLite adapter、真实 repository 存储或 `SessionContext` / `AccessControl` 权限边界。
+  - `coverAsset` 当前仍使用稳定派生键 `work:<id>:cover`，后续在 `T24` / `T28` 需要与真实上传或资源引用能力继续对齐。
+  - `sectionKind` 当前虽已在本模块 guard 层受测，但还未与 `home-discovery` 共享单一常量真源；后续 `T24` / `T26` 仍需继续收口。
+  - 还未把现有公开页切到 `community` 读模型，`sample-data` 仍是运行时公开内容真源，需由 `T24` ~ `T26` 继续收口。
+- Pending Reviews And Gates:
+  - `ahe-traceability-review`
+  - `ahe-regression-gate`
+  - `ahe-completion-gate`
+- Next Action Or Recommended Skill:
+  - `ahe-traceability-review`

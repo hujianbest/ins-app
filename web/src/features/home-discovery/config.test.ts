@@ -3,13 +3,15 @@ import { expect, test } from "vitest";
 import { modelProfiles, opportunityPosts, photographerProfiles, works } from "@/features/showcase/sample-data";
 
 import {
+  discoverSurfaceSectionOrder,
   homeDiscoveryFeaturedSlots,
-  homeDiscoverySectionOrder,
+  homeSurfaceSectionOrder,
   profileDiscoverySlotConfig,
 } from "./config";
 
-test("home discovery config exposes all three homepage discovery sections", () => {
-  expect(homeDiscoverySectionOrder).toEqual(["works", "profiles", "opportunities"]);
+test("home discovery config exposes separate section orders for home and discover surfaces", () => {
+  expect(homeSurfaceSectionOrder).toEqual(["featured", "latest"]);
+  expect(discoverSurfaceSectionOrder).toEqual(["featured", "latest", "following"]);
   expect(homeDiscoveryFeaturedSlots).toHaveLength(3);
 });
 

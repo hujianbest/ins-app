@@ -1,14 +1,14 @@
 import Link from "next/link";
 
 import { startContactThreadAction } from "@/features/contact/actions";
-import { toggleProfileFavoriteAction } from "@/features/engagement/actions";
+import { toggleProfileFollowAction } from "@/features/social/actions";
 
 import type { PublicProfile } from "./types";
 
 type ProfileShowcasePageProps = {
   profile: PublicProfile;
   isSignedIn: boolean;
-  isFavorited: boolean;
+  isFollowing: boolean;
   returnPath: string;
 };
 
@@ -16,7 +16,7 @@ function getRoleLabel(role: PublicProfile["role"]) {
   return role === "photographer" ? "摄影师" : "模特";
 }
 
-export function ProfileShowcasePage({ profile, isSignedIn, isFavorited, returnPath }: ProfileShowcasePageProps) {
+export function ProfileShowcasePage({ profile, isSignedIn, isFollowing, returnPath }: ProfileShowcasePageProps) {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(103,232,249,0.16),_transparent_22%),linear-gradient(180deg,_#050816_0%,_#0f172a_54%,_#111827_100%)] text-white">
       <section className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-12 px-6 py-10 sm:px-10 lg:px-14">
@@ -38,19 +38,19 @@ export function ProfileShowcasePage({ profile, isSignedIn, isFavorited, returnPa
                 <p className="mt-3 text-base text-white">{profile.city}</p>
               </div>
               <div className="rounded-3xl border border-white/10 bg-white/6 p-5 backdrop-blur">
-                <p className="text-xs uppercase tracking-[0.28em] text-white/50">收藏</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-white/50">关注</p>
                 {isSignedIn ? (
-                  <form action={toggleProfileFavoriteAction.bind(null, profile.slug, returnPath)}>
+                  <form action={toggleProfileFollowAction.bind(null, profile.role, profile.slug, returnPath)}>
                     <button
                       type="submit"
                       className="mt-3 inline-flex rounded-full border border-cyan-200/40 px-4 py-2 text-base text-cyan-200 transition hover:border-white/60 hover:text-white"
                     >
-                      {isFavorited ? "已加入收藏" : "收藏这份主页"}
+                      {isFollowing ? "取消关注" : "关注这位创作者"}
                     </button>
                   </form>
                 ) : (
                   <Link href="/login" className="mt-3 inline-flex text-base text-cyan-200 transition hover:text-white">
-                    登录后收藏这份主页
+                    登录后关注这位创作者
                   </Link>
                 )}
               </div>

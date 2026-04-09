@@ -2,7 +2,13 @@ import type { PublicOpportunityPost, PublicProfile, PublicWork } from "@/feature
 
 export type DiscoverySectionKind = "works" | "profiles" | "opportunities";
 
-export type HomeDiscoverySectionOrder = DiscoverySectionKind[];
+export type HomeDiscoverySectionKind = "featured" | "latest" | "following";
+
+export type HomeDiscoverySurface = "home" | "discover";
+
+export type HomeSurfaceSectionOrder = Array<Extract<HomeDiscoverySectionKind, "featured" | "latest">>;
+
+export type DiscoverSurfaceSectionOrder = HomeDiscoverySectionKind[];
 
 export type FeaturedProfileRef = {
   role: PublicProfile["role"];
@@ -39,8 +45,9 @@ export type HomeDiscoveryCard = {
 };
 
 export type HomeDiscoverySection = {
-  kind: DiscoverySectionKind;
+  kind: HomeDiscoverySectionKind;
   title: string;
   description: string;
+  emptyStateCopy: string;
   items: HomeDiscoveryCard[];
 };

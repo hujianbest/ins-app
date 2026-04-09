@@ -1,24 +1,51 @@
 import { render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 
-const { redirectMock, getSessionRoleMock } = vi.hoisted(() => ({
+import type { AccessControl } from "@/features/auth/types";
+
+const { redirectMock, getRequestAccessControlMock } = vi.hoisted(() => ({
   redirectMock: vi.fn(),
-  getSessionRoleMock: vi.fn(),
+  getRequestAccessControlMock: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
   redirect: redirectMock,
 }));
 
-vi.mock("@/features/auth/session", () => ({
-  getSessionRole: getSessionRoleMock,
+vi.mock("@/features/auth/access-control", () => ({
+  getRequestAccessControl: getRequestAccessControlMock,
 }));
 
 import StudioOpportunitiesPage from "./page";
 
+function createAuthenticatedAccessControl(
+  primaryRole: "photographer" | "model",
+): AccessControl {
+  return {
+    session: {
+      status: "authenticated",
+      isAuthenticated: true,
+      accountId: `demo-account:${primaryRole}`,
+      primaryRole,
+    },
+    creatorCapability: {
+      isCreator: true,
+      canManageCreatorProfile: true,
+      canPublishWorks: true,
+    },
+    studioGuard: {
+      allowed: true,
+      redirectTo: null,
+      reason: "allowed",
+    },
+  };
+}
+
 test("studio opportunities page renders request management fields for the signed-in creator", async () => {
   redirectMock.mockReset();
-  getSessionRoleMock.mockResolvedValue("photographer");
+  getRequestAccessControlMock.mockResolvedValue(
+    createAuthenticatedAccessControl("photographer"),
+  );
 
   const page = await StudioOpportunitiesPage();
 
@@ -38,7 +65,24 @@ test("studio opportunities page renders request management fields for the signed
 
 test("studio opportunities page redirects unauthenticated visitors to login", async () => {
   redirectMock.mockReset();
-  getSessionRoleMock.mockResolvedValue(null);
+  getRequestAccessControlMock.mockResolvedValue({
+    session: {
+      status: "guest",
+      isAuthenticated: false,
+      accountId: null,
+      primaryRole: null,
+    },
+    creatorCapability: {
+      isCreator: false,
+      canManageCreatorProfile: false,
+      canPublishWorks: false,
+    },
+    studioGuard: {
+      allowed: false,
+      redirectTo: "/login",
+      reason: "unauthenticated",
+    },
+  } satisfies AccessControl);
 
   await StudioOpportunitiesPage();
 

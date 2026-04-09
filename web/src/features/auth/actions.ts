@@ -3,7 +3,11 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { authSessionCookieName, isAuthRole } from "./session";
+import {
+  authSessionCookieName,
+  authSessionCookieOptions,
+  isAuthRole,
+} from "./session";
 
 export async function startDemoSession(formData: FormData) {
   const role = formData.get("role");
@@ -17,9 +21,7 @@ export async function startDemoSession(formData: FormData) {
   cookieStore.set({
     name: authSessionCookieName,
     value: role,
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
+    ...authSessionCookieOptions,
   });
 
   redirect("/studio");

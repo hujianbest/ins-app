@@ -6,15 +6,10 @@ type HomeDiscoverySectionProps = {
   section: HomeDiscoverySectionViewModel;
 };
 
-const emptyStateCopyByKind: Record<HomeDiscoverySectionViewModel["kind"], string> = {
-  works: "更多作品精选即将上线。",
-  profiles: "更多主页精选即将上线。",
-  opportunities: "更多约拍诉求即将上线。",
-};
-
 export function HomeDiscoverySection({ section }: HomeDiscoverySectionProps) {
   return (
     <section
+      id={`discovery-section-${section.kind}`}
       aria-labelledby={`home-discovery-${section.kind}`}
       className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur"
     >
@@ -44,7 +39,7 @@ export function HomeDiscoverySection({ section }: HomeDiscoverySectionProps) {
       ) : (
         <div className="mt-6 rounded-[1.5rem] border border-dashed border-white/15 bg-black/20 px-5 py-8">
           <p className="text-sm leading-7 text-slate-300">
-            {emptyStateCopyByKind[section.kind]}
+            {section.emptyStateCopy}
           </p>
         </div>
       )}

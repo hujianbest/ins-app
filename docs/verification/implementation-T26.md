@@ -1,0 +1,46 @@
+## 实现交接块
+
+- Task ID: `T26`
+- 回流来源: `ahe-test-driven-dev`
+- 触碰工件:
+  - `docs/verification/test-design-T26.md`
+  - `web/src/app/page.tsx`
+  - `web/src/app/page.test.tsx`
+  - `web/src/app/page.discovery-regression.test.tsx`
+  - `web/src/app/discover/page.tsx`
+  - `web/src/app/discover/page.test.tsx`
+  - `web/src/features/home-discovery/types.ts`
+  - `web/src/features/home-discovery/config.ts`
+  - `web/src/features/home-discovery/config.test.ts`
+  - `web/src/features/home-discovery/resolver.ts`
+  - `web/src/features/home-discovery/resolver.test.ts`
+  - `web/src/features/home-discovery/resolver.order.test.ts`
+  - `web/src/features/home-discovery/home-discovery-section.tsx`
+  - `web/src/features/home-discovery/home-discovery-section.test.tsx`
+  - `task-progress.md`
+- 测试设计确认证据:
+  - `docs/verification/test-design-T26.md` 已按 `Execution Mode=auto` 落盘本轮测试设计与 approval step。
+  - `task-progress.md` 已记录“用户已授权后续测试设计直接视为确认”，且当前轮用户显式要求继续自动推进。
+  - 本轮测试设计将“首页仍停在展示 / 约拍平台叙事”“缺少 /discover 页面”“关注中无稳定空态”固定为首批 fail-first。
+- RED 证据:
+  - 命令: `npm run test -- "src/app/page.test.tsx" "src/app/page.discovery-regression.test.tsx" "src/app/discover/page.test.tsx" "src/features/home-discovery"`
+  - 失败摘要: `src/app/discover/page.test.tsx` 无法解析 `./page` 导入；同时首页测试与 resolver 测试证明当前首页仍围绕旧 hero / 约拍入口表达，`home-discovery` 仍以 `works / profiles / opportunities` 三段旧结构驱动。
+  - 为什么这是预期失败: `T26` 的核心目标正是把首页切到社区主线，并新增 `/discover` 的持续浏览面；在补实现前，缺少路由与仍保留旧发现结构是有效 RED。
+- GREEN 证据:
+  - 命令: `npm run test -- "src/app/page.test.tsx" "src/app/page.discovery-regression.test.tsx" "src/app/discover/page.test.tsx" "src/features/home-discovery"`
+  - 通过摘要: `8` 个测试文件、`19` 个测试全部通过。
+  - 关键结果: 首页已切到社区化 hero 与次级合作 teaser，新增 `/discover` 页面，`home-discovery` resolver 已改为基于 repository bundle 装配 `featured / latest / following` 三类浏览分区，并为 guest / 无 follow 账号提供稳定空态。
+  - 命令: `npm run build`
+  - 通过摘要: Next.js 16 生产构建成功，新增 `/discover` 路由正常生成，全部 app routes 正常生成。
+  - 关键结果: 首页与 `/discover` 的社区读模型装配没有破坏现有公开页和默认 SQLite 读取路径，构建期页面数据收集保持健康。
+- 与任务计划测试种子的差异:
+  - 与种子保持一致，证明范围以首页、`/discover` 和 `home-discovery` resolver 为主；为了稳定承接“关注中”空态，本轮把 discover 页面测试与 resolver 的 follow 边界一并纳入。
+  - 当前次级合作模块以静态 teaser 入口保留，没有把 `opportunity` repository 正式纳入社区主线读模型；这与 `T26` 的降级表达目标一致，但属于后续任务仍可演进的边界。
+- 剩余风险 / 未覆盖项:
+  - `node:sqlite` 在 Node 24 下仍带 experimental warning；当前 task 已用 fresh build 证明首页与 discover 读取可工作，但后续任务仍需持续观察 API 稳定性。
+  - 当前首页次级合作 teaser 仍是静态入口表达，不读取真实 opportunity feed；若后续需要把 teaser 动态化，需要在设计上显式扩展。
+  - 当前 `following` 分区只消费 follow -> latest public works 读路径；更完整的关注关系写入与评论互动仍由 `T29/T30` 承接。
+- Pending Reviews And Gates:
+  - `ahe-regression-gate`、`ahe-completion-gate`
+- Next Action Or Recommended Skill:
+  - `ahe-regression-gate`
