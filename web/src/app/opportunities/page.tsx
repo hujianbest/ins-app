@@ -1,5 +1,8 @@
-import Link from "next/link";
-
+import {
+  OpportunityCard,
+  getOpportunityOwnerLabel,
+  getOpportunityVisualDescription,
+} from "@/features/opportunities/opportunity-card";
 import { PageHero } from "@/features/shell/page-hero";
 import { opportunityPosts } from "@/features/showcase/sample-data";
 
@@ -18,34 +21,30 @@ export default function OpportunitiesPage() {
         />
 
         <div className="grid gap-5 lg:grid-cols-2">
-          {opportunityPosts.map((post) => (
-            <Link
+          {opportunityPosts.map((post, index) => (
+            <OpportunityCard
               key={post.id}
               href={`/opportunities/${post.id}`}
-              className="museum-card block p-6"
-            >
-              <p className="museum-label">
-                {post.ownerRole === "photographer" ? "摄影师诉求" : "模特诉求"}
-              </p>
-              <h2 className="font-display mt-4 text-4xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)]">
-                {post.title}
-              </h2>
-              <div className="mt-5 grid gap-4 text-sm text-[color:var(--muted-strong)] sm:grid-cols-3">
-                <div>
-                  <p className="museum-label">城市</p>
-                  <p className="mt-2 text-base text-[color:var(--accent-strong)]">{post.city}</p>
-                </div>
-                <div>
-                  <p className="museum-label">档期</p>
-                  <p className="mt-2 text-base text-[color:var(--accent-strong)]">{post.schedule}</p>
-                </div>
-                <div>
-                  <p className="museum-label">发布者</p>
-                  <p className="mt-2 text-base text-[color:var(--accent-strong)]">{post.ownerName}</p>
-                </div>
-              </div>
-              <p className="museum-clamp-2 mt-5 text-sm leading-7 text-[color:var(--muted-strong)]">{post.summary}</p>
-            </Link>
+              assetRef={post.coverAsset}
+              visualLabel={getOpportunityOwnerLabel(post.ownerRole)}
+              visualDescription={getOpportunityVisualDescription(
+                post.city,
+                post.schedule,
+              )}
+              imageLoading={index === 0 ? "eager" : undefined}
+              title={post.title}
+              summary={post.summary}
+              ownerName={post.ownerName}
+              detailStats={[
+                { label: "城市", value: post.city },
+                { label: "档期", value: post.schedule },
+                { label: "发布者", value: post.ownerName },
+              ]}
+              showFooterMeta={false}
+              titleTag="h2"
+              titleClassName="font-display mt-4 text-4xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)]"
+              cardClassName="p-6"
+            />
           ))}
         </div>
       </section>

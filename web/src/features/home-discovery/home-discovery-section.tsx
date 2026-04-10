@@ -1,6 +1,5 @@
-import Link from "next/link";
-
-import { EditorialVisual } from "@/features/shell/editorial-visual";
+import { EditorialCard } from "@/features/cards/editorial-card";
+import { OpportunityCard } from "@/features/opportunities/opportunity-card";
 import { SectionHeading } from "@/features/shell/section-heading";
 
 import type { HomeDiscoverySection as HomeDiscoverySectionViewModel } from "./types";
@@ -26,30 +25,36 @@ export function HomeDiscoverySection({ section }: HomeDiscoverySectionProps) {
 
       {section.items.length > 0 ? (
         <div className="mt-8 grid gap-5 xl:grid-cols-3">
-          {section.items.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className="museum-card group block p-5"
-            >
-              <EditorialVisual
+          {section.items.map((item, index) => {
+            const shouldEagerLoad =
+              section.kind === "featured" && index === 0;
+
+            return item.contentKind === "opportunity" ? (
+              <OpportunityCard
+                key={item.id}
+                href={item.href}
                 assetRef={item.assetRef}
-                label={item.badge}
-                variant="landscape"
+                visualLabel={item.badge}
+                visualDescription={item.visualDescription}
+                imageLoading={shouldEagerLoad ? "eager" : undefined}
+                title={item.title}
+                summary={item.description}
+                ownerName={item.meta}
               />
-              <h3 className="font-display museum-clamp-2 mt-5 text-3xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)]">
-                {item.title}
-              </h3>
-              <p className="museum-clamp-2 mt-3 text-sm leading-7 text-[color:var(--muted-strong)]">
-                {item.description}
-              </p>
-              {item.meta ? (
-                <p className="museum-label mt-5">
-                  {item.meta}
-                </p>
-              ) : null}
-            </Link>
-          ))}
+            ) : (
+              <EditorialCard
+                key={item.id}
+                href={item.href}
+                assetRef={item.assetRef}
+                visualLabel={item.badge}
+                visualDescription={item.visualDescription}
+                imageLoading={shouldEagerLoad ? "eager" : undefined}
+                title={item.title}
+                summary={item.description}
+                footerText={item.meta}
+              />
+            );
+          })}
         </div>
       ) : (
         <div className="museum-empty mt-8 px-5 py-8">

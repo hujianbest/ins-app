@@ -1,6 +1,11 @@
 import { redirect } from "next/navigation";
 
 import { getRequestAccessControl } from "@/features/auth/access-control";
+import {
+  OpportunityCard,
+  getOpportunityOwnerLabel,
+  getOpportunityVisualDescription,
+} from "@/features/opportunities/opportunity-card";
 import { PageHero } from "@/features/shell/page-hero";
 import { getOpportunityPostsByRole } from "@/features/showcase/sample-data";
 
@@ -15,6 +20,7 @@ export default async function StudioOpportunitiesPage() {
 
   const managedPosts = getOpportunityPostsByRole(session.primaryRole);
   const draft = managedPosts[0];
+  const leadCoverAsset = managedPosts[0]?.coverAsset;
 
   return (
     <main className="museum-page">
@@ -87,14 +93,26 @@ export default async function StudioOpportunitiesPage() {
           <div className="museum-panel museum-panel--soft p-6 md:p-8">
             <p className="museum-label">已发布</p>
             <div className="mt-5 grid gap-4">
-              {managedPosts.map((post) => (
-                <article key={post.id} className="museum-stat p-5">
-                  <p className="museum-label">{post.city}</p>
-                  <h2 className="font-display mt-3 text-3xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)]">
-                    {post.title}
-                  </h2>
-                  <p className="mt-3 text-sm leading-7 text-[color:var(--muted-strong)]">{post.schedule}</p>
-                </article>
+              {managedPosts.map((post, index) => (
+                <OpportunityCard
+                  key={post.id}
+                  assetRef={post.coverAsset}
+                  visualLabel={getOpportunityOwnerLabel(post.ownerRole)}
+                  visualDescription={getOpportunityVisualDescription(
+                    post.city,
+                    post.schedule,
+                  )}
+                  imageLoading={
+                    index === 0 || post.coverAsset === leadCoverAsset
+                      ? "eager"
+                      : undefined
+                  }
+                  title={post.title}
+                  summary={post.summary}
+                  ownerName={post.ownerName}
+                  footerTag="已发布"
+                  titleTag="h2"
+                />
               ))}
             </div>
           </div>

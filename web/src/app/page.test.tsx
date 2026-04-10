@@ -26,6 +26,7 @@ test("home page prioritizes community discovery entry points instead of the old 
         {
           id: "featured-work",
           href: "/works/featured-work",
+          contentKind: "work",
           badge: "编辑人像",
           title: "社区精选作品",
           description: "一条来自社区主线的精选内容。",

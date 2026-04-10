@@ -5,6 +5,10 @@ import type {
   CreatorProfileRecord,
 } from "@/features/community/types";
 import {
+  getOpportunityOwnerLabel,
+  getOpportunityVisualDescription,
+} from "@/features/opportunities/opportunity-card";
+import {
   getProfileHeroAssetRef,
   opportunityPosts,
 } from "@/features/showcase/sample-data";
@@ -18,6 +22,7 @@ export type SearchResultItem = {
   description: string;
   meta: string;
   assetRef?: string;
+  visualDescription?: string;
 };
 
 export type SearchResults = {
@@ -126,11 +131,15 @@ export async function searchCatalog(
       id: post.id,
       href: `/opportunities/${post.id}`,
       kind: "opportunity",
-      badge: "合作",
+      badge: getOpportunityOwnerLabel(post.ownerRole),
       title: post.title,
       description: post.summary,
-      meta: `${post.city} · ${post.schedule}`,
+      meta: post.ownerName,
       assetRef: post.coverAsset,
+      visualDescription: getOpportunityVisualDescription(
+        post.city,
+        post.schedule,
+      ),
     }));
 
   return {

@@ -4,7 +4,14 @@ import type {
   CommunityWorkRecord,
   CreatorProfileRecord,
 } from "@/features/community/types";
-import { getProfileHeroAssetRef } from "@/features/showcase/sample-data";
+import {
+  getOpportunityOwnerLabel,
+  getOpportunityVisualDescription,
+} from "@/features/opportunities/opportunity-card";
+import {
+  getProfileHeroAssetRef,
+  opportunityPosts,
+} from "@/features/showcase/sample-data";
 
 import type {
   HomeDiscoveryCard,
@@ -46,6 +53,15 @@ type ResolveHomeDiscoverySectionsOptions = {
   bundle?: CommunityRepositoryBundle;
 };
 
+type FeaturedSectionResolution = {
+  section: HomeDiscoverySection;
+  featuredWorkIds: string[];
+};
+
+function getRoleLabel(role: "photographer" | "model") {
+  return role === "photographer" ? "摄影师" : "模特";
+}
+
 function getProfileHref(profile: CreatorProfileRecord) {
   return profile.role === "photographer"
     ? `/photographers/${profile.slug}`
@@ -58,7 +74,8 @@ function adaptProfileRecordToHomeDiscoveryCard(
   return {
     id: profile.id,
     href: getProfileHref(profile),
-    badge: profile.role === "photographer" ? "摄影师" : "模特",
+    contentKind: "profile",
+    badge: getRoleLabel(profile.role),
     title: profile.name,
     description: profile.tagline,
     meta: profile.city,
@@ -72,13 +89,31 @@ function adaptWorkRecordToHomeDiscoveryCard(
   return {
     id: work.id,
     href: `/works/${work.id}`,
+    contentKind: "work",
     badge: work.category,
     title: work.title,
     description: work.description,
-    meta: `${work.ownerName} · ${
-      work.ownerRole === "photographer" ? "摄影师" : "模特"
-    }`,
+    meta: `${work.ownerName} · ${getRoleLabel(work.ownerRole)}`,
     assetRef: work.coverAsset,
+  };
+}
+
+function adaptOpportunityPostToHomeDiscoveryCard(
+  opportunityPost: (typeof opportunityPosts)[number],
+): HomeDiscoveryCard {
+  return {
+    id: opportunityPost.id,
+    href: `/opportunities/${opportunityPost.id}`,
+    contentKind: "opportunity",
+    badge: getOpportunityOwnerLabel(opportunityPost.ownerRole),
+    title: opportunityPost.title,
+    description: opportunityPost.summary,
+    meta: opportunityPost.ownerName,
+    assetRef: opportunityPost.coverAsset,
+    visualDescription: getOpportunityVisualDescription(
+      opportunityPost.city,
+      opportunityPost.schedule,
+    ),
   };
 }
 
@@ -99,11 +134,29 @@ function buildSection(
 function createFeaturedFallbackCards(
   works: CommunityWorkRecord[],
   profiles: CreatorProfileRecord[],
+  opportunities: typeof opportunityPosts,
 ): HomeDiscoveryCard[] {
-  return [
-    ...works.map(adaptWorkRecordToHomeDiscoveryCard),
-    ...profiles.map(adaptProfileRecordToHomeDiscoveryCard),
-  ];
+  const workCards = works.map(adaptWorkRecordToHomeDiscoveryCard);
+  const profileCards = profiles.map(adaptProfileRecordToHomeDiscoveryCard);
+  const opportunityCards = opportunities.map(adaptOpportunityPostToHomeDiscoveryCard);
+  const fallbackCards: HomeDiscoveryCard[] = [];
+  const longestListLength = Math.max(
+    workCards.length,
+    profileCards.length,
+    opportunityCards.length,
+  );
+
+  for (let index = 0; index < longestListLength; index += 1) {
+    const candidates = [
+      workCards[index],
+      profileCards[index],
+      opportunityCards[index],
+    ].filter((card): card is HomeDiscoveryCard => Boolean(card));
+
+    fallbackCards.push(...candidates);
+  }
+
+  return fallbackCards;
 }
 
 async function resolveFeaturedSection(
@@ -111,10 +164,13 @@ async function resolveFeaturedSection(
   bundle: CommunityRepositoryBundle,
   works: CommunityWorkRecord[],
   profiles: CreatorProfileRecord[],
-): Promise<HomeDiscoverySection> {
+): Promise<FeaturedSectionResolution> {
   const curatedSlots = await bundle.curation.listSlotsBySurface(surface);
   const workById = new Map(works.map((work) => [work.id, work]));
   const profileById = new Map(profiles.map((profile) => [profile.id, profile]));
+  const opportunityById = new Map(
+    opportunityPosts.map((opportunityPost) => [opportunityPost.id, opportunityPost]),
+  );
   const selectedIds = new Set<string>();
   const cards: HomeDiscoveryCard[] = [];
 
@@ -140,22 +196,48 @@ async function resolveFeaturedSection(
 
       selectedIds.add(profile.id);
       cards.push(adaptProfileRecordToHomeDiscoveryCard(profile));
+      continue;
+    }
+
+    if (slot.targetType === "opportunity") {
+      const opportunityPost = opportunityById.get(slot.targetKey);
+
+      if (!opportunityPost || selectedIds.has(opportunityPost.id)) {
+        continue;
+      }
+
+      selectedIds.add(opportunityPost.id);
+      cards.push(adaptOpportunityPostToHomeDiscoveryCard(opportunityPost));
     }
   }
 
-  const fallbackCards = createFeaturedFallbackCards(works, profiles).filter(
+  const fallbackCards = createFeaturedFallbackCards(
+    works,
+    profiles,
+    opportunityPosts,
+  ).filter(
     (card) => !selectedIds.has(card.id),
   );
+  const featuredItems = [...cards, ...fallbackCards].slice(0, maxSectionItems);
 
-  return buildSection("featured", [...cards, ...fallbackCards].slice(0, maxSectionItems));
+  return {
+    section: buildSection("featured", featuredItems),
+    featuredWorkIds: featuredItems
+      .filter((card) => card.href.startsWith("/works/"))
+      .map((card) => card.id),
+  };
 }
 
 function resolveLatestSection(
   works: CommunityWorkRecord[],
+  featuredWorkIds: string[],
 ): HomeDiscoverySection {
+  const latestWorks = works.filter((work) => !featuredWorkIds.includes(work.id));
+  const itemsSource = latestWorks.length > 0 ? latestWorks : works;
+
   return buildSection(
     "latest",
-    works.slice(0, maxSectionItems).map(adaptWorkRecordToHomeDiscoveryCard),
+    itemsSource.slice(0, maxSectionItems).map(adaptWorkRecordToHomeDiscoveryCard),
   );
 }
 
@@ -196,13 +278,19 @@ export async function resolveHomeDiscoverySections({
     bundle.profiles.listPublicProfiles(),
     bundle.works.listPublicWorks(),
   ]);
+  const featuredResolution = await resolveFeaturedSection(
+    surface,
+    bundle,
+    works,
+    profiles,
+  );
 
   const sectionResolvers: Record<
     HomeDiscoverySectionKind,
     () => Promise<HomeDiscoverySection>
   > = {
-    featured: () => resolveFeaturedSection(surface, bundle, works, profiles),
-    latest: async () => resolveLatestSection(works),
+    featured: async () => featuredResolution.section,
+    latest: async () => resolveLatestSection(works, featuredResolution.featuredWorkIds),
     following: () => resolveFollowingSection(accountId, bundle, works),
   };
 

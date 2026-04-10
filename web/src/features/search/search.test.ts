@@ -11,13 +11,18 @@ describe("searchCatalog", () => {
 
   it("returns profile, work, and opportunity matches", async () => {
     const results = await searchCatalog("上海", bundle);
+    const opportunityMatch = results.opportunities.find((item) =>
+      item.href.includes("/opportunities/"),
+    );
 
     expect(results.profiles.some((item) => item.title === "Avery Vale")).toBe(
       true,
     );
-    expect(
-      results.opportunities.some((item) => item.href.includes("/opportunities/")),
-    ).toBe(true);
+    expect(opportunityMatch).toMatchObject({
+      badge: "摄影师诉求",
+      meta: "Avery Vale",
+      visualDescription: "上海 · 2026-04-20 晚间",
+    });
     expect(results.total).toBeGreaterThan(1);
   });
 

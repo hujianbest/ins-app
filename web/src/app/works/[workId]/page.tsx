@@ -115,6 +115,7 @@ export default async function WorkDetailPage({
               assetRef={work.coverAsset}
               label="作品详情视觉"
               variant="portrait"
+              imageLoading="eager"
               showSourceLabel
             />
           </div>

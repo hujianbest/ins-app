@@ -9,12 +9,13 @@ vi.mock("@/features/auth/session", () => ({
   getSessionRole: getSessionRoleMock,
 }));
 
-import { opportunityPosts } from "@/features/showcase/sample-data";
+import { opportunityPosts, resolveSeedVisualAsset } from "@/features/showcase/sample-data";
 
 import OpportunityDetailPage from "./page";
 
 test("opportunity detail page renders the post content and owner summary", async () => {
   getSessionRoleMock.mockResolvedValue("model");
+  const firstPostAsset = resolveSeedVisualAsset(opportunityPosts[0].coverAsset);
 
   const page = await OpportunityDetailPage({
     params: Promise.resolve({ postId: "shanghai-editorial-casting" }),
@@ -32,6 +33,7 @@ test("opportunity detail page renders the post content and owner summary", async
   expect(screen.getByText(opportunityPosts[0].city)).toBeDefined();
   expect(screen.getByText(opportunityPosts[0].schedule)).toBeDefined();
   expect(screen.getByText(opportunityPosts[0].ownerName)).toBeDefined();
+  expect(screen.getByAltText(firstPostAsset?.alt ?? "")).toBeDefined();
   expect(screen.getByRole("link", { name: /^返回$/ }).getAttribute("href")).toBe(
     "/opportunities"
   );

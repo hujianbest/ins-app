@@ -64,8 +64,19 @@ test("search page renders grouped results for a keyword", async () => {
         meta: "上海",
       },
     ],
-    opportunities: [],
-    total: 2,
+    opportunities: [
+      {
+        id: "opportunity-1",
+        href: "/opportunities/opportunity-1",
+        kind: "opportunity",
+        badge: "摄影师诉求",
+        title: "上海夜景编辑拍摄招募",
+        description: "一条合作内容命中。",
+        meta: "Avery Vale",
+        visualDescription: "上海 · 2026-04-20 晚间",
+      },
+    ],
+    total: 3,
   });
 
   const page = await SearchPage({
@@ -78,8 +89,15 @@ test("search page renders grouped results for a keyword", async () => {
   ).toBeDefined();
   expect(screen.getByRole("heading", { level: 2, name: "作品" })).toBeDefined();
   expect(screen.getByRole("heading", { level: 2, name: "创作者" })).toBeDefined();
+  expect(screen.getByRole("heading", { level: 2, name: "合作内容" })).toBeDefined();
   expect(screen.getByRole("link", { name: /上海夜景人像/ }).getAttribute("href")).toBe(
     "/works/work-1",
+  );
+  expect(screen.getByText("摄影师诉求")).toBeDefined();
+  expect(screen.getByText("上海 · 2026-04-20 晚间")).toBeDefined();
+  expect(screen.getAllByText("Avery Vale").length).toBeGreaterThan(0);
+  expect(screen.getByRole("link", { name: /上海夜景编辑拍摄招募/ }).getAttribute("href")).toBe(
+    "/opportunities/opportunity-1",
   );
   const profileLink = screen
     .getAllByRole("link")

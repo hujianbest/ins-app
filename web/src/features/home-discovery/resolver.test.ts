@@ -66,9 +66,12 @@ test("discover resolver builds featured, latest, and following sections from the
     expect.arrayContaining([
       "neon-portrait-study",
       "photographer:sample-photographer",
+      opportunityPosts[0].id,
     ]),
   );
-  expect(sections[1].items[0]?.id).toBe("neon-portrait-study");
+  expect(sections[1].items.map((item) => item.id)).not.toContain(
+    "neon-portrait-study",
+  );
   expect(sections[2].items.map((item) => item.id)).toContain("soft-light-editorial");
 });
 

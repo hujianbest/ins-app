@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { EditorialCard } from "@/features/cards/editorial-card";
 import { EditorialVisual } from "@/features/shell/editorial-visual";
 import { startContactThreadAction } from "@/features/contact/actions";
 import { SectionHeading } from "@/features/shell/section-heading";
@@ -89,6 +90,7 @@ export function ProfileShowcasePage({ profile, isSignedIn, isFollowing, returnPa
               assetRef={profile.heroAsset}
               label={profile.heroImageLabel}
               variant="portrait"
+              imageLoading="eager"
               showSourceLabel
             />
           </div>
@@ -107,22 +109,22 @@ export function ProfileShowcasePage({ profile, isSignedIn, isFollowing, returnPa
             />
 
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-              {profile.showcaseItems.map((item) => (
-                <Link
+              {profile.showcaseItems.map((item, index) => (
+                <EditorialCard
                   key={item.workId}
                   href={`/works/${item.workId}`}
-                  className="museum-card block p-5"
-                >
-                  <EditorialVisual
-                    assetRef={item.coverAsset}
-                    label={item.subtitle}
-                    variant="card"
-                  />
-                  <h2 className="font-display mt-5 text-3xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)]">
-                    {item.title}
-                  </h2>
-                  <p className="museum-clamp-2 mt-3 text-sm leading-7 text-[color:var(--muted-strong)]">{item.description}</p>
-                </Link>
+                  assetRef={item.coverAsset}
+                  visualLabel={item.subtitle}
+                  visualVariant="card"
+                  imageLoading={
+                    index === 0 || item.coverAsset === profile.heroAsset
+                      ? "eager"
+                      : undefined
+                  }
+                  title={item.title}
+                  summary={item.description}
+                  titleTag="h2"
+                />
               ))}
             </div>
           </div>

@@ -36,6 +36,15 @@ const mediaStyleByVariant: Record<
   },
 };
 
+const imageSizesByVariant: Record<
+  "landscape" | "card" | "portrait",
+  string
+> = {
+  landscape: "(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw",
+  card: "(min-width: 1280px) 22vw, (min-width: 768px) 42vw, 100vw",
+  portrait: "(min-width: 1024px) 32vw, 100vw",
+};
+
 const frameBaseStyle: CSSProperties = {
   pointerEvents: "none",
   padding: "0.7rem",
@@ -74,6 +83,8 @@ type EditorialVisualProps = {
   variant: keyof typeof frameStyleByVariant;
   description?: string;
   showSourceLabel?: boolean;
+  imageLoading?: "lazy" | "eager";
+  imageSizes?: string;
 };
 
 export function EditorialVisual({
@@ -82,6 +93,8 @@ export function EditorialVisual({
   variant,
   description,
   showSourceLabel = false,
+  imageLoading,
+  imageSizes,
 }: EditorialVisualProps) {
   const asset = resolveSeedVisualAsset(assetRef);
 
@@ -104,7 +117,9 @@ export function EditorialVisual({
             alt={asset.alt}
             fill
             unoptimized
-            sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+            loading={imageLoading}
+            fetchPriority={imageLoading === "eager" ? "high" : undefined}
+            sizes={imageSizes ?? imageSizesByVariant[variant]}
             style={{
               objectFit: "cover",
               pointerEvents: "none",

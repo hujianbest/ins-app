@@ -38,11 +38,13 @@ export type HomeDiscoverySlotConfig =
 export type HomeDiscoveryCard = {
   id: string;
   href: string;
+  contentKind: "work" | "profile" | "opportunity";
   badge: string;
   title: string;
   description: string;
   meta?: string;
   assetRef?: string;
+  visualDescription?: string;
 };
 
 export type HomeDiscoverySection = {

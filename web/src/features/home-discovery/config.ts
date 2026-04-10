@@ -20,7 +20,7 @@ export const discoverSurfaceSectionOrder: DiscoverSurfaceSectionOrder = [
 
 export const worksDiscoverySlotConfig: WorkDiscoverySlotConfig = {
   kind: "works",
-  featuredIds: ["neon-portrait-study", "soft-light-editorial"],
+  featuredIds: ["neon-portrait-study", "luminous-closeup-dossier"],
 };
 
 export const profileDiscoverySlotConfig: ProfileDiscoverySlotConfig = {
@@ -28,18 +28,18 @@ export const profileDiscoverySlotConfig: ProfileDiscoverySlotConfig = {
   featuredProfiles: [
     {
       role: "photographer",
-      slug: "sample-photographer",
+      slug: "elio-ren",
     },
     {
       role: "model",
-      slug: "sample-model",
+      slug: "sora-lin",
     },
   ],
 };
 
 export const opportunitiesDiscoverySlotConfig: OpportunityDiscoverySlotConfig = {
   kind: "opportunities",
-  featuredIds: ["shanghai-editorial-casting", "hangzhou-beauty-collab"],
+  featuredIds: ["shenzhen-monochrome-campaign", "hangzhou-beauty-collab"],
 };
 
 export const homeDiscoveryFeaturedSlots: HomeDiscoverySlotConfig[] = [

@@ -19,6 +19,7 @@ test("work adapter maps a public work into a homepage discovery card", () => {
   expect(card).toMatchObject({
     id: works[0].id,
     href: `/works/${works[0].id}`,
+    contentKind: "work",
     badge: works[0].category,
     title: works[0].title,
     description: works[0].description,
@@ -32,6 +33,8 @@ test("profile adapter maps photographer and model profiles to distinct public ro
 
   expect(photographerCard.href).toBe(`/photographers/${photographerProfiles[0].slug}`);
   expect(modelCard.href).toBe(`/models/${modelProfiles[0].slug}`);
+  expect(photographerCard.contentKind).toBe("profile");
+  expect(modelCard.contentKind).toBe("profile");
   expect(photographerCard.title).toBe(photographerProfiles[0].name);
   expect(modelCard.title).toBe(modelProfiles[0].name);
   expect(photographerCard.badge).toBe("摄影师");
@@ -46,8 +49,12 @@ test("opportunity adapter maps a public opportunity into a detail-first discover
   expect(card).toMatchObject({
     id: opportunityPosts[0].id,
     href: `/opportunities/${opportunityPosts[0].id}`,
+    contentKind: "opportunity",
+    badge: "摄影师诉求",
     title: opportunityPosts[0].title,
     description: opportunityPosts[0].summary,
+    meta: opportunityPosts[0].ownerName,
+    visualDescription: `${opportunityPosts[0].city} · ${opportunityPosts[0].schedule}`,
   });
   expect(card.assetRef).toBe(opportunityPosts[0].coverAsset);
 });

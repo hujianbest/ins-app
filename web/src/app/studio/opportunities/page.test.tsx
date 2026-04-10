@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 
 import type { AccessControl } from "@/features/auth/types";
+import { resolveSeedVisualAsset } from "@/features/showcase/sample-data";
 
 const { redirectMock, getRequestAccessControlMock } = vi.hoisted(() => ({
   redirectMock: vi.fn(),
@@ -46,6 +47,7 @@ test("studio opportunities page renders request management fields for the signed
   getRequestAccessControlMock.mockResolvedValue(
     createAuthenticatedAccessControl("photographer"),
   );
+  const firstManagedPostAsset = resolveSeedVisualAsset("seed:night-editorial-brief");
 
   const page = await StudioOpportunitiesPage();
 
@@ -61,6 +63,10 @@ test("studio opportunities page renders request management fields for the signed
   expect(screen.getByDisplayValue(/^2026-04-20 晚间$/)).toBeDefined();
   expect(screen.getByRole("button", { name: /^发布$/ })).toBeDefined();
   expect(screen.getByText(/上海夜景编辑拍摄招募/)).toBeDefined();
+  expect(screen.getAllByText(/摄影师诉求/).length).toBeGreaterThan(0);
+  expect(screen.getByText("上海 · 2026-04-20 晚间")).toBeDefined();
+  expect(screen.getAllByText("Avery Vale").length).toBeGreaterThan(0);
+  expect(screen.getAllByAltText(firstManagedPostAsset?.alt ?? "").length).toBeGreaterThan(0);
 });
 
 test("studio opportunities page redirects unauthenticated visitors to login", async () => {

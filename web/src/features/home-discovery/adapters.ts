@@ -3,6 +3,10 @@ import type {
   PublicProfile,
   PublicWork,
 } from "@/features/showcase/types";
+import {
+  getOpportunityOwnerLabel,
+  getOpportunityVisualDescription,
+} from "@/features/opportunities/opportunity-card";
 import { getProfileHeroAssetRef } from "@/features/showcase/sample-data";
 
 import type { HomeDiscoveryCard } from "./types";
@@ -21,6 +25,7 @@ export function adaptWorkToHomeDiscoveryCard(work: PublicWork): HomeDiscoveryCar
   return {
     id: work.id,
     href: `/works/${work.id}`,
+    contentKind: "work",
     badge: work.category,
     title: work.title,
     description: work.description,
@@ -33,6 +38,7 @@ export function adaptProfileToHomeDiscoveryCard(profile: PublicProfile): HomeDis
   return {
     id: `${profile.role}:${profile.slug}`,
     href: getProfileHref(profile),
+    contentKind: "profile",
     badge: getRoleLabel(profile.role),
     title: profile.name,
     description: profile.tagline,
@@ -49,10 +55,15 @@ export function adaptOpportunityPostToHomeDiscoveryCard(
   return {
     id: opportunityPost.id,
     href: `/opportunities/${opportunityPost.id}`,
-    badge: opportunityPost.city,
+    contentKind: "opportunity",
+    badge: getOpportunityOwnerLabel(opportunityPost.ownerRole),
     title: opportunityPost.title,
     description: opportunityPost.summary,
-    meta: opportunityPost.schedule,
+    meta: opportunityPost.ownerName,
     assetRef: opportunityPost.coverAsset,
+    visualDescription: getOpportunityVisualDescription(
+      opportunityPost.city,
+      opportunityPost.schedule,
+    ),
   };
 }

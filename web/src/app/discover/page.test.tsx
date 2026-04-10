@@ -93,6 +93,7 @@ test("discover page shows followed updates section for authenticated members", a
         {
           id: "followed-work",
           href: "/works/followed-work",
+          contentKind: "work",
           badge: "摄影师",
           title: "关注中的新作品",
           description: "来自已关注创作者的更新。",

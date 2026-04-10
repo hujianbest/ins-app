@@ -6,6 +6,7 @@ import {
   discoverSurfaceSectionOrder,
   homeDiscoveryFeaturedSlots,
   homeSurfaceSectionOrder,
+  opportunitiesDiscoverySlotConfig,
   profileDiscoverySlotConfig,
   worksDiscoverySlotConfig,
 } from "./config";
@@ -20,18 +21,25 @@ test("profile discovery config requires role and slug for featured profiles", ()
   expect(profileDiscoverySlotConfig.kind).toBe("profiles");
   expect(profileDiscoverySlotConfig.featuredProfiles[0]).toEqual({
     role: "photographer",
-    slug: "sample-photographer",
+    slug: "elio-ren",
   });
   expect(profileDiscoverySlotConfig.featuredProfiles[1]).toEqual({
     role: "model",
-    slug: "sample-model",
+    slug: "sora-lin",
   });
 });
 
 test("work discovery config balances featured work curation against profile and opportunity slots", () => {
   expect(worksDiscoverySlotConfig.featuredIds).toEqual([
     "neon-portrait-study",
-    "soft-light-editorial",
+    "luminous-closeup-dossier",
+  ]);
+});
+
+test("opportunity discovery config highlights a photographer brief and a model collaboration", () => {
+  expect(opportunitiesDiscoverySlotConfig.featuredIds).toEqual([
+    "shenzhen-monochrome-campaign",
+    "hangzhou-beauty-collab",
   ]);
 });
 

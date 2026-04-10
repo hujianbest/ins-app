@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-import { EditorialVisual } from "@/features/shell/editorial-visual";
+import { EditorialCard } from "@/features/cards/editorial-card";
+import { OpportunityCard } from "@/features/opportunities/opportunity-card";
 import { PageHero } from "@/features/shell/page-hero";
 import { SectionHeading } from "@/features/shell/section-heading";
 import { searchCatalog } from "@/features/search/search";
@@ -40,6 +41,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       items: results.opportunities,
     },
   ];
+  const firstVisibleGroupKey =
+    resultGroups.find((group) => group.items.length > 0)?.key ?? null;
 
   return (
     <main className="museum-page">
@@ -94,28 +97,38 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                       title={group.title}
                     />
                     <div className="mt-8 grid gap-5 xl:grid-cols-3">
-                      {group.items.map((item) => (
-                        <Link
-                          key={item.id}
-                          href={item.href}
-                          className="museum-card group block p-5"
-                        >
-                          <EditorialVisual
+                      {group.items.map((item, itemIndex) => {
+                        const shouldEagerLoad =
+                          group.key === firstVisibleGroupKey && itemIndex === 0;
+
+                        return item.kind === "opportunity" ? (
+                          <OpportunityCard
+                            key={item.id}
+                            href={item.href}
                             assetRef={item.assetRef}
-                            label={item.badge}
-                            variant="landscape"
+                            visualLabel={item.badge}
+                            visualDescription={item.visualDescription}
+                            imageLoading={shouldEagerLoad ? "eager" : undefined}
+                            title={item.title}
+                            summary={item.description}
+                            ownerName={item.meta}
+                            titleTag="h2"
                           />
-                          <h2 className="font-display mt-5 text-3xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)]">
-                            {item.title}
-                          </h2>
-                          <p className="museum-clamp-2 mt-3 text-sm leading-7 text-[color:var(--muted-strong)]">
-                            {item.description}
-                          </p>
-                          <p className="museum-label mt-5">
-                            {item.meta}
-                          </p>
-                        </Link>
-                      ))}
+                        ) : (
+                          <EditorialCard
+                            key={item.id}
+                            href={item.href}
+                            assetRef={item.assetRef}
+                            visualLabel={item.badge}
+                            visualDescription={item.visualDescription}
+                            imageLoading={shouldEagerLoad ? "eager" : undefined}
+                            title={item.title}
+                            summary={item.description}
+                            footerText={item.meta}
+                            titleTag="h2"
+                          />
+                        )
+                      })}
                     </div>
                   </section>
                 ) : null,

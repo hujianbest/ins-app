@@ -3,11 +3,16 @@ import { notFound } from "next/navigation";
 
 import { getSessionRole } from "@/features/auth/session";
 import { startContactThreadAction } from "@/features/contact/actions";
+import { EditorialVisual } from "@/features/shell/editorial-visual";
 import { PageHero } from "@/features/shell/page-hero";
 import { getOpportunityPostById, opportunityPosts } from "@/features/showcase/sample-data";
 
 export function generateStaticParams() {
   return opportunityPosts.map((post) => ({ postId: post.id }));
+}
+
+function getOpportunityOwnerLabel(ownerRole: "photographer" | "model") {
+  return ownerRole === "photographer" ? "摄影师诉求" : "模特诉求";
 }
 
 export default async function OpportunityDetailPage({
@@ -61,28 +66,43 @@ export default async function OpportunityDetailPage({
             </div>
           </div>
 
-          <div className="museum-panel p-6 md:p-7">
-            <p className="museum-label">主页</p>
-            <div className="mt-5 space-y-4">
-              <Link href={profileHref} className="museum-button-quiet text-base">
-                主页
-              </Link>
-              {sessionRole ? (
-                <form
-                  action={startContactThreadAction.bind(null, post.ownerRole, post.ownerSlug, "opportunity", post.id)}
-                >
-                  <button
-                    type="submit"
-                    className="museum-button-primary"
-                  >
-                    私信
-                  </button>
-                </form>
-              ) : (
-                <Link href="/login" className="museum-button-quiet text-base">
-                  登录后私信
+          <div className="space-y-6">
+            <div className="museum-panel p-6 md:p-7">
+              <EditorialVisual
+                assetRef={post.coverAsset}
+                label={getOpportunityOwnerLabel(post.ownerRole)}
+                variant="portrait"
+                description={`${post.city} · ${post.schedule}`}
+                imageLoading="eager"
+              />
+            </div>
+
+            <div className="museum-panel p-6 md:p-7">
+              <p className="museum-label">主页</p>
+              <p className="mt-4 text-sm leading-7 text-[color:var(--muted-strong)]">
+                先查看发布者主页，再继续确认档期与合作方向。
+              </p>
+              <div className="mt-5 space-y-4">
+                <Link href={profileHref} className="museum-button-quiet text-base">
+                  主页
                 </Link>
-              )}
+                {sessionRole ? (
+                  <form
+                    action={startContactThreadAction.bind(null, post.ownerRole, post.ownerSlug, "opportunity", post.id)}
+                  >
+                    <button
+                      type="submit"
+                      className="museum-button-primary"
+                    >
+                      私信
+                    </button>
+                  </form>
+                ) : (
+                  <Link href="/login" className="museum-button-quiet text-base">
+                    登录后私信
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </div>
