@@ -7,20 +7,20 @@ test.each([
   {
     kind: "featured" as const,
     title: "精选推荐",
-    description: "优先展示社区精选作品与创作者。",
-    emptyStateCopy: /精选内容整理中/i,
+    description: "优先推荐",
+    emptyStateCopy: /暂无精选/i,
   },
   {
     kind: "latest" as const,
     title: "最新发布",
-    description: "按最新公开发布时间浏览社区内容。",
-    emptyStateCopy: /最新内容整理中/i,
+    description: "按时间浏览",
+    emptyStateCopy: /暂无更新/i,
   },
   {
     kind: "following" as const,
     title: "关注中",
-    description: "关注创作者后，这里会显示他们的最新公开内容。",
-    emptyStateCopy: /登录后查看关注中的创作者更新/i,
+    description: "关注更新",
+    emptyStateCopy: /登录后查看关注更新/i,
   },
 ])("home discovery section keeps its shell and empty-state copy for $kind", ({
   kind,

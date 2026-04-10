@@ -37,10 +37,10 @@ export function HomeDiscoverySection({ section }: HomeDiscoverySectionProps) {
                 label={item.badge}
                 variant="landscape"
               />
-              <h3 className="font-display mt-5 text-3xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)]">
+              <h3 className="font-display museum-clamp-2 mt-5 text-3xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)]">
                 {item.title}
               </h3>
-              <p className="mt-3 text-sm leading-7 text-[color:var(--muted-strong)]">
+              <p className="museum-clamp-2 mt-3 text-sm leading-7 text-[color:var(--muted-strong)]">
                 {item.description}
               </p>
               {item.meta ? (

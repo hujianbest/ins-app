@@ -6,7 +6,7 @@ import { loginAccountAction, registerAccountAction } from "./actions";
 type AuthEntryGridProps = {
   eyebrow: string;
   title: string;
-  description: string;
+  description?: string;
   submitMode: "login" | "register";
   alternateHref: string;
   alternateLabel: string;
@@ -35,26 +35,30 @@ export function AuthEntryGrid({
               <h1 className="font-display max-w-4xl text-5xl leading-none tracking-[-0.04em] text-[color:var(--accent-strong)] sm:text-6xl lg:text-7xl">
                 {title}
               </h1>
-              <p className="max-w-3xl text-base leading-8 text-[color:var(--muted-strong)] sm:text-lg">
-                {description}
-              </p>
+              {description ? (
+                <p className="max-w-3xl text-base leading-8 text-[color:var(--muted-strong)] sm:text-lg">
+                  {description}
+                </p>
+              ) : null}
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              {authRoles.map((roleOption) => (
-                <div
-                  key={roleOption.role}
-                  className="museum-stat p-5"
-                >
-                  <p className="museum-label">
-                    {roleOption.title}
-                  </p>
-                  <p className="mt-4 text-sm leading-7 text-[color:var(--muted-strong)]">
-                    {roleOption.description}
-                  </p>
-                </div>
-              ))}
-            </div>
+            {submitMode === "register" ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                {authRoles.map((roleOption) => (
+                  <div
+                    key={roleOption.role}
+                    className="museum-stat p-5"
+                  >
+                    <p className="museum-label">
+                      {roleOption.title}
+                    </p>
+                    <p className="mt-4 text-sm leading-7 text-[color:var(--muted-strong)]">
+                      {roleOption.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
 
             <Link
               href={alternateHref}
@@ -68,14 +72,7 @@ export function AuthEntryGrid({
             action={action}
             className="museum-panel grid gap-6 p-6 md:p-7"
           >
-            <div className="space-y-2">
-              <p className="museum-label">
-                Account Access
-              </p>
-              <p className="text-sm leading-7 text-[color:var(--muted-strong)]">
-                使用真实邮箱和密码建立登录态，后续工作台、互动和合作线索都会绑定到你的当前账号。
-              </p>
-            </div>
+            <p className="museum-label">账号</p>
 
             {statusMessage ? (
               <div className="rounded-[1.4rem] border border-[color:var(--surface-border-strong)] bg-[rgba(255,255,255,0.72)] px-4 py-3 text-sm leading-7 text-[color:var(--accent-strong)]">
@@ -102,7 +99,7 @@ export function AuthEntryGrid({
               <input
                 type="password"
                 name="password"
-                placeholder="至少 8 位字符"
+                placeholder="至少 8 位"
                 className="museum-field"
               />
             </label>
@@ -110,7 +107,7 @@ export function AuthEntryGrid({
             {submitMode === "register" ? (
               <fieldset className="space-y-3">
                 <legend className="museum-label">
-                  主身份
+                  身份
                 </legend>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {authRoles.map((roleOption, index) => (
@@ -141,8 +138,8 @@ export function AuthEntryGrid({
               className="museum-button-primary"
             >
               {submitMode === "login"
-                ? "登录进入工作台"
-                : "创建账号并进入工作台"}
+                ? "登录"
+                : "创建账号"}
             </button>
           </form>
         </div>

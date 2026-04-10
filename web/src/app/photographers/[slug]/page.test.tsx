@@ -91,7 +91,7 @@ test("photographer profile page renders the public showcase from repository read
   expect(screen.getByText(photographerProfile.bio)).toBeDefined();
   expect(screen.getByText(photographerProfile.sectionTitle)).toBeDefined();
   expect(screen.getByRole("button", { name: /取消关注/ })).toBeDefined();
-  expect(screen.getByRole("button", { name: /发送关于这份主页的私信/ })).toBeDefined();
+  expect(screen.getByRole("button", { name: /私信/ })).toBeDefined();
   expect(
     screen.getByRole("link", { name: /Repo Work/ }).getAttribute("href")
   ).toBe("/works/repo-work");

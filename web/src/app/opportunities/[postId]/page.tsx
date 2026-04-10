@@ -24,7 +24,6 @@ export default async function OpportunityDetailPage({
 
   const sessionRole = await getSessionRole();
   const profileHref = `/${post.ownerRole}s/${post.ownerSlug}`;
-  const profileLabel = `查看${post.ownerRole === "photographer" ? "摄影师" : "模特"}主页`;
 
   return (
     <main className="museum-page">
@@ -34,14 +33,14 @@ export default async function OpportunityDetailPage({
             {post.ownerRole === "photographer" ? "摄影师诉求" : "模特诉求"}
           </p>
           <Link href="/opportunities" className="museum-button-quiet text-sm uppercase tracking-[0.3em]">
-            返回诉求列表
+            返回
           </Link>
         </div>
 
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:items-start">
           <div className="space-y-8">
             <PageHero
-              eyebrow="公开诉求"
+              eyebrow="诉求"
               title={post.title}
               description={post.summary}
             />
@@ -56,17 +55,17 @@ export default async function OpportunityDetailPage({
                 <p className="mt-3 text-base text-[color:var(--accent-strong)]">{post.schedule}</p>
               </div>
               <div className="museum-stat p-5">
-                <p className="museum-label">发布者</p>
+                <p className="museum-label">作者</p>
                 <p className="mt-3 text-base text-[color:var(--accent-strong)]">{post.ownerName}</p>
               </div>
             </div>
           </div>
 
           <div className="museum-panel p-6 md:p-7">
-            <p className="museum-label">主页信息</p>
+            <p className="museum-label">主页</p>
             <div className="mt-5 space-y-4">
               <Link href={profileHref} className="museum-button-quiet text-base">
-                {profileLabel}
+                主页
               </Link>
               {sessionRole ? (
                 <form
@@ -76,12 +75,12 @@ export default async function OpportunityDetailPage({
                     type="submit"
                     className="museum-button-primary"
                   >
-                    发送关于该诉求的私信
+                    私信
                   </button>
                 </form>
               ) : (
                 <Link href="/login" className="museum-button-quiet text-base">
-                  {post.contactLabel}
+                  登录后私信
                 </Link>
               )}
             </div>

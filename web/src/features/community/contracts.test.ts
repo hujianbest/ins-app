@@ -47,11 +47,11 @@ test("createShowcaseSeedSnapshot derives stable creator ids and a minimal work c
     title: "霓虹人像研究",
     category: "编辑人像",
     description:
-      "以夜色城市光源、镜面反射和强轮廓对比建立情绪强烈的编辑人像，用来充当首页与公开主页的首发主视觉。",
+      "以夜色城市光源、镜面反射和强轮廓对比建立情绪强烈的编辑人像，用来充当首页与公开主页的主视觉。",
     detailNote:
       "这组作品把合作方最关心的三件事放在同一页里说明白：控光、色彩判断和在复杂城市环境中的人物调度能力。",
-    publishedAt: "2026-04-05T09:00:00Z",
-    updatedAt: "2026-04-05T18:00:00Z",
+    publishedAt: "2026-04-09T09:00:00Z",
+    updatedAt: "2026-04-09T11:00:00Z",
   });
   expect(neonWork?.coverAsset).toBe("seed:avery-hero");
 });

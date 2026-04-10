@@ -45,7 +45,7 @@ test("inbox page renders contact threads for the signed-in role", async () => {
     })
   ).toBeDefined();
   expect(screen.getByText(/有新的咨询从这组作品发起/)).toBeDefined();
-  expect(screen.getByRole("link", { name: /查看来源/ }).getAttribute("href")).toBe(
+  expect(screen.getByRole("link", { name: /^来源$/ }).getAttribute("href")).toBe(
     "/works/neon-portrait-study"
   );
 });

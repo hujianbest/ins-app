@@ -92,7 +92,7 @@ test("authenticated members can follow and unfollow a creator, and discover feed
   expect(sectionsAfterUnfollow[2]).toMatchObject({
     kind: "following",
     items: [],
-    emptyStateCopy: "关注创作者后，这里会显示他们的最新公开内容。",
+    emptyStateCopy: "关注后查看更新。",
   });
 
   bundle.close();

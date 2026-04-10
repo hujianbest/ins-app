@@ -9,18 +9,18 @@ type SiteFooterProps = {
 function getFooterCopy(variant: SiteFooterProps["variant"]) {
   if (variant === "auth") {
     return {
-      eyebrow: "Creator Access",
-      title: "从浏览到登录，保持同一套克制而高级的视觉语气",
+      eyebrow: "账号",
+      title: "登录与浏览",
       description:
-        "登录与注册只承担进入工作流的职责，但仍然延续站点的摄影档案馆气质，不再像独立的营销面板。",
+        "保留必要入口。",
     };
   }
 
   return {
-    eyebrow: "Lens Archive",
-    title: "把作品浏览、创作者关系与合作线索收成一座可持续更新的线上画廊",
+    eyebrow: "浏览",
+    title: "浏览与发布",
     description:
-      "首页、发现、作品详情、创作者主页与合作入口共用一套更克制的视觉系统，让照片和作者本身成为真正的主角。",
+      "少字，直达入口。",
   };
 }
 
@@ -63,7 +63,7 @@ export function SiteFooter({ variant }: SiteFooterProps) {
             <p className="museum-label">创作者</p>
             <div className="grid gap-2">
               <Link href="/studio" className="museum-button-quiet w-fit">
-                进入工作台
+                工作台
               </Link>
               <Link href="/login" className="museum-button-quiet w-fit">
                 登录

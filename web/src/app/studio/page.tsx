@@ -20,18 +20,10 @@ export default async function StudioPage() {
     <main className="museum-page">
       <section className="museum-shell flex flex-col gap-10 pt-14">
         <PageHero
-          eyebrow="Creator Workspace"
+          eyebrow="工作台"
           title={roleCopy?.studioTitle ?? "创作者工作台"}
-          description="你的主身份已经激活。通过这个受保护的入口继续进入主页编辑、作品管理、诉求发布和站内收件箱。"
+          description="主页、作品、诉求、收件箱。"
           tone="utility"
-          aside={
-            <div className="space-y-4">
-              <p className="museum-label">Workspace Note</p>
-              <p className="text-sm leading-7 text-[color:var(--muted-strong)]">
-                这一侧不再强调营销式强调，而是把编辑、发布与沟通入口收进更稳定的工作流节奏里。
-              </p>
-            </div>
-          }
         />
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">

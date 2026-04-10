@@ -3,6 +3,7 @@ import {
 } from "./runtime";
 
 import type { CommunityRepositoryBundle, CommunityRole, CommunityWorkRecord, CreatorProfileRecord } from "./types";
+import { getProfileHeroAssetRef } from "@/features/showcase/sample-data";
 import type { PublicProfile, PublicWork, ProfileShowcaseItem } from "@/features/showcase/types";
 
 const publicProfileCopy: Record<
@@ -66,7 +67,9 @@ function toPublicProfile(
     sectionTitle: roleCopy.sectionTitle,
     sectionDescription: roleCopy.sectionDescription,
     heroImageLabel: roleCopy.heroImageLabel,
-    heroAsset: works.find(isPublishedWork)?.coverAsset,
+    heroAsset:
+      getProfileHeroAssetRef(profile.role, profile.slug) ??
+      works.find(isPublishedWork)?.coverAsset,
     showcaseItems: works.filter(isPublishedWork).map(toProfileShowcaseItem),
   };
 }

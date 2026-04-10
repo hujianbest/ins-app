@@ -24,27 +24,27 @@ type SiteHeaderProps = {
 function getHeaderCopy(variant: SiteShellVariant) {
   if (variant === "studio") {
     return {
-      eyebrow: "Creator Workspace",
+      eyebrow: "工作台",
       links: studioLinks,
-      secondaryAction: { href: "/discover", label: "查看公开站点" },
-      primaryAction: { href: "/studio", label: "工作台首页" },
+      secondaryAction: { href: "/discover", label: "站点" },
+      primaryAction: { href: "/studio", label: "总览" },
     };
   }
 
   if (variant === "auth") {
     return {
-      eyebrow: "Creator Access",
+      eyebrow: "账号",
       links: publicLinks,
-      secondaryAction: { href: "/discover", label: "继续浏览" },
+      secondaryAction: { href: "/discover", label: "发现" },
       primaryAction: { href: "/login", label: "登录" },
     };
   }
 
   return {
-    eyebrow: "Photography Archive",
+    eyebrow: "浏览",
     links: publicLinks,
     secondaryAction: { href: "/login", label: "登录" },
-    primaryAction: { href: "/studio", label: "发布作品" },
+    primaryAction: { href: "/studio", label: "发布" },
   };
 }
 

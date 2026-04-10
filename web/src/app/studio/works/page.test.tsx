@@ -98,9 +98,9 @@ test("studio works page renders the signed-in creator work list", async () => {
   expect(screen.getByDisplayValue("Repository Published Work")).toBeDefined();
   expect(screen.getAllByText(/草稿/).length).toBeGreaterThan(0);
   expect(screen.getAllByText(/已发布/).length).toBeGreaterThan(0);
-  expect(screen.getAllByRole("button", { name: /保存为草稿/ }).length).toBeGreaterThan(0);
-  expect(screen.getAllByRole("button", { name: /发布作品/ }).length).toBeGreaterThan(0);
-  expect(screen.getAllByRole("button", { name: /保存更改/ }).length).toBeGreaterThan(0);
+  expect(screen.getAllByRole("button", { name: /存草稿/ }).length).toBeGreaterThan(0);
+  expect(screen.getAllByRole("button", { name: /^发布$/ }).length).toBeGreaterThan(0);
+  expect(screen.getAllByRole("button", { name: /^保存$/ }).length).toBeGreaterThan(0);
 });
 
 test("studio works page redirects unauthenticated visitors to login", async () => {

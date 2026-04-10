@@ -15,51 +15,33 @@ export default async function Home() {
     <main className="museum-page">
       <section className="museum-shell pt-14">
         <PageHero
-          eyebrow="Editorial Discovery"
-          title="以作品、创作者与合作灵感重构 Lens Archive 的首页主线"
-          description="这不再是单纯的演示站首屏，而是一个面向真实浏览、真实发布与真实合作线索的入口。首页优先承接精选作品、创作者关系和下一步发现路径。"
+          eyebrow="首页"
+          title="从作品开始浏览"
+          description="精选、创作者、诉求。"
           actions={[
-            { href: "/discover", label: "进入发现流", variant: "primary" },
-            { href: "/studio", label: "进入工作台" },
-            { href: "/opportunities", label: "查看合作入口" },
+            { href: "/discover", label: "发现", variant: "primary" },
+            { href: "/studio", label: "工作台" },
+            { href: "/opportunities", label: "诉求" },
           ]}
           supporting={
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="museum-stat p-5">
-                <p className="museum-label">内容主线</p>
+                <p className="museum-label">精选</p>
                 <p className="mt-3 text-base text-[color:var(--accent-strong)]">
-                  精选作品、创作者摘要与持续浏览入口优先占据首屏。
+                  先看作品。
                 </p>
               </div>
               <div className="museum-stat p-5">
-                <p className="museum-label">发布能力</p>
+                <p className="museum-label">发布</p>
                 <p className="mt-3 text-base text-[color:var(--accent-strong)]">
-                  创作者可从工作台进入资料维护、作品编辑与公开发布。
+                  工作台发布。
                 </p>
               </div>
               <div className="museum-stat p-5">
-                <p className="museum-label">合作入口</p>
+                <p className="museum-label">诉求</p>
                 <p className="mt-3 text-base text-[color:var(--accent-strong)]">
-                  保留合作线索与约拍浏览，但不再挤占首页核心叙事。
+                  单独查看。
                 </p>
-              </div>
-            </div>
-          }
-          aside={
-            <div className="space-y-5">
-              <div>
-                <p className="museum-label">Featured Direction</p>
-                <h2 className="font-display mt-3 text-4xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)]">
-                  更像线上画廊的留白式编排与作品陈列
-                </h2>
-              </div>
-              <div className="grid gap-3 text-sm text-[color:var(--muted-strong)]">
-                <div className="museum-stat p-4">
-                  首页把精选作品、创作者与合作灵感收成一条连续叙事。
-                </div>
-                <div className="museum-stat p-4">
-                  后续通过发现页、作品详情和工作台形成持续浏览与发布闭环。
-                </div>
               </div>
             </div>
           }
@@ -76,23 +58,23 @@ export default async function Home() {
 
       <section className="museum-shell pt-10">
         <div className="museum-panel p-6 md:p-8">
-          <p className="museum-label">Seed Content Notice</p>
+          <p className="museum-label">本地素材包</p>
           <p className="mt-4 max-w-4xl text-sm leading-7 text-[color:var(--muted-strong)] sm:text-base">
             {seedContentDisclosure}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             {seedContentSourceManifest.slice(0, 4).map((asset) => (
-              <a
+              <span
                 key={asset.id}
-                href={asset.sourceUrl}
-                target="_blank"
-                rel="noreferrer"
                 className="museum-tag"
               >
                 {asset.sourceName}
-              </a>
+              </span>
             ))}
           </div>
+          <p className="mt-5 text-xs uppercase tracking-[0.26em] text-[color:var(--muted)]">
+            图片文件已本地化到仓库，不再依赖第三方图片外链。
+          </p>
         </div>
       </section>
     </main>

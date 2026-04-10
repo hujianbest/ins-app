@@ -86,7 +86,7 @@ test("studio profile page renders editable creator profile fields", async () => 
   expect(screen.getByDisplayValue(/^苏州$/)).toBeDefined();
   expect(screen.getByDisplayValue(/repo-backed profile/)).toBeDefined();
   expect(screen.getByDisplayValue(/Repo biography for studio editing\./)).toBeDefined();
-  expect(screen.getByRole("button", { name: /保存主页更改/ })).toBeDefined();
+  expect(screen.getByRole("button", { name: /^保存$/ })).toBeDefined();
 });
 
 test("studio profile page redirects unauthenticated visitors to login", async () => {

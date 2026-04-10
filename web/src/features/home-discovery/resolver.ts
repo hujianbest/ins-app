@@ -25,18 +25,18 @@ const sectionCopy: Record<
 > = {
   featured: {
     title: "精选推荐",
-    description: "优先展示社区精选作品与创作者。",
-    emptyStateCopy: "精选内容整理中。",
+    description: "优先推荐",
+    emptyStateCopy: "暂无精选。",
   },
   latest: {
     title: "最新发布",
-    description: "按最新公开发布时间浏览社区内容。",
-    emptyStateCopy: "最新内容整理中。",
+    description: "按时间浏览",
+    emptyStateCopy: "暂无更新。",
   },
   following: {
     title: "关注中",
-    description: "关注创作者后，这里会显示他们的最新公开内容。",
-    emptyStateCopy: "关注创作者后，这里会显示他们的最新公开内容。",
+    description: "关注更新",
+    emptyStateCopy: "关注后查看更新。",
   },
 };
 
@@ -168,7 +168,7 @@ async function resolveFollowingSection(
     return buildSection(
       "following",
       [],
-      "登录后查看关注中的创作者更新。",
+      "登录后查看关注更新。",
     );
   }
 

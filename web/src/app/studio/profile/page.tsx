@@ -20,10 +20,9 @@ export default async function StudioProfilePage() {
     <main className="museum-page">
       <section className="museum-shell flex max-w-5xl flex-col gap-10 pt-14">
         <PageHero
-          eyebrow="Studio Profile"
+          eyebrow="主页"
           title="编辑主页"
-          description="完善你的公开身份信息，及时更新城市与定位，并打磨访客首先看到的主页内容。"
-          actions={[{ href: "/studio", label: "返回工作台" }]}
+          actions={[{ href: "/studio", label: "总览" }]}
           tone="utility"
         />
 
@@ -32,7 +31,7 @@ export default async function StudioProfilePage() {
           className="museum-panel grid gap-6 p-6 md:p-8"
         >
           <label className="space-y-2">
-            <span className="museum-label">展示名称</span>
+            <span className="museum-label">名称</span>
             <input
               name="name"
               defaultValue={profile.name}
@@ -50,7 +49,7 @@ export default async function StudioProfilePage() {
               />
             </label>
             <label className="space-y-2">
-              <span className="museum-label">一句话介绍</span>
+              <span className="museum-label">短句</span>
               <input
                 name="tagline"
                 defaultValue={profile.tagline}
@@ -73,7 +72,7 @@ export default async function StudioProfilePage() {
             type="submit"
             className="museum-button-primary w-fit"
           >
-            保存主页更改
+            保存
           </button>
         </form>
       </section>

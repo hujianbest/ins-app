@@ -103,6 +103,7 @@ export function EditorialVisual({
             src={asset.imageUrl}
             alt={asset.alt}
             fill
+            unoptimized
             sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
             style={{
               objectFit: "cover",

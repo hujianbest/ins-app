@@ -26,11 +26,11 @@ export default async function InboxPage() {
               {roleCopy?.title}消息
             </h1>
             <p className="max-w-3xl text-lg leading-8 text-[color:var(--muted-strong)]">
-              直接在工作台流程内查看来自主页、作品和约拍诉求的咨询，不必离开当前身份上下文。
+              查看消息。
             </p>
           </div>
           <Link href="/studio" className="museum-button-quiet text-sm uppercase tracking-[0.28em]">
-            返回工作台
+            总览
           </Link>
         </div>
 
@@ -45,15 +45,15 @@ export default async function InboxPage() {
                 <h2 className="font-display mt-3 text-3xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)]">
                   {thread.participantName}
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-[color:var(--muted-strong)]">{thread.preview}</p>
+                <p className="museum-clamp-2 mt-3 text-sm leading-7 text-[color:var(--muted-strong)]">{thread.preview}</p>
                 <Link href={thread.sourceHref} className="museum-button-quiet mt-4 text-base">
-                  查看来源
+                  来源
                 </Link>
               </article>
             ))
           ) : (
             <section className="museum-empty p-6">
-              <p className="text-lg text-[color:var(--muted-strong)]">暂时还没有对话。</p>
+              <p className="text-lg text-[color:var(--muted-strong)]">暂无消息。</p>
             </section>
           )}
         </div>

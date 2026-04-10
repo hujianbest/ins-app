@@ -403,6 +403,26 @@ img {
   background: rgba(255, 249, 243, 0.58);
 }
 
+.museum-clamp-2,
+.museum-clamp-3,
+.museum-clamp-5 {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}
+
+.museum-clamp-2 {
+  -webkit-line-clamp: 2;
+}
+
+.museum-clamp-3 {
+  -webkit-line-clamp: 3;
+}
+
+.museum-clamp-5 {
+  -webkit-line-clamp: 5;
+}
+
 @media (min-width: 960px) {
   .shell-header__nav {
     display: flex;

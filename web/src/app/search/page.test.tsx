@@ -31,7 +31,7 @@ test("search page renders suggested queries before input", async () => {
   expect(
     screen.getByRole("heading", {
       level: 1,
-      name: /搜索作品、创作者与合作内容/,
+      name: /^搜索$/,
     }),
   ).toBeDefined();
   expect(screen.getByRole("link", { name: "上海" }).getAttribute("href")).toBe(
@@ -74,7 +74,7 @@ test("search page renders grouped results for a keyword", async () => {
   render(page);
 
   expect(
-    screen.getByRole("heading", { level: 1, name: /搜索 “上海”/ }),
+    screen.getByRole("heading", { level: 1, name: /^上海$/ }),
   ).toBeDefined();
   expect(screen.getByRole("heading", { level: 2, name: "作品" })).toBeDefined();
   expect(screen.getByRole("heading", { level: 2, name: "创作者" })).toBeDefined();

@@ -32,11 +32,11 @@ test("opportunity detail page renders the post content and owner summary", async
   expect(screen.getByText(opportunityPosts[0].city)).toBeDefined();
   expect(screen.getByText(opportunityPosts[0].schedule)).toBeDefined();
   expect(screen.getByText(opportunityPosts[0].ownerName)).toBeDefined();
-  expect(screen.getByRole("link", { name: /返回诉求列表/ }).getAttribute("href")).toBe(
+  expect(screen.getByRole("link", { name: /^返回$/ }).getAttribute("href")).toBe(
     "/opportunities"
   );
-  expect(screen.getByRole("link", { name: /查看摄影师主页/ }).getAttribute("href")).toBe(
+  expect(screen.getByRole("link", { name: /^主页$/ }).getAttribute("href")).toBe(
     "/photographers/sample-photographer"
   );
-  expect(screen.getByRole("button", { name: /发送关于该诉求的私信/ })).toBeDefined();
+  expect(screen.getByRole("button", { name: /^私信$/ })).toBeDefined();
 });

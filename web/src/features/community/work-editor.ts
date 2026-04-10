@@ -1,4 +1,5 @@
 import { type AuthRole } from "@/features/auth/types";
+import { getStudioProfileSlugForRole } from "@/features/showcase/sample-data";
 
 import { getDefaultCommunityRepositoryBundle } from "./runtime";
 import type { CommunityRepositoryBundle, CommunityWorkRecord } from "./types";
@@ -47,6 +48,15 @@ async function resolveEditableProfileForRole(
   role: AuthRole,
   bundle: CommunityRepositoryBundle,
 ) {
+  const preferredProfile = await bundle.profiles.getByRoleAndSlug(
+    role,
+    getStudioProfileSlugForRole(role),
+  );
+
+  if (preferredProfile) {
+    return preferredProfile;
+  }
+
   const profiles = await bundle.profiles.listPublicProfiles();
   const roleProfiles = profiles.filter((profile) => profile.role === role);
 

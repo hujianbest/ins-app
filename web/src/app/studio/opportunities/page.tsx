@@ -20,10 +20,9 @@ export default async function StudioOpportunitiesPage() {
     <main className="museum-page">
       <section className="museum-shell flex flex-col gap-10 pt-14">
         <PageHero
-          eyebrow="工作台诉求"
+          eyebrow="诉求"
           title="管理诉求"
-          description="起草、更新和下线约拍诉求，让访客始终看到你工作台里最新的城市与档期信息。"
-          actions={[{ href: "/studio", label: "返回工作台" }]}
+          actions={[{ href: "/studio", label: "总览" }]}
           tone="utility"
         />
 
@@ -68,25 +67,25 @@ export default async function StudioOpportunitiesPage() {
                 type="button"
                 className="museum-button-primary"
               >
-                发布诉求
+                发布
               </button>
               <button
                 type="button"
                 className="museum-button-secondary"
               >
-                保存草稿
+                存草稿
               </button>
               <button
                 type="button"
                 className="museum-button-secondary"
               >
-                下线诉求
+                下线
               </button>
             </div>
           </form>
 
           <div className="museum-panel museum-panel--soft p-6 md:p-8">
-            <p className="museum-label">当前诉求</p>
+            <p className="museum-label">已发布</p>
             <div className="mt-5 grid gap-4">
               {managedPosts.map((post) => (
                 <article key={post.id} className="museum-stat p-5">

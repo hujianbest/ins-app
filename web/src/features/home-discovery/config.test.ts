@@ -28,11 +28,10 @@ test("profile discovery config requires role and slug for featured profiles", ()
   });
 });
 
-test("work discovery config keeps the richer seed curation order stable", () => {
+test("work discovery config balances featured work curation against profile and opportunity slots", () => {
   expect(worksDiscoverySlotConfig.featuredIds).toEqual([
     "neon-portrait-study",
     "soft-light-editorial",
-    "monochrome-street-session",
   ]);
 });
 

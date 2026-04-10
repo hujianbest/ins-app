@@ -95,7 +95,7 @@ test("work detail page renders repository-backed work content and owner summary"
   expect(screen.getByText(publicWork.description)).toBeDefined();
   expect(screen.getByText(publicWork.ownerName)).toBeDefined();
   expect(screen.getByRole("button", { name: /已点赞/ })).toBeDefined();
-  expect(screen.getByRole("button", { name: /发送关于这组作品的私信/ })).toBeDefined();
+  expect(screen.getByRole("button", { name: /私信/ })).toBeDefined();
   expect(screen.getByRole("button", { name: /发表评论/ })).toBeDefined();
   expect(screen.getAllByText(/评论/).length).toBeGreaterThan(0);
   expect(screen.getByText("最新评论")).toBeDefined();
@@ -116,10 +116,10 @@ test("work detail page asks guests to log in before liking", async () => {
 
   render(page);
 
-  expect(screen.getByRole("link", { name: /登录后点赞这组作品/ }).getAttribute("href")).toBe(
+  expect(screen.getByRole("link", { name: /登录后点赞/ }).getAttribute("href")).toBe(
     "/login"
   );
-  expect(screen.getByRole("link", { name: /登录后发表评论/ }).getAttribute("href")).toBe(
+  expect(screen.getByRole("link", { name: /登录后评论/ }).getAttribute("href")).toBe(
     "/login"
   );
 });

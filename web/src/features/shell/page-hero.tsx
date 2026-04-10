@@ -10,7 +10,7 @@ type PageHeroAction = {
 type PageHeroProps = {
   eyebrow: string;
   title: string;
-  description: string;
+  description?: string;
   actions?: PageHeroAction[];
   supporting?: ReactNode;
   aside?: ReactNode;
@@ -48,9 +48,11 @@ export function PageHero({
           >
             {title}
           </h1>
-          <p className="max-w-3xl text-base leading-8 text-[color:var(--muted-strong)] sm:text-lg">
-            {description}
-          </p>
+          {description ? (
+            <p className="max-w-3xl text-base leading-8 text-[color:var(--muted-strong)] sm:text-lg">
+              {description}
+            </p>
+          ) : null}
         </div>
 
         {actions.length > 0 ? (

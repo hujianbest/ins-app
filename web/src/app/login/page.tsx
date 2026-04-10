@@ -12,10 +12,9 @@ export default async function LoginPage({
     <AuthEntryGrid
       eyebrow="登录"
       title="欢迎回来"
-      description="使用真实邮箱和密码继续进入工作台，后续主页维护、作品发布和互动行为都会绑定到你的账号。"
       submitMode="login"
       alternateHref="/register"
-      alternateLabel="创建账号"
+      alternateLabel="注册"
       statusMessage={getAuthStatusMessage("login", resolvedSearchParams)}
     />
   );

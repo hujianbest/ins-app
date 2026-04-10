@@ -57,7 +57,7 @@ export default async function WorkDetailPage({
               <div className="flex flex-wrap items-center gap-3">
                 <span className="museum-label">{work.category}</span>
                 <span className="museum-tag">
-                  Work Detail
+                  详情
                 </span>
               </div>
               <h1 className="font-display max-w-4xl text-5xl leading-none tracking-[-0.04em] text-[color:var(--accent-strong)] sm:text-6xl lg:text-7xl">
@@ -81,29 +81,29 @@ export default async function WorkDetailPage({
                       type="submit"
                       className="museum-button-secondary mt-3"
                     >
-                      {liked ? "已点赞" : "点赞这组作品"}
+                      {liked ? "已点赞" : "点赞"}
                     </button>
                   </form>
                 ) : (
                   <Link href="/login" className="museum-button-quiet mt-3 text-base">
-                    登录后点赞这组作品
+                    登录后点赞
                   </Link>
                 )}
               </div>
               <div className="museum-stat p-5">
-                <p className="museum-label">合作联系</p>
+                <p className="museum-label">联系</p>
                 {sessionRole ? (
                   <form action={startContactThreadAction.bind(null, work.ownerRole, work.ownerSlug, "work", work.id)}>
                     <button
                       type="submit"
                       className="museum-button-primary mt-3"
                     >
-                      发送关于这组作品的私信
+                      私信
                     </button>
                   </form>
                 ) : (
                   <Link href="/login" className="museum-button-quiet mt-3 text-base">
-                    {work.contactLabel}
+                    登录后私信
                   </Link>
                 )}
               </div>
@@ -115,14 +115,13 @@ export default async function WorkDetailPage({
               assetRef={work.coverAsset}
               label="作品详情视觉"
               variant="portrait"
-              description="作品主体、作者关系、互动与合作入口在同一画面秩序内完成承接。"
               showSourceLabel
             />
           </div>
         </div>
 
         <section className="museum-panel museum-panel--soft p-6 md:p-8">
-          <p className="museum-label">作品说明</p>
+          <p className="museum-label">说明</p>
           <p className="mt-4 max-w-4xl text-base leading-8 text-[color:var(--muted-strong)]">
             {work.detailNote}
           </p>
@@ -132,15 +131,14 @@ export default async function WorkDetailPage({
           <div className="flex flex-wrap items-center justify-between gap-4">
             <SectionHeading
               eyebrow="评论"
-              title="围绕作品留下反馈与交流"
-              description="已登录成员可发布 1..500 字纯文本评论，列表按最新优先展示。"
+              title="评论"
             />
             {sessionRole ? (
               <form action={addWorkCommentAction.bind(null, work.id, `/works/${work.id}`)} className="flex w-full max-w-xl flex-col gap-3">
                 <textarea
                   name="body"
                   rows={3}
-                  placeholder="写下你对这组作品的看法"
+                  placeholder="写点看法"
                   className="museum-textarea"
                 />
                 <button
@@ -152,7 +150,7 @@ export default async function WorkDetailPage({
               </form>
             ) : (
               <Link href="/login" className="museum-button-quiet text-base">
-                登录后发表评论
+                登录后评论
               </Link>
             )}
           </div>
@@ -174,7 +172,7 @@ export default async function WorkDetailPage({
               ))
             ) : (
               <p className="text-sm leading-7 text-[color:var(--muted-strong)]">
-                还没有评论，成为第一个留言的人。
+                暂无评论。
               </p>
             )}
           </div>

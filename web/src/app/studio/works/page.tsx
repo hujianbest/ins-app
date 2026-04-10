@@ -20,10 +20,9 @@ export default async function StudioWorksPage() {
     <main className="museum-page">
       <section className="museum-shell flex flex-col gap-10 pt-14">
         <PageHero
-          eyebrow="Studio Works"
+          eyebrow="作品"
           title="管理作品"
-          description="查看当前挂载在公开主页上的作品，并为展示区准备下一批新增内容。"
-          actions={[{ href: "/studio", label: "返回工作台" }]}
+          actions={[{ href: "/studio", label: "总览" }]}
           tone="utility"
         />
 
@@ -32,37 +31,37 @@ export default async function StudioWorksPage() {
           className="museum-panel grid gap-4 p-6 md:p-8"
         >
           <div className="space-y-2">
-            <p className="museum-label">新作品</p>
+            <p className="museum-label">新增</p>
             <h2 className="font-display text-4xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)]">
-              添加新作品
+              新建
             </h2>
           </div>
           <input
             name="title"
-            placeholder="作品标题"
+            placeholder="标题"
             className="museum-field"
           />
           <input
             name="category"
-            placeholder="作品分类"
+            placeholder="分类"
             className="museum-field"
           />
           <input
             name="coverAsset"
-            placeholder="封面资源引用"
+            placeholder="封面资源"
             defaultValue="work:new-work:cover"
             className="museum-field"
           />
           <textarea
             name="description"
             rows={3}
-            placeholder="作品简介"
+            placeholder="摘要"
             className="museum-textarea"
           />
           <textarea
             name="detailNote"
             rows={4}
-            placeholder="作品说明"
+            placeholder="说明"
             className="museum-textarea"
           />
           <div className="flex flex-wrap gap-3">
@@ -72,7 +71,7 @@ export default async function StudioWorksPage() {
               value="save_draft"
               className="museum-button-secondary"
             >
-              保存为草稿
+              存草稿
             </button>
             <button
               type="submit"
@@ -80,7 +79,7 @@ export default async function StudioWorksPage() {
               value="publish"
               className="museum-button-primary"
             >
-              发布作品
+              发布
             </button>
           </div>
         </form>
@@ -135,7 +134,7 @@ export default async function StudioWorksPage() {
                   value="publish"
                   className="museum-button-primary"
                 >
-                  {work.status === "published" ? "保存更改" : "发布作品"}
+                  {work.status === "published" ? "保存" : "发布"}
                 </button>
                 {work.status === "draft" ? (
                   <button
@@ -144,7 +143,7 @@ export default async function StudioWorksPage() {
                     value="save_draft"
                     className="museum-button-secondary"
                   >
-                    保存为草稿
+                    存草稿
                   </button>
                 ) : null}
                 <button
@@ -153,7 +152,7 @@ export default async function StudioWorksPage() {
                   value="revert_to_draft"
                   className="museum-button-secondary"
                 >
-                  回退到草稿
+                  转草稿
                 </button>
               </div>
             </form>

@@ -20,11 +20,7 @@ export const discoverSurfaceSectionOrder: DiscoverSurfaceSectionOrder = [
 
 export const worksDiscoverySlotConfig: WorkDiscoverySlotConfig = {
   kind: "works",
-  featuredIds: [
-    "neon-portrait-study",
-    "soft-light-editorial",
-    "monochrome-street-session",
-  ],
+  featuredIds: ["neon-portrait-study", "soft-light-editorial"],
 };
 
 export const profileDiscoverySlotConfig: ProfileDiscoverySlotConfig = {

@@ -28,7 +28,7 @@ export function ProfileShowcasePage({ profile, isSignedIn, isFollowing, returnPa
               <div className="flex flex-wrap items-center gap-3">
                 <span className="museum-label">{getRoleLabel(profile.role)}主页</span>
                 <span className="museum-tag">
-                  Public Profile
+                  公开
                 </span>
               </div>
               <h1 className="font-display max-w-4xl text-5xl leading-none tracking-[-0.04em] text-[color:var(--accent-strong)] sm:text-6xl lg:text-7xl">
@@ -52,24 +52,24 @@ export function ProfileShowcasePage({ profile, isSignedIn, isFollowing, returnPa
                       type="submit"
                       className="museum-button-secondary mt-3"
                     >
-                      {isFollowing ? "取消关注" : "关注这位创作者"}
+                      {isFollowing ? "取消关注" : "关注"}
                     </button>
                   </form>
                 ) : (
                   <Link href="/login" className="museum-button-quiet mt-3 text-base">
-                    登录后关注这位创作者
+                    登录后关注
                   </Link>
                 )}
               </div>
               <div className="museum-stat p-5">
-                <p className="museum-label">合作联系</p>
+                <p className="museum-label">联系</p>
                 {isSignedIn ? (
                   <form action={startContactThreadAction.bind(null, profile.role, profile.slug, "profile", profile.slug)}>
                     <button
                       type="submit"
                       className="museum-button-primary mt-3"
                     >
-                      发送关于这份主页的私信
+                      私信
                     </button>
                   </form>
                 ) : (
@@ -77,7 +77,7 @@ export function ProfileShowcasePage({ profile, isSignedIn, isFollowing, returnPa
                     href="/login"
                     className="museum-button-quiet mt-3 text-base"
                   >
-                    {profile.contactLabel}
+                    登录后私信
                   </Link>
                 )}
               </div>
@@ -89,7 +89,6 @@ export function ProfileShowcasePage({ profile, isSignedIn, isFollowing, returnPa
               assetRef={profile.heroAsset}
               label={profile.heroImageLabel}
               variant="portrait"
-              description="以更安静的版面承接作品展示、关注关系和合作线索。"
               showSourceLabel
             />
           </div>
@@ -97,15 +96,14 @@ export function ProfileShowcasePage({ profile, isSignedIn, isFollowing, returnPa
 
         <section className="grid gap-8 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)]">
           <div className="museum-panel museum-panel--soft p-6 md:p-7">
-            <p className="museum-label">主页介绍</p>
-            <p className="mt-4 text-base leading-8 text-[color:var(--muted-strong)]">{profile.bio}</p>
+            <p className="museum-label">介绍</p>
+            <p className="museum-clamp-5 mt-4 text-base leading-8 text-[color:var(--muted-strong)]">{profile.bio}</p>
           </div>
 
           <div className="space-y-5">
             <SectionHeading
               eyebrow={profile.sectionTitle}
-              title="已发布作品与公开展示"
-              description={profile.sectionDescription}
+              title="作品"
             />
 
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -123,7 +121,7 @@ export function ProfileShowcasePage({ profile, isSignedIn, isFollowing, returnPa
                   <h2 className="font-display mt-5 text-3xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)]">
                     {item.title}
                   </h2>
-                  <p className="mt-3 text-sm leading-7 text-[color:var(--muted-strong)]">{item.description}</p>
+                  <p className="museum-clamp-2 mt-3 text-sm leading-7 text-[color:var(--muted-strong)]">{item.description}</p>
                 </Link>
               ))}
             </div>

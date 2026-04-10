@@ -35,7 +35,7 @@ test("public discovery surfaces render and search returns results", async ({
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: /以作品、创作者与合作灵感重构 Lens Archive 的首页主线/,
+      name: /从作品开始浏览/,
     }),
   ).toBeVisible();
 
@@ -43,7 +43,7 @@ test("public discovery surfaces render and search returns results", async ({
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: /持续浏览作品、创作者与值得跟进的摄影灵感/,
+      name: /继续发现作品与创作者/,
     }),
   ).toBeVisible();
 
@@ -55,10 +55,10 @@ test("public discovery surfaces render and search returns results", async ({
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: /搜索 “上海”/,
+      name: /^上海$/,
     }),
   ).toBeVisible();
-  await expect(page.getByText(/当前共命中/)).toBeVisible();
+  await expect(page.getByText(/\d+ 条结果/)).toBeVisible();
 
   expect(pageErrors).toEqual([]);
 });
@@ -78,7 +78,7 @@ test("register and login submissions both reach the protected studio workspace",
     .locator('input[name="primaryRole"][value="photographer"]')
     .check();
   await page
-    .getByRole("button", { name: /创建账号并进入工作台/ })
+    .getByRole("button", { name: /^创建账号$/ })
     .click();
   await page.waitForURL(/\/studio$/);
   await expectStudioWorkspace(page);
@@ -91,7 +91,7 @@ test("register and login submissions both reach the protected studio workspace",
 
   await page.locator('input[name="email"]').fill(credentials.email);
   await page.locator('input[name="password"]').fill(credentials.password);
-  await page.getByRole("button", { name: /登录进入工作台/ }).click();
+  await page.getByRole("button", { name: /^登录$/ }).click();
   await page.waitForURL(/\/studio$/);
   await expectStudioWorkspace(page);
 
@@ -120,7 +120,7 @@ test("discover surface links into a public work detail page", async ({
       name: workTitle?.trim() ?? "",
     }),
   ).toBeVisible();
-  await expect(page.getByText("作品说明")).toBeVisible();
+  await expect(page.getByText("说明", { exact: true })).toBeVisible();
   await expect(
     page.getByRole("link", { name: /返回主页/ }),
   ).toBeVisible();

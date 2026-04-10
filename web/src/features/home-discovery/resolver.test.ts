@@ -97,12 +97,12 @@ test("discover resolver keeps a stable following empty state for guests and no-f
   expect(guestSections[2]).toMatchObject({
     kind: "following",
     items: [],
-    emptyStateCopy: "登录后查看关注中的创作者更新。",
+    emptyStateCopy: "登录后查看关注更新。",
   });
   expect(memberSections[2]).toMatchObject({
     kind: "following",
     items: [],
-    emptyStateCopy: "关注创作者后，这里会显示他们的最新公开内容。",
+    emptyStateCopy: "关注后查看更新。",
   });
 });
 

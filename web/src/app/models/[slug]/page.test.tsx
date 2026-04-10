@@ -88,8 +88,8 @@ test("model profile page renders the public showcase from repository read model"
   ).toBeDefined();
   expect(screen.getByText(modelProfile.bio)).toBeDefined();
   expect(screen.getByText(modelProfile.sectionTitle)).toBeDefined();
-  expect(screen.getByRole("link", { name: /联系模特/ })).toBeDefined();
-  expect(screen.getByRole("link", { name: /登录后关注这位创作者/ }).getAttribute("href")).toBe(
+  expect(screen.getByRole("link", { name: /登录后私信/ })).toBeDefined();
+  expect(screen.getByRole("link", { name: /登录后关注/ }).getAttribute("href")).toBe(
     "/login"
   );
   expect(screen.getByRole("link", { name: /Repo Model Work/ }).getAttribute("href")).toBe(

@@ -12,11 +12,12 @@ import {
 } from "./sample-data";
 
 test("seed content disclosure keeps source and usage guidance visible", () => {
-  expect(seedContentDisclosure).toMatch(/Pexels/i);
-  expect(seedContentDisclosure).toMatch(/虚构演示内容/);
+  expect(seedContentDisclosure).toMatch(/本地化/);
+  expect(seedContentDisclosure).toMatch(/虚构演示文案/);
+  expect(seedContentDisclosure).toMatch(/不再依赖第三方图片外链/);
 });
 
-test("all referenced seed assets resolve to licensed manifest entries", () => {
+test("all referenced seed assets resolve to local manifest entries", () => {
   const referencedAssets = [
     ...photographerProfiles.map((profile) => profile.heroAsset),
     ...modelProfiles.map((profile) => profile.heroAsset),
@@ -35,7 +36,8 @@ test("all referenced seed assets resolve to licensed manifest entries", () => {
   for (const assetRef of referencedAssets) {
     expect(resolveSeedVisualAsset(assetRef)).toMatchObject({
       id: assetRef,
-      licenseLabel: "Pexels License",
+      imageUrl: expect.stringMatching(/^\/seed\//),
+      licenseLabel: "Pexels License (local mirror)",
     });
   }
 });
@@ -49,9 +51,16 @@ test("profile hero asset lookup stays aligned with the seeded public profiles", 
   );
 });
 
-test("seed source manifest preserves traceable source pages", () => {
-  expect(seedContentSourceManifest).toHaveLength(6);
-  expect(seedContentSourceManifest.every((asset) => asset.sourceUrl.includes("pexels.com/photo/"))).toBe(
-    true,
-  );
+test("seed source manifest preserves a medium local image pack with traceable source pages", () => {
+  expect(seedContentSourceManifest).toHaveLength(21);
+  expect(
+    seedContentSourceManifest.every((asset) =>
+      asset.imageUrl.startsWith("/seed/"),
+    ),
+  ).toBe(true);
+  expect(
+    seedContentSourceManifest.every((asset) =>
+      asset.sourceUrl.includes("pexels.com/photo/"),
+    ),
+  ).toBe(true);
 });

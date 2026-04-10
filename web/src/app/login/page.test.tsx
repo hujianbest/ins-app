@@ -16,6 +16,6 @@ test("login page renders real credential fields for account access", async () =>
   ).toBeDefined();
   expect(screen.getByLabelText(/邮箱/)).toBeDefined();
   expect(screen.getByLabelText(/密码/)).toBeDefined();
-  expect(screen.getByRole("button", { name: /登录进入工作台/ })).toBeDefined();
-  expect(screen.getByRole("link", { name: /创建账号/ }).getAttribute("href")).toBe("/register");
+  expect(screen.getByRole("button", { name: /^登录$/ })).toBeDefined();
+  expect(screen.getByRole("link", { name: /注册/ }).getAttribute("href")).toBe("/register");
 });

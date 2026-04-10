@@ -9,20 +9,12 @@ export default function OpportunitiesPage() {
       <section className="museum-shell flex flex-col gap-10 pt-14">
         <PageHero
           eyebrow="公开约拍板"
-          title="当前诉求"
-          description="浏览摄影师和模特当前发布的城市与档期诉求，再继续进入完整详情或对应创作者主页。"
+          title="诉求"
+          description="按城市、档期与发布者快速浏览。"
           actions={[
-            { href: "/discover", label: "回到发现页" },
-            { href: "/studio/opportunities", label: "进入诉求工作台", variant: "primary" },
+            { href: "/discover", label: "发现" },
+            { href: "/studio/opportunities", label: "管理", variant: "primary" },
           ]}
-          aside={
-            <div className="space-y-4">
-              <p className="museum-label">Curation Rule</p>
-              <p className="text-sm leading-7 text-[color:var(--muted-strong)]">
-                每条诉求都保持城市、档期、发布者和摘要在同一阅读块中，优先帮助品牌或创作者快速判断是否值得继续沟通。
-              </p>
-            </div>
-          }
         />
 
         <div className="grid gap-5 lg:grid-cols-2">
@@ -52,7 +44,7 @@ export default function OpportunitiesPage() {
                   <p className="mt-2 text-base text-[color:var(--accent-strong)]">{post.ownerName}</p>
                 </div>
               </div>
-              <p className="mt-5 text-sm leading-7 text-[color:var(--muted-strong)]">{post.summary}</p>
+              <p className="museum-clamp-2 mt-5 text-sm leading-7 text-[color:var(--muted-strong)]">{post.summary}</p>
             </Link>
           ))}
         </div>

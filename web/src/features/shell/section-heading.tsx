@@ -1,7 +1,7 @@
 type SectionHeadingProps = {
   eyebrow: string;
   title: string;
-  description: string;
+  description?: string;
 };
 
 export function SectionHeading({
@@ -17,9 +17,11 @@ export function SectionHeading({
       <h2 className="font-display text-4xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)] sm:text-5xl">
         {title}
       </h2>
-      <p className="max-w-3xl text-sm leading-7 text-[color:var(--muted-strong)] sm:text-base">
-        {description}
-      </p>
+      {description ? (
+        <p className="museum-clamp-2 max-w-3xl text-sm leading-7 text-[color:var(--muted-strong)] sm:text-base">
+          {description}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -11,8 +11,7 @@ export default async function RegisterPage({
   return (
     <AuthEntryGrid
       eyebrow="注册"
-      title="创建你的创作者账号"
-      description="首个版本仍然保留单一主身份模型，但注册过程已经切换为真实邮箱与密码，会在成功后直接建立登录会话。"
+      title="创建账号"
       submitMode="register"
       alternateHref="/login"
       alternateLabel="登录"
