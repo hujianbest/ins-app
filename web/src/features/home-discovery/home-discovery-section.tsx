@@ -14,7 +14,7 @@ export function HomeDiscoverySection({ section }: HomeDiscoverySectionProps) {
     <section
       id={`discovery-section-${section.kind}`}
       aria-labelledby={`home-discovery-${section.kind}`}
-      className="rounded-[2rem] border border-white/10 bg-[rgba(14,18,28,0.62)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.22)] backdrop-blur-xl"
+      className="museum-panel museum-panel--soft p-6 md:p-8"
     >
       <div id={`home-discovery-${section.kind}`}>
         <SectionHeading
@@ -25,24 +25,26 @@ export function HomeDiscoverySection({ section }: HomeDiscoverySectionProps) {
       </div>
 
       {section.items.length > 0 ? (
-        <div className="mt-8 grid gap-4 xl:grid-cols-3">
+        <div className="mt-8 grid gap-5 xl:grid-cols-3">
           {section.items.map((item) => (
             <Link
               key={item.id}
               href={item.href}
-              className="group rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.01))] p-5 transition hover:-translate-y-0.5 hover:border-cyan-200/40 hover:bg-[rgba(255,255,255,0.08)]"
+              className="museum-card group block p-5"
             >
               <EditorialVisual
                 assetRef={item.assetRef}
                 label={item.badge}
                 variant="landscape"
               />
-              <h3 className="mt-4 text-xl font-medium text-white transition group-hover:text-cyan-100">
+              <h3 className="font-display mt-5 text-3xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)]">
                 {item.title}
               </h3>
-              <p className="mt-3 text-sm leading-7 text-slate-300">{item.description}</p>
+              <p className="mt-3 text-sm leading-7 text-[color:var(--muted-strong)]">
+                {item.description}
+              </p>
               {item.meta ? (
-                <p className="mt-5 text-xs uppercase tracking-[0.24em] text-white/45">
+                <p className="museum-label mt-5">
                   {item.meta}
                 </p>
               ) : null}
@@ -50,8 +52,8 @@ export function HomeDiscoverySection({ section }: HomeDiscoverySectionProps) {
           ))}
         </div>
       ) : (
-        <div className="mt-8 rounded-[1.5rem] border border-dashed border-white/15 bg-black/20 px-5 py-8">
-          <p className="text-sm leading-7 text-slate-300">
+        <div className="museum-empty mt-8 px-5 py-8">
+          <p className="text-sm leading-7 text-[color:var(--muted-strong)]">
             {section.emptyStateCopy}
           </p>
         </div>

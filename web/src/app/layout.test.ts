@@ -6,6 +6,7 @@ import { expect, test, vi } from "vitest";
 vi.mock("next/font/google", () => ({
   Geist: () => ({ variable: "--font-geist-sans" }),
   Geist_Mono: () => ({ variable: "--font-geist-mono" }),
+  Cormorant_Garamond: () => ({ variable: "--font-cormorant" }),
 }));
 
 import { metadata } from "./layout";
@@ -20,10 +21,11 @@ test("layout metadata is branded for the showcase site", () => {
 test("global styles define the branded visual tokens", () => {
   const css = readFileSync(path.join(process.cwd(), "src/app/globals.css"), "utf8");
 
-  expect(css).toContain("--background: #050713;");
-  expect(css).toContain("--foreground: #f8fafc;");
-  expect(css).toContain("--surface-strong: rgba(18, 24, 40, 0.92);");
+  expect(css).toContain("--background: #f5efe6;");
+  expect(css).toContain("--foreground: #16110c;");
+  expect(css).toContain("--surface-strong: rgba(255, 252, 248, 0.94);");
   expect(css).toContain("--font-sans: var(--font-geist-sans);");
+  expect(css).toContain("--font-display: var(--font-cormorant);");
   expect(css).not.toContain("--background: #ffffff;");
   expect(css).not.toContain("--foreground: #171717;");
 });

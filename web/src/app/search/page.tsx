@@ -45,8 +45,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   ];
 
   return (
-    <main className="pb-24 text-white">
-      <section className="mx-auto w-full max-w-7xl px-6 pt-12 sm:px-10 lg:px-14">
+    <main className="museum-page">
+      <section className="museum-shell pt-14">
         <PageHero
           eyebrow="Search"
           title={hasQuery ? `搜索 “${results.query}”` : "搜索作品、创作者与合作内容"}
@@ -61,20 +61,18 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           ]}
           aside={
             <div className="space-y-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-cyan-200/80">
-                Search Inputs
-              </p>
+              <p className="museum-label">Search Inputs</p>
               <form action="/search" className="grid gap-3">
                 <input
                   type="search"
                   name="q"
                   defaultValue={query}
                   placeholder="例如：上海、编辑人像、Mika"
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-base text-white outline-none"
+                  className="museum-field"
                 />
                 <button
                   type="submit"
-                  className="inline-flex justify-center rounded-full bg-white px-5 py-3 text-sm font-medium text-slate-950 transition hover:bg-cyan-100"
+                  className="museum-button-primary"
                 >
                   搜索
                 </button>
@@ -84,7 +82,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         />
       </section>
 
-      <section className="mx-auto w-full max-w-7xl px-6 pt-14 sm:px-10 lg:px-14">
+      <section className="museum-shell pt-14">
         {hasQuery ? (
           results.total > 0 ? (
             <div className="grid gap-8">
@@ -92,32 +90,32 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 group.items.length > 0 ? (
                   <section
                     key={group.key}
-                    className="rounded-[2rem] border border-white/10 bg-[rgba(14,18,28,0.62)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.22)] backdrop-blur-xl"
+                    className="museum-panel p-6 md:p-8"
                   >
                     <SectionHeading
                       eyebrow="Search Results"
                       title={group.title}
                       description={group.description}
                     />
-                    <div className="mt-8 grid gap-4 xl:grid-cols-3">
+                    <div className="mt-8 grid gap-5 xl:grid-cols-3">
                       {group.items.map((item) => (
                         <Link
                           key={item.id}
                           href={item.href}
-                          className="group rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.01))] p-5 transition hover:-translate-y-0.5 hover:border-cyan-200/40 hover:bg-[rgba(255,255,255,0.08)]"
+                          className="museum-card group block p-5"
                         >
                           <EditorialVisual
                             assetRef={item.assetRef}
                             label={item.badge}
                             variant="landscape"
                           />
-                          <h2 className="mt-4 text-xl font-medium text-white transition group-hover:text-cyan-100">
+                          <h2 className="font-display mt-5 text-3xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)]">
                             {item.title}
                           </h2>
-                          <p className="mt-3 text-sm leading-7 text-slate-300">
+                          <p className="mt-3 text-sm leading-7 text-[color:var(--muted-strong)]">
                             {item.description}
                           </p>
-                          <p className="mt-5 text-xs uppercase tracking-[0.24em] text-white/45">
+                          <p className="museum-label mt-5">
                             {item.meta}
                           </p>
                         </Link>
@@ -128,7 +126,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               )}
             </div>
           ) : (
-            <section className="rounded-[2rem] border border-dashed border-white/15 bg-[rgba(14,18,28,0.54)] px-6 py-12">
+            <section className="museum-empty px-6 py-12">
               <SectionHeading
                 eyebrow="No Results"
                 title="没有找到匹配内容"
@@ -137,7 +135,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             </section>
           )
         ) : (
-          <section className="rounded-[2rem] border border-white/10 bg-[rgba(14,18,28,0.62)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+          <section className="museum-panel p-6 md:p-8">
             <SectionHeading
               eyebrow="Suggested Queries"
               title="从这些常见关键词开始"
@@ -148,7 +146,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 <Link
                   key={suggestion}
                   href={`/search?q=${encodeURIComponent(suggestion)}`}
-                  className="inline-flex rounded-full border border-white/10 px-4 py-2 text-sm text-white transition hover:border-cyan-200/60 hover:bg-white/5"
+                  className="museum-tag"
                 >
                   {suggestion}
                 </Link>

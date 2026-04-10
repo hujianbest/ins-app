@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { getSessionRole } from "@/features/auth/session";
 import { startContactThreadAction } from "@/features/contact/actions";
+import { PageHero } from "@/features/shell/page-hero";
 import { getOpportunityPostById, opportunityPosts } from "@/features/showcase/sample-data";
 
 export function generateStaticParams() {
@@ -26,43 +27,45 @@ export default async function OpportunityDetailPage({
   const profileLabel = `查看${post.ownerRole === "photographer" ? "摄影师" : "模特"}主页`;
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(103,232,249,0.14),_transparent_20%),linear-gradient(180deg,_#050816_0%,_#0f172a_56%,_#111827_100%)] text-white">
-      <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-6 py-10 sm:px-10 lg:px-14">
-        <div className="flex flex-wrap items-center justify-between gap-4 text-sm uppercase tracking-[0.3em] text-white/60">
-          <p>{post.ownerRole === "photographer" ? "摄影师诉求" : "模特诉求"}</p>
-          <Link href="/opportunities" className="transition hover:text-cyan-200">
+    <main className="museum-page">
+      <section className="museum-shell flex flex-col gap-10 pt-14">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <p className="museum-label">
+            {post.ownerRole === "photographer" ? "摄影师诉求" : "模特诉求"}
+          </p>
+          <Link href="/opportunities" className="museum-button-quiet text-sm uppercase tracking-[0.3em]">
             返回诉求列表
           </Link>
         </div>
 
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:items-start">
-          <div className="space-y-6">
-            <div className="space-y-3">
-              <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">公开诉求</p>
-              <h1 className="max-w-4xl text-5xl font-semibold tracking-tight sm:text-6xl">{post.title}</h1>
-              <p className="max-w-3xl text-lg leading-8 text-slate-300">{post.summary}</p>
-            </div>
+          <div className="space-y-8">
+            <PageHero
+              eyebrow="公开诉求"
+              title={post.title}
+              description={post.summary}
+            />
 
-            <div className="grid gap-4 text-sm text-slate-300 sm:grid-cols-3">
-              <div className="rounded-3xl border border-white/10 bg-white/6 p-5 backdrop-blur">
-                <p className="text-xs uppercase tracking-[0.28em] text-white/50">城市</p>
-                <p className="mt-3 text-base text-white">{post.city}</p>
+            <div className="grid gap-4 text-sm text-[color:var(--muted-strong)] sm:grid-cols-3">
+              <div className="museum-stat p-5">
+                <p className="museum-label">城市</p>
+                <p className="mt-3 text-base text-[color:var(--accent-strong)]">{post.city}</p>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-white/6 p-5 backdrop-blur">
-                <p className="text-xs uppercase tracking-[0.28em] text-white/50">档期</p>
-                <p className="mt-3 text-base text-white">{post.schedule}</p>
+              <div className="museum-stat p-5">
+                <p className="museum-label">档期</p>
+                <p className="mt-3 text-base text-[color:var(--accent-strong)]">{post.schedule}</p>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-white/6 p-5 backdrop-blur">
-                <p className="text-xs uppercase tracking-[0.28em] text-white/50">发布者</p>
-                <p className="mt-3 text-base text-white">{post.ownerName}</p>
+              <div className="museum-stat p-5">
+                <p className="museum-label">发布者</p>
+                <p className="mt-3 text-base text-[color:var(--accent-strong)]">{post.ownerName}</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/50">主页信息</p>
+          <div className="museum-panel p-6 md:p-7">
+            <p className="museum-label">主页信息</p>
             <div className="mt-5 space-y-4">
-              <Link href={profileHref} className="inline-flex text-base text-cyan-200 transition hover:text-white">
+              <Link href={profileHref} className="museum-button-quiet text-base">
                 {profileLabel}
               </Link>
               {sessionRole ? (
@@ -71,13 +74,13 @@ export default async function OpportunityDetailPage({
                 >
                   <button
                     type="submit"
-                    className="inline-flex rounded-full border border-cyan-200/40 px-4 py-2 text-base text-cyan-200 transition hover:border-white/60 hover:text-white"
+                    className="museum-button-primary"
                   >
                     发送关于该诉求的私信
                   </button>
                 </form>
               ) : (
-                <Link href="/login" className="inline-flex text-base text-cyan-200 transition hover:text-white">
+                <Link href="/login" className="museum-button-quiet text-base">
                   {post.contactLabel}
                 </Link>
               )}

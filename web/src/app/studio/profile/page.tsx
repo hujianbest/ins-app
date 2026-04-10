@@ -17,60 +17,61 @@ export default async function StudioProfilePage() {
   const profile = await getStudioProfileEditorModel(session.primaryRole);
 
   return (
-    <main className="pb-24 text-white">
-      <section className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-6 pt-12 sm:px-10 lg:px-14">
+    <main className="museum-page">
+      <section className="museum-shell flex max-w-5xl flex-col gap-10 pt-14">
         <PageHero
           eyebrow="Studio Profile"
           title="编辑主页"
           description="完善你的公开身份信息，及时更新城市与定位，并打磨访客首先看到的主页内容。"
           actions={[{ href: "/studio", label: "返回工作台" }]}
+          tone="utility"
         />
 
         <form
           action={saveStudioProfileAction}
-          className="grid gap-6 rounded-[2rem] border border-white/10 bg-[rgba(14,18,28,0.72)] p-6 shadow-[0_28px_80px_rgba(0,0,0,0.26)] backdrop-blur-xl"
+          className="museum-panel grid gap-6 p-6 md:p-8"
         >
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-[0.28em] text-white/45">展示名称</span>
+            <span className="museum-label">展示名称</span>
             <input
               name="name"
               defaultValue={profile.name}
-              className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-base text-white outline-none"
+              className="museum-field"
             />
           </label>
 
           <div className="grid gap-6 md:grid-cols-2">
             <label className="space-y-2">
-              <span className="text-xs uppercase tracking-[0.28em] text-white/45">城市</span>
+              <span className="museum-label">城市</span>
               <input
                 name="city"
                 defaultValue={profile.city}
-                className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-base text-white outline-none"
+                className="museum-field"
               />
             </label>
             <label className="space-y-2">
-              <span className="text-xs uppercase tracking-[0.28em] text-white/45">一句话介绍</span>
+              <span className="museum-label">一句话介绍</span>
               <input
                 name="tagline"
                 defaultValue={profile.tagline}
-                className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-base text-white outline-none"
+                className="museum-field"
               />
             </label>
           </div>
 
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-[0.28em] text-white/45">简介</span>
+            <span className="museum-label">简介</span>
             <textarea
               name="bio"
               defaultValue={profile.bio}
               rows={6}
-              className="w-full rounded-[1.5rem] border border-white/10 bg-black/20 px-4 py-3 text-base leading-7 text-white outline-none"
+              className="museum-textarea"
             />
           </label>
 
           <button
             type="submit"
-            className="inline-flex w-fit rounded-full bg-white px-6 py-3 text-sm font-medium text-slate-950 transition hover:bg-cyan-100"
+            className="museum-button-primary w-fit"
           >
             保存主页更改
           </button>

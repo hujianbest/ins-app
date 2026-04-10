@@ -14,14 +14,15 @@ type PageHeroProps = {
   actions?: PageHeroAction[];
   supporting?: ReactNode;
   aside?: ReactNode;
+  tone?: "immersive" | "utility";
 };
 
 function getActionClassName(variant: PageHeroAction["variant"] = "secondary") {
   if (variant === "primary") {
-    return "inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-medium text-slate-950 transition hover:bg-cyan-100";
+    return "museum-button-primary";
   }
 
-  return "inline-flex items-center justify-center rounded-full border border-white/10 px-5 py-3 text-sm font-medium text-white transition hover:border-cyan-200/60 hover:bg-white/5";
+  return "museum-button-secondary";
 }
 
 export function PageHero({
@@ -31,24 +32,29 @@ export function PageHero({
   actions = [],
   supporting,
   aside,
+  tone = "immersive",
 }: PageHeroProps) {
   return (
-    <section className="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] lg:items-end">
-      <div className="space-y-6">
-        <div className="space-y-4">
-          <p className="text-xs uppercase tracking-[0.4em] text-cyan-200/80">
+    <section
+      className={`grid gap-10 ${tone === "utility" ? "lg:grid-cols-[minmax(0,1fr)_minmax(300px,0.78fr)] lg:items-start" : "lg:grid-cols-[minmax(0,1.16fr)_minmax(320px,0.84fr)] lg:items-end"}`}
+    >
+      <div className="space-y-8">
+        <div className="space-y-5">
+          <p className="museum-label">
             {eyebrow}
           </p>
-          <h1 className="max-w-5xl text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
+          <h1
+            className={`font-display leading-none tracking-[-0.04em] text-[color:var(--accent-strong)] ${tone === "utility" ? "max-w-4xl text-5xl sm:text-6xl" : "max-w-5xl text-5xl sm:text-6xl lg:text-7xl"}`}
+          >
             {title}
           </h1>
-          <p className="max-w-3xl text-base leading-8 text-slate-300 sm:text-lg">
+          <p className="max-w-3xl text-base leading-8 text-[color:var(--muted-strong)] sm:text-lg">
             {description}
           </p>
         </div>
 
         {actions.length > 0 ? (
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 pt-1">
             {actions.map((action) => (
               <Link
                 key={`${action.href}:${action.label}`}
@@ -65,7 +71,9 @@ export function PageHero({
       </div>
 
       {aside ? (
-        <div className="rounded-[2rem] border border-white/10 bg-[rgba(14,18,28,0.68)] p-6 shadow-[0_28px_80px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+        <div
+          className={`museum-panel p-6 md:p-7 ${tone === "utility" ? "museum-panel--soft" : ""}`}
+        >
           {aside}
         </div>
       ) : null}

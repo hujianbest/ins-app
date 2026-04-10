@@ -26,18 +26,16 @@ export function AuthEntryGrid({
     submitMode === "login" ? loginAccountAction : registerAccountAction;
 
   return (
-    <main className="pb-24 text-white">
-      <section className="mx-auto flex w-full max-w-6xl flex-col justify-center gap-10 px-6 pt-14 sm:px-10 lg:px-14">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] lg:items-start">
+    <main className="museum-page">
+      <section className="museum-shell flex w-full flex-col justify-center gap-10 px-0 pt-16">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)] lg:items-start">
           <div className="space-y-6">
-            <div className="space-y-4">
-              <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">
-                {eyebrow}
-              </p>
-              <h1 className="max-w-4xl text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
+            <div className="space-y-5">
+              <p className="museum-label">{eyebrow}</p>
+              <h1 className="font-display max-w-4xl text-5xl leading-none tracking-[-0.04em] text-[color:var(--accent-strong)] sm:text-6xl lg:text-7xl">
                 {title}
               </h1>
-              <p className="max-w-3xl text-base leading-8 text-slate-300 sm:text-lg">
+              <p className="max-w-3xl text-base leading-8 text-[color:var(--muted-strong)] sm:text-lg">
                 {description}
               </p>
             </div>
@@ -46,12 +44,12 @@ export function AuthEntryGrid({
               {authRoles.map((roleOption) => (
                 <div
                   key={roleOption.role}
-                  className="rounded-[1.75rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5"
+                  className="museum-stat p-5"
                 >
-                  <p className="text-xs uppercase tracking-[0.3em] text-cyan-200/80">
+                  <p className="museum-label">
                     {roleOption.title}
                   </p>
-                  <p className="mt-4 text-sm leading-7 text-slate-300">
+                  <p className="mt-4 text-sm leading-7 text-[color:var(--muted-strong)]">
                     {roleOption.description}
                   </p>
                 </div>
@@ -60,7 +58,7 @@ export function AuthEntryGrid({
 
             <Link
               href={alternateHref}
-              className="inline-flex text-sm uppercase tracking-[0.28em] text-cyan-200 transition hover:text-white"
+              className="museum-button-quiet text-sm uppercase tracking-[0.28em]"
             >
               {alternateLabel}
             </Link>
@@ -68,57 +66,57 @@ export function AuthEntryGrid({
 
           <form
             action={action}
-            className="grid gap-6 rounded-[2rem] border border-white/10 bg-[rgba(14,18,28,0.74)] p-6 shadow-[0_28px_80px_rgba(0,0,0,0.28)] backdrop-blur-xl"
+            className="museum-panel grid gap-6 p-6 md:p-7"
           >
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.3em] text-white/45">
+              <p className="museum-label">
                 Account Access
               </p>
-              <p className="text-sm leading-7 text-slate-300">
+              <p className="text-sm leading-7 text-[color:var(--muted-strong)]">
                 使用真实邮箱和密码建立登录态，后续工作台、互动和合作线索都会绑定到你的当前账号。
               </p>
             </div>
 
             {statusMessage ? (
-              <div className="rounded-[1.4rem] border border-cyan-200/25 bg-cyan-200/8 px-4 py-3 text-sm leading-7 text-cyan-50">
+              <div className="rounded-[1.4rem] border border-[color:var(--surface-border-strong)] bg-[rgba(255,255,255,0.72)] px-4 py-3 text-sm leading-7 text-[color:var(--accent-strong)]">
                 {statusMessage}
               </div>
             ) : null}
 
             <label className="space-y-2">
-              <span className="text-xs uppercase tracking-[0.28em] text-white/45">
+              <span className="museum-label">
                 邮箱
               </span>
               <input
                 type="email"
                 name="email"
                 placeholder="creator@example.com"
-                className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-base text-white outline-none"
+                className="museum-field"
               />
             </label>
 
             <label className="space-y-2">
-              <span className="text-xs uppercase tracking-[0.28em] text-white/45">
+              <span className="museum-label">
                 密码
               </span>
               <input
                 type="password"
                 name="password"
                 placeholder="至少 8 位字符"
-                className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-base text-white outline-none"
+                className="museum-field"
               />
             </label>
 
             {submitMode === "register" ? (
               <fieldset className="space-y-3">
-                <legend className="text-xs uppercase tracking-[0.28em] text-white/45">
+                <legend className="museum-label">
                   主身份
                 </legend>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {authRoles.map((roleOption, index) => (
                     <label
                       key={roleOption.role}
-                      className="flex cursor-pointer flex-col gap-3 rounded-[1.4rem] border border-white/10 bg-black/20 p-4 text-sm text-slate-300"
+                      className="museum-stat flex cursor-pointer flex-col gap-3 p-4 text-sm text-[color:var(--muted-strong)]"
                     >
                       <div className="flex items-center gap-3">
                         <input
@@ -127,7 +125,7 @@ export function AuthEntryGrid({
                           value={roleOption.role}
                           defaultChecked={index === 0}
                         />
-                        <span className="text-base font-medium text-white">
+                        <span className="text-base font-medium text-[color:var(--accent-strong)]">
                           {roleOption.title}
                         </span>
                       </div>
@@ -140,7 +138,7 @@ export function AuthEntryGrid({
 
             <button
               type="submit"
-              className="inline-flex justify-center rounded-full bg-white px-6 py-3 text-sm font-medium text-slate-950 transition hover:bg-cyan-100"
+              className="museum-button-primary"
             >
               {submitMode === "login"
                 ? "登录进入工作台"

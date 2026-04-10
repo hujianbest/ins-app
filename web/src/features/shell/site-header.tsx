@@ -1,53 +1,93 @@
 import Link from "next/link";
 
-const primaryLinks = [
+export type SiteShellVariant = "public" | "auth" | "studio";
+
+const publicLinks = [
   { href: "/", label: "首页" },
   { href: "/discover", label: "发现" },
   { href: "/search", label: "搜索" },
   { href: "/opportunities", label: "合作" },
-  { href: "/studio", label: "工作台" },
 ];
 
-export function SiteHeader() {
+const studioLinks = [
+  { href: "/studio", label: "总览" },
+  { href: "/studio/profile", label: "主页" },
+  { href: "/studio/works", label: "作品" },
+  { href: "/studio/opportunities", label: "诉求" },
+  { href: "/inbox", label: "收件箱" },
+];
+
+type SiteHeaderProps = {
+  variant: SiteShellVariant;
+};
+
+function getHeaderCopy(variant: SiteShellVariant) {
+  if (variant === "studio") {
+    return {
+      eyebrow: "Creator Workspace",
+      links: studioLinks,
+      secondaryAction: { href: "/discover", label: "查看公开站点" },
+      primaryAction: { href: "/studio", label: "工作台首页" },
+    };
+  }
+
+  if (variant === "auth") {
+    return {
+      eyebrow: "Creator Access",
+      links: publicLinks,
+      secondaryAction: { href: "/discover", label: "继续浏览" },
+      primaryAction: { href: "/login", label: "登录" },
+    };
+  }
+
+  return {
+    eyebrow: "Photography Archive",
+    links: publicLinks,
+    secondaryAction: { href: "/login", label: "登录" },
+    primaryAction: { href: "/studio", label: "发布作品" },
+  };
+}
+
+export function SiteHeader({ variant }: SiteHeaderProps) {
+  const copy = getHeaderCopy(variant);
+
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-[rgba(6,10,18,0.78)] backdrop-blur-xl">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-6 px-6 py-4 sm:px-10 lg:px-14">
-        <div className="flex items-center gap-4">
-          <Link
-            href="/"
-            className="text-sm font-semibold uppercase tracking-[0.42em] text-white"
-          >
-            Lens Archive
+    <header className="shell-header">
+      <div className="shell-header__inner">
+        <div className="shell-header__brand">
+          <Link href="/" className="shell-header__mark">
+            LA
           </Link>
-          <span className="hidden rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.28em] text-white/55 md:inline-flex">
-            Hybrid Platform
-          </span>
+          <Link href="/" className="shell-header__title">
+            <span className="shell-header__eyebrow">{copy.eyebrow}</span>
+            <span className="shell-header__name">Lens Archive</span>
+          </Link>
         </div>
 
-        <nav className="hidden items-center gap-5 text-sm text-slate-300 md:flex">
-          {primaryLinks.map((link) => (
+        <nav className="shell-header__nav">
+          {copy.links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="transition hover:text-white"
+              className="shell-header__link"
             >
               {link.label}
             </Link>
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="shell-header__actions">
           <Link
-            href="/login"
-            className="inline-flex items-center rounded-full border border-white/10 px-4 py-2 text-sm text-slate-200 transition hover:border-cyan-200/60 hover:text-white"
+            href={copy.secondaryAction.href}
+            className="museum-button-secondary"
           >
-            登录
+            {copy.secondaryAction.label}
           </Link>
           <Link
-            href="/studio"
-            className="inline-flex items-center rounded-full bg-white px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-cyan-100"
+            href={copy.primaryAction.href}
+            className="museum-button-primary"
           >
-            发布作品
+            {copy.primaryAction.label}
           </Link>
         </div>
       </div>

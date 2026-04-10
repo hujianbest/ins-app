@@ -39,11 +39,14 @@ export default async function WorkDetailPage({
   const comments = await getWorkComments(work.id);
 
   return (
-    <main className="pb-24 text-white">
-      <section className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 pt-12 sm:px-10 lg:px-14">
-        <div className="flex flex-wrap items-center justify-between gap-4 text-sm uppercase tracking-[0.3em] text-white/60">
-          <p>{getRoleLabel(work.ownerRole)}作品</p>
-          <Link href={`/${work.ownerRole}s/${work.ownerSlug}`} className="transition hover:text-cyan-200">
+    <main className="museum-page">
+      <section className="museum-shell flex flex-col gap-10 pt-14">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <p className="museum-label">{getRoleLabel(work.ownerRole)}作品</p>
+          <Link
+            href={`/${work.ownerRole}s/${work.ownerSlug}`}
+            className="museum-button-quiet text-sm uppercase tracking-[0.3em]"
+          >
             返回主页
           </Link>
         </div>
@@ -51,51 +54,55 @@ export default async function WorkDetailPage({
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:items-start">
           <div className="space-y-6">
             <div className="space-y-3">
-              <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.32em] text-white/45">
-                <span className="text-cyan-200/80">{work.category}</span>
-                <span className="rounded-full border border-white/10 px-3 py-1 text-[11px]">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="museum-label">{work.category}</span>
+                <span className="museum-tag">
                   Work Detail
                 </span>
               </div>
-              <h1 className="max-w-4xl text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">{work.title}</h1>
-              <p className="max-w-3xl text-base leading-8 text-slate-300 sm:text-lg">{work.description}</p>
+              <h1 className="font-display max-w-4xl text-5xl leading-none tracking-[-0.04em] text-[color:var(--accent-strong)] sm:text-6xl lg:text-7xl">
+                {work.title}
+              </h1>
+              <p className="max-w-3xl text-base leading-8 text-[color:var(--muted-strong)] sm:text-lg">
+                {work.description}
+              </p>
             </div>
 
-            <div className="grid gap-4 text-sm text-slate-300 sm:grid-cols-3">
-              <div className="rounded-[1.6rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5">
-                <p className="text-xs uppercase tracking-[0.28em] text-white/45">作者</p>
-                <p className="mt-3 text-base text-white">{work.ownerName}</p>
+            <div className="grid gap-4 text-sm text-[color:var(--muted-strong)] sm:grid-cols-3">
+              <div className="museum-stat p-5">
+                <p className="museum-label">作者</p>
+                <p className="mt-3 text-base text-[color:var(--accent-strong)]">{work.ownerName}</p>
               </div>
-              <div className="rounded-[1.6rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5">
-                <p className="text-xs uppercase tracking-[0.28em] text-white/45">点赞</p>
+              <div className="museum-stat p-5">
+                <p className="museum-label">点赞</p>
                 {sessionRole ? (
                   <form action={toggleWorkLikeAction.bind(null, work.id, `/works/${work.id}`)}>
                     <button
                       type="submit"
-                      className="mt-3 inline-flex rounded-full border border-cyan-200/40 px-4 py-2 text-base text-cyan-200 transition hover:border-white/60 hover:text-white"
+                      className="museum-button-secondary mt-3"
                     >
                       {liked ? "已点赞" : "点赞这组作品"}
                     </button>
                   </form>
                 ) : (
-                  <Link href="/login" className="mt-3 inline-flex text-base text-cyan-200 transition hover:text-white">
+                  <Link href="/login" className="museum-button-quiet mt-3 text-base">
                     登录后点赞这组作品
                   </Link>
                 )}
               </div>
-              <div className="rounded-[1.6rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5">
-                <p className="text-xs uppercase tracking-[0.28em] text-white/45">合作联系</p>
+              <div className="museum-stat p-5">
+                <p className="museum-label">合作联系</p>
                 {sessionRole ? (
                   <form action={startContactThreadAction.bind(null, work.ownerRole, work.ownerSlug, "work", work.id)}>
                     <button
                       type="submit"
-                      className="mt-3 inline-flex rounded-full border border-cyan-200/40 px-4 py-2 text-base text-cyan-200 transition hover:border-white/60 hover:text-white"
+                      className="museum-button-primary mt-3"
                     >
                       发送关于这组作品的私信
                     </button>
                   </form>
                 ) : (
-                  <Link href="/login" className="mt-3 inline-flex text-base text-cyan-200 transition hover:text-white">
+                  <Link href="/login" className="museum-button-quiet mt-3 text-base">
                     {work.contactLabel}
                   </Link>
                 )}
@@ -103,23 +110,25 @@ export default async function WorkDetailPage({
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-[rgba(14,18,28,0.72)] p-6 shadow-[0_28px_80px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+          <div className="museum-panel p-6 md:p-7">
             <EditorialVisual
               assetRef={work.coverAsset}
               label="作品详情视觉"
               variant="portrait"
-              description="作品主体、作者关系、互动与合作入口都在同一页内完成承接。"
+              description="作品主体、作者关系、互动与合作入口在同一画面秩序内完成承接。"
               showSourceLabel
             />
           </div>
         </div>
 
-        <section className="rounded-[2rem] border border-white/10 bg-[rgba(14,18,28,0.7)] p-6">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/45">作品说明</p>
-          <p className="mt-4 max-w-4xl text-base leading-8 text-slate-300">{work.detailNote}</p>
+        <section className="museum-panel museum-panel--soft p-6 md:p-8">
+          <p className="museum-label">作品说明</p>
+          <p className="mt-4 max-w-4xl text-base leading-8 text-[color:var(--muted-strong)]">
+            {work.detailNote}
+          </p>
         </section>
 
-        <section className="rounded-[2rem] border border-white/10 bg-[rgba(14,18,28,0.7)] p-6">
+        <section className="museum-panel p-6 md:p-8">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <SectionHeading
               eyebrow="评论"
@@ -132,17 +141,17 @@ export default async function WorkDetailPage({
                   name="body"
                   rows={3}
                   placeholder="写下你对这组作品的看法"
-                  className="w-full rounded-[1.5rem] border border-white/10 bg-black/20 px-4 py-3 text-base leading-7 text-white outline-none"
+                  className="museum-textarea"
                 />
                 <button
                   type="submit"
-                  className="inline-flex w-fit rounded-full border border-cyan-200/40 px-4 py-2 text-base text-cyan-200 transition hover:border-white/60 hover:text-white"
+                  className="museum-button-primary w-fit"
                 >
                   发表评论
                 </button>
               </form>
             ) : (
-              <Link href="/login" className="inline-flex text-base text-cyan-200 transition hover:text-white">
+              <Link href="/login" className="museum-button-quiet text-base">
                 登录后发表评论
               </Link>
             )}
@@ -153,18 +162,18 @@ export default async function WorkDetailPage({
               comments.map((comment) => (
                 <article
                   key={comment.id}
-                  className="rounded-[1.5rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5"
+                  className="museum-stat p-5"
                 >
-                  <p className="text-xs uppercase tracking-[0.28em] text-white/45">
+                  <p className="museum-label">
                     {comment.authorLabel}
                   </p>
-                  <p className="mt-3 text-base leading-7 text-slate-200">
+                  <p className="mt-3 text-base leading-7 text-[color:var(--muted-strong)]">
                     {comment.body}
                   </p>
                 </article>
               ))
             ) : (
-              <p className="text-sm leading-7 text-slate-300">
+              <p className="text-sm leading-7 text-[color:var(--muted-strong)]">
                 还没有评论，成为第一个留言的人。
               </p>
             )}
