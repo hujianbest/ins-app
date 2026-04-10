@@ -35,8 +35,7 @@ export function HomeDiscoverySection({ section }: HomeDiscoverySectionProps) {
               <EditorialVisual
                 assetRef={item.assetRef}
                 label={item.badge}
-                aspectClassName="aspect-[16/10]"
-                className="rounded-[1.25rem]"
+                variant="landscape"
               />
               <h3 className="mt-4 text-xl font-medium text-white transition group-hover:text-cyan-100">
                 {item.title}

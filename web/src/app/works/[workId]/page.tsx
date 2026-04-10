@@ -107,7 +107,7 @@ export default async function WorkDetailPage({
             <EditorialVisual
               assetRef={work.coverAsset}
               label="作品详情视觉"
-              aspectClassName="aspect-[4/5]"
+              variant="portrait"
               description="作品主体、作者关系、互动与合作入口都在同一页内完成承接。"
               showSourceLabel
             />

@@ -1,13 +1,56 @@
 import Image from "next/image";
+import type { CSSProperties } from "react";
 
 import { resolveSeedVisualAsset } from "@/features/showcase/sample-data";
+
+const visualShellStyleByVariant: Record<
+  "landscape" | "card" | "portrait",
+  CSSProperties
+> = {
+  landscape: {
+    aspectRatio: "16 / 10",
+    borderRadius: "1.25rem",
+  },
+  card: {
+    aspectRatio: "4 / 3",
+    borderRadius: "1.25rem",
+  },
+  portrait: {
+    aspectRatio: "4 / 5",
+    borderRadius: "1.5rem",
+  },
+};
+
+const visualShellBaseStyle: CSSProperties = {
+  position: "relative",
+  overflow: "hidden",
+  pointerEvents: "none",
+  border: "1px solid rgba(255, 255, 255, 0.1)",
+  background:
+    "radial-gradient(circle at top, rgba(143, 227, 255, 0.24), transparent 35%), linear-gradient(180deg, rgba(255,255,255,0.04), rgba(2,6,23,0.92))",
+};
+
+const overlayStyle: CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  pointerEvents: "none",
+  background:
+    "linear-gradient(to top, rgba(2,6,23,0.82), rgba(2,6,23,0.2), transparent)",
+};
+
+const contentStyle: CSSProperties = {
+  position: "relative",
+  display: "flex",
+  height: "100%",
+  alignItems: "flex-end",
+  padding: "1.5rem",
+  pointerEvents: "none",
+} as const;
 
 type EditorialVisualProps = {
   assetRef?: string;
   label: string;
-  aspectClassName: string;
-  className?: string;
-  imageClassName?: string;
+  variant: keyof typeof visualShellStyleByVariant;
   description?: string;
   showSourceLabel?: boolean;
 };
@@ -15,9 +58,7 @@ type EditorialVisualProps = {
 export function EditorialVisual({
   assetRef,
   label,
-  aspectClassName,
-  className = "",
-  imageClassName = "",
+  variant,
   description,
   showSourceLabel = false,
 }: EditorialVisualProps) {
@@ -25,7 +66,10 @@ export function EditorialVisual({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(143,227,255,0.24),transparent_35%),linear-gradient(180deg,rgba(255,255,255,0.04),rgba(2,6,23,0.92))] ${aspectClassName} ${className}`.trim()}
+      style={{
+        ...visualShellBaseStyle,
+        ...visualShellStyleByVariant[variant],
+      }}
     >
       {asset ? (
         <Image
@@ -33,11 +77,14 @@ export function EditorialVisual({
           alt={asset.alt}
           fill
           sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
-          className={`absolute inset-0 h-full w-full object-cover ${imageClassName}`.trim()}
+          style={{
+            objectFit: "cover",
+            pointerEvents: "none",
+          }}
         />
       ) : null}
-      <div className="absolute inset-0 bg-gradient-to-t from-[rgba(2,6,23,0.82)] via-[rgba(2,6,23,0.2)] to-transparent" />
-      <div className="relative flex h-full items-end p-4 sm:p-6">
+      <div style={overlayStyle} />
+      <div style={contentStyle}>
         <div className="space-y-2">
           <p className="text-[11px] uppercase tracking-[0.3em] text-cyan-100/85">
             {label}

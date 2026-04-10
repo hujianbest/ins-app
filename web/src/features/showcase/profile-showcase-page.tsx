@@ -88,7 +88,7 @@ export function ProfileShowcasePage({ profile, isSignedIn, isFollowing, returnPa
             <EditorialVisual
               assetRef={profile.heroAsset}
               label={profile.heroImageLabel}
-              aspectClassName="aspect-[4/5]"
+              variant="portrait"
               description="用更成熟的公开信息层级承接作品展示、关注关系和合作线索。"
               showSourceLabel
             />
@@ -118,8 +118,7 @@ export function ProfileShowcasePage({ profile, isSignedIn, isFollowing, returnPa
                   <EditorialVisual
                     assetRef={item.coverAsset}
                     label={item.subtitle}
-                    aspectClassName="aspect-[4/3]"
-                    className="rounded-[1.25rem]"
+                    variant="card"
                   />
                   <h2 className="mt-3 text-2xl font-medium text-white">{item.title}</h2>
                   <p className="mt-3 text-sm leading-7 text-slate-300">{item.description}</p>

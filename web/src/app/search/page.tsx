@@ -109,8 +109,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                           <EditorialVisual
                             assetRef={item.assetRef}
                             label={item.badge}
-                            aspectClassName="aspect-[16/10]"
-                            className="rounded-[1.25rem]"
+                            variant="landscape"
                           />
                           <h2 className="mt-4 text-xl font-medium text-white transition group-hover:text-cyan-100">
                             {item.title}
