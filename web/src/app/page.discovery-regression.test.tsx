@@ -92,7 +92,12 @@ test.each([
     const page = await Home();
     render(page);
 
-    expect(screen.getByRole("heading", { level: 1, name: /摄影社区发现首页/i })).toBeDefined();
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: /以作品、创作者与合作灵感重构 Lens Archive 的首页主线/i,
+      })
+    ).toBeDefined();
     expect(screen.getByText(emptyStateCopy)).toBeDefined();
 
     if (emptyKind !== "featured") {

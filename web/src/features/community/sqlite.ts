@@ -1,6 +1,8 @@
 import { existsSync, mkdirSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
-import { dirname, join } from "node:path";
+import { dirname } from "node:path";
+
+import { getAppConfig } from "@/config/env";
 
 import { homeDiscoveryFeaturedSlots } from "@/features/home-discovery/config";
 import {
@@ -46,16 +48,14 @@ type CreateReadonlySqliteCommunityRepositoryBundleOptions = {
   timeoutMs?: number;
 };
 
+type GetDefaultSqliteCommunityRepositoryBundleOptions = {
+  databasePath?: string;
+};
+
 export type SqliteCommunityRepositoryBundle = CommunityRepositoryBundle & {
   databasePath: string;
   close(): void;
 };
-
-const defaultSqliteDatabasePath = join(
-  process.cwd(),
-  ".data",
-  "community.sqlite",
-);
 
 let defaultBundle: SqliteCommunityRepositoryBundle | null = null;
 
@@ -293,7 +293,7 @@ function createSchema(database: DatabaseSync) {
 }
 
 function resolveSqliteDatabasePath(databasePath?: string) {
-  return databasePath ?? defaultSqliteDatabasePath;
+  return databasePath ?? getAppConfig().sqliteDatabasePath;
 }
 
 function createRepositoryBundleFromDatabase(
@@ -829,20 +829,32 @@ export function createReadonlySqliteCommunityRepositoryBundle(
     timeout: options.timeoutMs ?? 1000,
   });
 
+  if (databasePath === ":memory:") {
+    createSchema(database);
+  }
+
   return createRepositoryBundleFromDatabase(database, databasePath);
 }
 
-export function getDefaultSqliteCommunityRepositoryBundle() {
-  if (defaultBundle) {
+export function getDefaultSqliteCommunityRepositoryBundle(
+  options: GetDefaultSqliteCommunityRepositoryBundleOptions = {},
+) {
+  const databasePath = resolveSqliteDatabasePath(options.databasePath);
+
+  if (defaultBundle && defaultBundle.databasePath === databasePath) {
     return defaultBundle;
   }
 
-  if (!existsSync(defaultSqliteDatabasePath)) {
-    ensureSqliteDatabaseDirectory(defaultSqliteDatabasePath);
+  if (defaultBundle) {
+    defaultBundle.close();
+  }
+
+  if (!existsSync(databasePath)) {
+    ensureSqliteDatabaseDirectory(databasePath);
   }
 
   defaultBundle = createSqliteCommunityRepositoryBundle({
-    databasePath: defaultSqliteDatabasePath,
+    databasePath,
   });
 
   return defaultBundle;

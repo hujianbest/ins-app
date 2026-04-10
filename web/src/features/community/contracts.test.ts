@@ -47,12 +47,13 @@ test("createShowcaseSeedSnapshot derives stable creator ids and a minimal work c
     title: "霓虹人像研究",
     category: "编辑人像",
     description:
-      "一组以青色高光与浓重阴影平衡的低调人像，用来建立强烈的合作第一印象。",
-    detailNote: "这组作品适合用于艺术指导沟通，重点体现强控光能力与一眼可见的视觉自信。",
+      "以夜色城市光源、镜面反射和强轮廓对比建立情绪强烈的编辑人像，用来充当首页与公开主页的首发主视觉。",
+    detailNote:
+      "这组作品把合作方最关心的三件事放在同一页里说明白：控光、色彩判断和在复杂城市环境中的人物调度能力。",
     publishedAt: "2026-04-05T09:00:00Z",
     updatedAt: "2026-04-05T18:00:00Z",
   });
-  expect(neonWork?.coverAsset).toBe("work:neon-portrait-study:cover");
+  expect(neonWork?.coverAsset).toBe("seed:avery-hero");
 });
 
 test("getPublicWorkRecords excludes draft works from public reads", () => {

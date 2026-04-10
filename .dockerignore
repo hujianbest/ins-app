@@ -1,0 +1,11 @@
+.git
+.cursor
+docs
+RELEASE_NOTES.md
+task-progress.md
+web/node_modules
+web/.next
+web/coverage
+web/.data
+web/.browser-session
+web/*.log

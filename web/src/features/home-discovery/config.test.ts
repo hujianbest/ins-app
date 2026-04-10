@@ -7,6 +7,7 @@ import {
   homeDiscoveryFeaturedSlots,
   homeSurfaceSectionOrder,
   profileDiscoverySlotConfig,
+  worksDiscoverySlotConfig,
 } from "./config";
 
 test("home discovery config exposes separate section orders for home and discover surfaces", () => {
@@ -25,6 +26,14 @@ test("profile discovery config requires role and slug for featured profiles", ()
     role: "model",
     slug: "sample-model",
   });
+});
+
+test("work discovery config keeps the richer seed curation order stable", () => {
+  expect(worksDiscoverySlotConfig.featuredIds).toEqual([
+    "neon-portrait-study",
+    "soft-light-editorial",
+    "monochrome-street-session",
+  ]);
 });
 
 test("homepage discovery sample data exposes a stable published time key", () => {

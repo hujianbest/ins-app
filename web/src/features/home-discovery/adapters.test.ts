@@ -23,6 +23,7 @@ test("work adapter maps a public work into a homepage discovery card", () => {
     title: works[0].title,
     description: works[0].description,
   });
+  expect(card.assetRef).toBe(works[0].coverAsset);
 });
 
 test("profile adapter maps photographer and model profiles to distinct public routes", () => {
@@ -35,6 +36,8 @@ test("profile adapter maps photographer and model profiles to distinct public ro
   expect(modelCard.title).toBe(modelProfiles[0].name);
   expect(photographerCard.badge).toBe("摄影师");
   expect(modelCard.badge).toBe("模特");
+  expect(photographerCard.assetRef).toBe(photographerProfiles[0].heroAsset);
+  expect(modelCard.assetRef).toBe(modelProfiles[0].heroAsset);
 });
 
 test("opportunity adapter maps a public opportunity into a detail-first discovery card", () => {
@@ -46,4 +49,5 @@ test("opportunity adapter maps a public opportunity into a detail-first discover
     title: opportunityPosts[0].title,
     description: opportunityPosts[0].summary,
   });
+  expect(card.assetRef).toBe(opportunityPosts[0].coverAsset);
 });

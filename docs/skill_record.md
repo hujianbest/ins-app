@@ -2407,4 +2407,15 @@
 - **偏差/缺口：** 当前 `coverAsset` 仍只是稳定引用字符串，不接上传系统；这与任务边界一致。排序对齐与数据库层 owner 纵深约束留作后续增强。
 - **建议：** test-driven-dev skill 可补一个“当作品状态机存在 `draft/published/revert` 三态且页面按钮语义也会影响实现判断时，如何组织 RED -> GREEN -> reviewer 回流修复”的示例。
 
+### 2026-04-09 — 执行综合摄影平台重发布增量重定
+
+- **技能：** `d:\workspace\ins-app\.cursor\skills\ahe\ahe-increment\SKILL.md`
+- **触发原因：** 用户明确指出当前网站虽已具备社区 MVP 功能，但距离“可云端部署的正式网站”和成熟界面目标仍有明显差距，需要把主线从轻量 MVP 升级为阶段化上线的综合平台。
+- **执行摘要：**
+  - 固定当前基线：`task-progress.md` 仍指向 2026-04-08 的摄影社区轻量 MVP 规格、设计与任务计划，当前状态为“全部任务完成”，已不再匹配新的发布目标。
+  - 形成结构化变更包：新增 Docker 部署、环境变量契约、真实账号 / 会话、安全种子内容、成熟暗色杂志风壳层、基础搜索与合作线索入口；修改当前产品定位、运行时和验收标准；弃用把 demo 登录、本地默认 SQLite 和 MVP 页面表达当作当前主线交付基线的假设。
+  - 写回 `docs/reviews/increment-hybrid-platform-relaunch.md`、`docs/specs/2026-04-09-hybrid-platform-relaunch-srs.md`、`docs/designs/2026-04-09-hybrid-platform-relaunch-design.md`、`docs/tasks/2026-04-09-hybrid-platform-relaunch-tasks.md` 与 `task-progress.md`，将当前主线切换到 `Hybrid Platform Relaunch`，并把唯一活跃任务锁定为 `T33`。
+- **偏差/缺口：** 本次 increment 直接吸收了用户已确认的 relaunch 计划，没有再额外派发 spec/design/tasks review；后续若需要恢复更严格的 formal review 链，应以新版工件重新派发。
+- **建议：** increment skill 可补一个“当用户直接以实施指令确认新版产品计划时，如何在不重走完整前置 workflow 的情况下，仍然把变更包、失效项和新任务基线写清楚”的示例。
+
 <!-- 新记录请追加在「历史记录」章节上方紧接本注释之上，或按时间倒序追加在章节最前 -->

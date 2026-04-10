@@ -1,6 +1,6 @@
 import { type AuthRole } from "@/features/auth/types";
 
-import { getDefaultSqliteCommunityRepositoryBundle } from "./sqlite";
+import { getDefaultCommunityRepositoryBundle } from "./runtime";
 import type {
   CommunityRepositoryBundle,
   CreatorProfileRecord,
@@ -43,7 +43,7 @@ async function resolveEditableProfileForRole(
 
 export async function getStudioProfileEditorModel(
   role: AuthRole,
-  bundle: CommunityRepositoryBundle = getDefaultSqliteCommunityRepositoryBundle(),
+  bundle: CommunityRepositoryBundle = getDefaultCommunityRepositoryBundle(),
 ): Promise<StudioProfileEditorModel> {
   const profile = await resolveEditableProfileForRole(role, bundle);
 
@@ -61,7 +61,7 @@ export async function getStudioProfileEditorModel(
 export async function saveCreatorProfileForRole(
   role: AuthRole,
   input: StudioProfileEditorInput,
-  bundle: CommunityRepositoryBundle = getDefaultSqliteCommunityRepositoryBundle(),
+  bundle: CommunityRepositoryBundle = getDefaultCommunityRepositoryBundle(),
 ) {
   const targetProfile = await resolveEditableProfileForRole(role, bundle);
   const normalizedInput = normalizeStudioProfileInput(input);

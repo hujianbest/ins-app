@@ -1,5 +1,5 @@
 import type { CommunityRole } from "@/features/community/types";
-import { getDefaultSqliteCommunityRepositoryBundle } from "@/features/community/sqlite";
+import { getDefaultCommunityRepositoryBundle } from "@/features/community/runtime";
 import type { CommunityRepositoryBundle } from "@/features/community/types";
 
 type ToggleProfileFollowResult = {
@@ -25,7 +25,7 @@ export async function isProfileFollowedByViewer(
   accountId: string | null,
   role: CommunityRole,
   slug: string,
-  bundle: CommunityRepositoryBundle = getDefaultSqliteCommunityRepositoryBundle(),
+  bundle: CommunityRepositoryBundle = getDefaultCommunityRepositoryBundle(),
 ) {
   if (!accountId) {
     return false;
@@ -40,7 +40,7 @@ export async function toggleProfileFollowForViewer(
   accountId: string,
   role: CommunityRole,
   slug: string,
-  bundle: CommunityRepositoryBundle = getDefaultSqliteCommunityRepositoryBundle(),
+  bundle: CommunityRepositoryBundle = getDefaultCommunityRepositoryBundle(),
 ): Promise<ToggleProfileFollowResult> {
   const profile = await resolveTargetProfile(role, slug, bundle);
   const currentlyFollowing = await bundle.follows.isFollowing(accountId, profile.id);

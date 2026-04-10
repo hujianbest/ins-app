@@ -42,6 +42,7 @@ export type HomeDiscoveryCard = {
   title: string;
   description: string;
   meta?: string;
+  assetRef?: string;
 };
 
 export type HomeDiscoverySection = {

@@ -47,10 +47,10 @@ test("home page prioritizes community discovery entry points instead of the old 
   expect(
     screen.getByRole("heading", {
       level: 1,
-      name: /摄影社区发现首页/i,
+      name: /以作品、创作者与合作灵感重构 Lens Archive 的首页主线/i,
     })
   ).toBeDefined();
-  expect(screen.getByRole("link", { name: /进入社区发现/i }).getAttribute("href")).toBe(
+  expect(screen.getByRole("link", { name: /进入发现流/i }).getAttribute("href")).toBe(
     "/discover"
   );
   expect(
@@ -60,7 +60,8 @@ test("home page prioritizes community discovery entry points instead of the old 
   );
   expect(screen.getByRole("heading", { level: 2, name: /精选推荐/ })).toBeDefined();
   expect(screen.getByRole("heading", { level: 2, name: /最新发布/ })).toBeDefined();
-  expect(screen.getByText(/次级合作入口/)).toBeDefined();
+  expect(screen.getAllByText(/合作入口/).length).toBeGreaterThan(0);
+  expect(screen.getByText(/首发种子视觉使用 Pexels 授权图片/i)).toBeDefined();
   expect(screen.queryByText(/作品展示与约拍平台/)).toBeNull();
   expect(screen.queryByRole("heading", { level: 2, name: /精选诉求/ })).toBeNull();
 });

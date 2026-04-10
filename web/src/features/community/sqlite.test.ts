@@ -28,7 +28,7 @@ test("default sqlite seed bridges showcase and home discovery data into stable r
   await expect(bundle.works.listPublicWorks()).resolves.toHaveLength(works.length);
 
   await expect(bundle.curation.listSlotsBySurface("home")).resolves.toHaveLength(
-    6,
+    7,
   );
   expect(discoverSlots).toEqual(
     expect.arrayContaining([

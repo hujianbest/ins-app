@@ -9,6 +9,8 @@ import {
 import { startContactThreadAction } from "@/features/contact/actions";
 import { toggleWorkLikeAction } from "@/features/engagement/actions";
 import { isWorkLiked } from "@/features/engagement/state";
+import { EditorialVisual } from "@/features/shell/editorial-visual";
+import { SectionHeading } from "@/features/shell/section-heading";
 import { addWorkCommentAction } from "@/features/social/comment-actions";
 import { getWorkComments } from "@/features/social/comments";
 
@@ -37,8 +39,8 @@ export default async function WorkDetailPage({
   const comments = await getWorkComments(work.id);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(103,232,249,0.14),_transparent_20%),linear-gradient(180deg,_#050816_0%,_#0f172a_56%,_#111827_100%)] text-white">
-      <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-6 py-10 sm:px-10 lg:px-14">
+    <main className="pb-24 text-white">
+      <section className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 pt-12 sm:px-10 lg:px-14">
         <div className="flex flex-wrap items-center justify-between gap-4 text-sm uppercase tracking-[0.3em] text-white/60">
           <p>{getRoleLabel(work.ownerRole)}作品</p>
           <Link href={`/${work.ownerRole}s/${work.ownerSlug}`} className="transition hover:text-cyan-200">
@@ -49,18 +51,23 @@ export default async function WorkDetailPage({
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:items-start">
           <div className="space-y-6">
             <div className="space-y-3">
-              <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">{work.category}</p>
-              <h1 className="max-w-4xl text-5xl font-semibold tracking-tight sm:text-6xl">{work.title}</h1>
-              <p className="max-w-3xl text-lg leading-8 text-slate-300">{work.description}</p>
+              <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.32em] text-white/45">
+                <span className="text-cyan-200/80">{work.category}</span>
+                <span className="rounded-full border border-white/10 px-3 py-1 text-[11px]">
+                  Work Detail
+                </span>
+              </div>
+              <h1 className="max-w-4xl text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">{work.title}</h1>
+              <p className="max-w-3xl text-base leading-8 text-slate-300 sm:text-lg">{work.description}</p>
             </div>
 
-            <div className="grid gap-4 text-sm text-slate-300 sm:grid-cols-2">
-              <div className="rounded-3xl border border-white/10 bg-white/6 p-5 backdrop-blur">
-                <p className="text-xs uppercase tracking-[0.28em] text-white/50">主页</p>
+            <div className="grid gap-4 text-sm text-slate-300 sm:grid-cols-3">
+              <div className="rounded-[1.6rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5">
+                <p className="text-xs uppercase tracking-[0.28em] text-white/45">作者</p>
                 <p className="mt-3 text-base text-white">{work.ownerName}</p>
               </div>
-              <div className="rounded-3xl border border-white/10 bg-white/6 p-5 backdrop-blur">
-                <p className="text-xs uppercase tracking-[0.28em] text-white/50">点赞</p>
+              <div className="rounded-[1.6rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5">
+                <p className="text-xs uppercase tracking-[0.28em] text-white/45">点赞</p>
                 {sessionRole ? (
                   <form action={toggleWorkLikeAction.bind(null, work.id, `/works/${work.id}`)}>
                     <button
@@ -76,8 +83,8 @@ export default async function WorkDetailPage({
                   </Link>
                 )}
               </div>
-              <div className="rounded-3xl border border-white/10 bg-white/6 p-5 backdrop-blur">
-                <p className="text-xs uppercase tracking-[0.28em] text-white/50">私信联系</p>
+              <div className="rounded-[1.6rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5">
+                <p className="text-xs uppercase tracking-[0.28em] text-white/45">合作联系</p>
                 {sessionRole ? (
                   <form action={startContactThreadAction.bind(null, work.ownerRole, work.ownerSlug, "work", work.id)}>
                     <button
@@ -96,26 +103,29 @@ export default async function WorkDetailPage({
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
-            <div className="flex aspect-[4/5] items-end rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,_rgba(103,232,249,0.12),_rgba(15,23,42,0.92))] p-6">
-              <p className="text-sm uppercase tracking-[0.35em] text-cyan-100/80">作品详情视觉</p>
-            </div>
+          <div className="rounded-[2rem] border border-white/10 bg-[rgba(14,18,28,0.72)] p-6 shadow-[0_28px_80px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+            <EditorialVisual
+              assetRef={work.coverAsset}
+              label="作品详情视觉"
+              aspectClassName="aspect-[4/5]"
+              description="作品主体、作者关系、互动与合作入口都在同一页内完成承接。"
+              showSourceLabel
+            />
           </div>
         </div>
 
-        <section className="rounded-[2rem] border border-white/10 bg-black/20 p-6">
-          <p className="text-xs uppercase tracking-[0.3em] text-white/50">作品说明</p>
+        <section className="rounded-[2rem] border border-white/10 bg-[rgba(14,18,28,0.7)] p-6">
+          <p className="text-xs uppercase tracking-[0.3em] text-white/45">作品说明</p>
           <p className="mt-4 max-w-4xl text-base leading-8 text-slate-300">{work.detailNote}</p>
         </section>
 
-        <section className="rounded-[2rem] border border-white/10 bg-black/20 p-6">
+        <section className="rounded-[2rem] border border-white/10 bg-[rgba(14,18,28,0.7)] p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-white/50">评论</p>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
-                已登录成员可发布 1..500 字纯文本评论，列表按最新优先展示。
-              </p>
-            </div>
+            <SectionHeading
+              eyebrow="评论"
+              title="围绕作品留下反馈与交流"
+              description="已登录成员可发布 1..500 字纯文本评论，列表按最新优先展示。"
+            />
             {sessionRole ? (
               <form action={addWorkCommentAction.bind(null, work.id, `/works/${work.id}`)} className="flex w-full max-w-xl flex-col gap-3">
                 <textarea
@@ -143,9 +153,9 @@ export default async function WorkDetailPage({
               comments.map((comment) => (
                 <article
                   key={comment.id}
-                  className="rounded-[1.5rem] border border-white/10 bg-white/6 p-5"
+                  className="rounded-[1.5rem] border border-white/10 bg-[rgba(255,255,255,0.04)] p-5"
                 >
-                  <p className="text-xs uppercase tracking-[0.28em] text-white/50">
+                  <p className="text-xs uppercase tracking-[0.28em] text-white/45">
                     {comment.authorLabel}
                   </p>
                   <p className="mt-3 text-base leading-7 text-slate-200">

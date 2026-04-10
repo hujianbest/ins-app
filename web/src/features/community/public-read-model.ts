@@ -1,7 +1,6 @@
 import {
-  createReadonlySqliteCommunityRepositoryBundle,
-  type SqliteCommunityRepositoryBundle,
-} from "./sqlite";
+  createReadonlyCommunityRepositoryBundle,
+} from "./runtime";
 
 import type { CommunityRepositoryBundle, CommunityRole, CommunityWorkRecord, CreatorProfileRecord } from "./types";
 import type { PublicProfile, PublicWork, ProfileShowcaseItem } from "@/features/showcase/types";
@@ -44,6 +43,7 @@ function toProfileShowcaseItem(work: CommunityWorkRecord): ProfileShowcaseItem {
     title: work.title,
     subtitle: work.category,
     description: work.description,
+    coverAsset: work.coverAsset,
   };
 }
 
@@ -66,6 +66,7 @@ function toPublicProfile(
     sectionTitle: roleCopy.sectionTitle,
     sectionDescription: roleCopy.sectionDescription,
     heroImageLabel: roleCopy.heroImageLabel,
+    heroAsset: works.find(isPublishedWork)?.coverAsset,
     showcaseItems: works.filter(isPublishedWork).map(toProfileShowcaseItem),
   };
 }
@@ -83,12 +84,13 @@ function toPublicWork(work: CommunityWorkRecord): PublicWork {
     description: work.description,
     detailNote: work.detailNote,
     contactLabel: publicWorkContactLabel[work.ownerRole],
+    coverAsset: work.coverAsset,
   };
 }
 
 function resolveActiveBundle(bundle?: CommunityRepositoryBundle): {
   activeBundle: CommunityRepositoryBundle;
-  ownedBundle: SqliteCommunityRepositoryBundle | null;
+  ownedBundle: { close(): void } | null;
 } {
   if (bundle) {
     return {
@@ -97,7 +99,7 @@ function resolveActiveBundle(bundle?: CommunityRepositoryBundle): {
     };
   }
 
-  const ownedBundle = createReadonlySqliteCommunityRepositoryBundle();
+  const ownedBundle = createReadonlyCommunityRepositoryBundle();
 
   return {
     activeBundle: ownedBundle,

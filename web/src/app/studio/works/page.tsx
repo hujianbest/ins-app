@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { getRequestAccessControl } from "@/features/auth/access-control";
 import { saveStudioWorkAction } from "@/features/community/work-actions";
 import { getStudioWorksEditorModel } from "@/features/community/work-editor";
+import { PageHero } from "@/features/shell/page-hero";
 
 export default async function StudioWorksPage() {
   const accessControl = await getRequestAccessControl();
@@ -17,26 +17,18 @@ export default async function StudioWorksPage() {
   const managedWorks = await getStudioWorksEditorModel(session.primaryRole);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(103,232,249,0.18),_transparent_24%),linear-gradient(180deg,_#050816_0%,_#0f172a_56%,_#111827_100%)] text-white">
-      <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-6 py-10 sm:px-10 lg:px-14">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="space-y-3">
-            <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">工作台作品</p>
-            <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl">管理作品</h1>
-            <p className="max-w-3xl text-lg leading-8 text-slate-300">
-              查看当前挂载在公开主页上的作品，并为展示区准备下一批新增内容。
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/studio" className="text-sm uppercase tracking-[0.28em] text-cyan-200 transition hover:text-white">
-              返回工作台
-            </Link>
-          </div>
-        </div>
+    <main className="pb-24 text-white">
+      <section className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 pt-12 sm:px-10 lg:px-14">
+        <PageHero
+          eyebrow="Studio Works"
+          title="管理作品"
+          description="查看当前挂载在公开主页上的作品，并为展示区准备下一批新增内容。"
+          actions={[{ href: "/studio", label: "返回工作台" }]}
+        />
 
         <form
           action={saveStudioWorkAction}
-          className="grid gap-4 rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur"
+          className="grid gap-4 rounded-[1.75rem] border border-white/10 bg-[rgba(14,18,28,0.72)] p-6 shadow-[0_28px_80px_rgba(0,0,0,0.26)] backdrop-blur-xl"
         >
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-[0.28em] text-cyan-200/80">新作品</p>
@@ -95,7 +87,7 @@ export default async function StudioWorksPage() {
             <form
               key={work.id}
               action={saveStudioWorkAction}
-              className="grid gap-4 rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur md:grid-cols-[minmax(0,1fr)_auto]"
+              className="grid gap-4 rounded-[1.75rem] border border-white/10 bg-[rgba(14,18,28,0.72)] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.18)] backdrop-blur-xl md:grid-cols-[minmax(0,1fr)_auto]"
             >
               <input type="hidden" name="workId" value={work.id} />
               <div>

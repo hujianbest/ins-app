@@ -1,6 +1,6 @@
 import { type AuthRole } from "@/features/auth/types";
 
-import { getDefaultSqliteCommunityRepositoryBundle } from "./sqlite";
+import { getDefaultCommunityRepositoryBundle } from "./runtime";
 import type { CommunityRepositoryBundle, CommunityWorkRecord } from "./types";
 
 export type StudioManagedWork = Pick<
@@ -127,7 +127,7 @@ function resolveNextVisibility(
 
 export async function getStudioWorksEditorModel(
   role: AuthRole,
-  bundle: CommunityRepositoryBundle = getDefaultSqliteCommunityRepositoryBundle(),
+  bundle: CommunityRepositoryBundle = getDefaultCommunityRepositoryBundle(),
 ): Promise<StudioManagedWork[]> {
   const profile = await resolveEditableProfileForRole(role, bundle);
   const works = await bundle.works.listByOwnerProfileId(profile.id);
@@ -138,7 +138,7 @@ export async function getStudioWorksEditorModel(
 export async function saveCreatorWorkForRole(
   role: AuthRole,
   input: StudioWorkEditorInput,
-  bundle: CommunityRepositoryBundle = getDefaultSqliteCommunityRepositoryBundle(),
+  bundle: CommunityRepositoryBundle = getDefaultCommunityRepositoryBundle(),
 ) {
   const profile = await resolveEditableProfileForRole(role, bundle);
   const normalizedInput = normalizeStudioWorkInput(input);

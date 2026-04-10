@@ -5,6 +5,17 @@ export type FeaturedPath = {
   description: string;
 };
 
+export type SeedAssetRef = string;
+
+export type SeedVisualAsset = {
+  id: SeedAssetRef;
+  imageUrl: string;
+  alt: string;
+  sourceName: string;
+  sourceUrl: string;
+  licenseLabel: string;
+};
+
 export type HomeHeroContent = {
   label: string;
   title: string;
@@ -29,6 +40,7 @@ export type ProfileShowcaseItem = {
   title: string;
   subtitle: string;
   description: string;
+  coverAsset?: SeedAssetRef;
 };
 
 export type PublicProfile = {
@@ -44,6 +56,7 @@ export type PublicProfile = {
   sectionTitle: string;
   sectionDescription: string;
   heroImageLabel: string;
+  heroAsset?: SeedAssetRef;
   showcaseItems: ProfileShowcaseItem[];
 };
 
@@ -59,6 +72,7 @@ export type PublicWork = {
   description: string;
   detailNote: string;
   contactLabel: string;
+  coverAsset?: SeedAssetRef;
 };
 
 export type PublicOpportunityPost = {
@@ -73,4 +87,5 @@ export type PublicOpportunityPost = {
   schedule: string;
   summary: string;
   contactLabel: string;
+  coverAsset?: SeedAssetRef;
 };

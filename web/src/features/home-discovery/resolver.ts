@@ -1,9 +1,10 @@
-import { getDefaultSqliteCommunityRepositoryBundle } from "@/features/community/sqlite";
+import { getDefaultCommunityRepositoryBundle } from "@/features/community/runtime";
 import type {
   CommunityRepositoryBundle,
   CommunityWorkRecord,
   CreatorProfileRecord,
 } from "@/features/community/types";
+import { getProfileHeroAssetRef } from "@/features/showcase/sample-data";
 
 import type {
   HomeDiscoveryCard,
@@ -61,6 +62,7 @@ function adaptProfileRecordToHomeDiscoveryCard(
     title: profile.name,
     description: profile.tagline,
     meta: profile.city,
+    assetRef: getProfileHeroAssetRef(profile.role, profile.slug),
   };
 }
 
@@ -76,6 +78,7 @@ function adaptWorkRecordToHomeDiscoveryCard(
     meta: `${work.ownerName} · ${
       work.ownerRole === "photographer" ? "摄影师" : "模特"
     }`,
+    assetRef: work.coverAsset,
   };
 }
 
@@ -187,7 +190,7 @@ function getSectionOrder(surface: HomeDiscoverySurface) {
 export async function resolveHomeDiscoverySections({
   surface,
   accountId = null,
-  bundle = getDefaultSqliteCommunityRepositoryBundle(),
+  bundle = getDefaultCommunityRepositoryBundle(),
 }: ResolveHomeDiscoverySectionsOptions): Promise<HomeDiscoverySection[]> {
   const [profiles, works] = await Promise.all([
     bundle.profiles.listPublicProfiles(),

@@ -1,4 +1,4 @@
-import { getDefaultSqliteCommunityRepositoryBundle } from "@/features/community/sqlite";
+import { getDefaultCommunityRepositoryBundle } from "@/features/community/runtime";
 import type { CommunityRepositoryBundle } from "@/features/community/types";
 
 export type WorkCommentViewModel = {
@@ -30,7 +30,7 @@ export async function saveWorkCommentForViewer(
   accountId: string,
   workId: string,
   body: string,
-  bundle: CommunityRepositoryBundle = getDefaultSqliteCommunityRepositoryBundle(),
+  bundle: CommunityRepositoryBundle = getDefaultCommunityRepositoryBundle(),
 ) {
   const normalizedBody = normalizeCommentBody(body);
   validateCommentBody(normalizedBody);
@@ -46,7 +46,7 @@ export async function saveWorkCommentForViewer(
 
 export async function getWorkComments(
   workId: string,
-  bundle: CommunityRepositoryBundle = getDefaultSqliteCommunityRepositoryBundle(),
+  bundle: CommunityRepositoryBundle = getDefaultCommunityRepositoryBundle(),
 ): Promise<WorkCommentViewModel[]> {
   const comments = await bundle.comments.listByWorkId(workId);
 

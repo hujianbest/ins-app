@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { getRequestAccessControl } from "@/features/auth/access-control";
 import { saveStudioProfileAction } from "@/features/community/profile-actions";
 import { getStudioProfileEditorModel } from "@/features/community/profile-editor";
+import { PageHero } from "@/features/shell/page-hero";
 
 export default async function StudioProfilePage() {
   const accessControl = await getRequestAccessControl();
@@ -17,27 +17,21 @@ export default async function StudioProfilePage() {
   const profile = await getStudioProfileEditorModel(session.primaryRole);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(103,232,249,0.18),_transparent_24%),linear-gradient(180deg,_#050816_0%,_#0f172a_56%,_#111827_100%)] text-white">
-      <section className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-10 px-6 py-10 sm:px-10 lg:px-14">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="space-y-3">
-            <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">工作台主页</p>
-            <h1 className="text-5xl font-semibold tracking-tight sm:text-6xl">编辑主页</h1>
-            <p className="max-w-3xl text-lg leading-8 text-slate-300">
-              完善你的公开身份信息，及时更新城市与定位，并打磨访客首先看到的主页内容。
-            </p>
-          </div>
-          <Link href="/studio" className="text-sm uppercase tracking-[0.28em] text-cyan-200 transition hover:text-white">
-            返回工作台
-          </Link>
-        </div>
+    <main className="pb-24 text-white">
+      <section className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-6 pt-12 sm:px-10 lg:px-14">
+        <PageHero
+          eyebrow="Studio Profile"
+          title="编辑主页"
+          description="完善你的公开身份信息，及时更新城市与定位，并打磨访客首先看到的主页内容。"
+          actions={[{ href: "/studio", label: "返回工作台" }]}
+        />
 
         <form
           action={saveStudioProfileAction}
-          className="grid gap-6 rounded-[2rem] border border-white/10 bg-white/6 p-6 backdrop-blur"
+          className="grid gap-6 rounded-[2rem] border border-white/10 bg-[rgba(14,18,28,0.72)] p-6 shadow-[0_28px_80px_rgba(0,0,0,0.26)] backdrop-blur-xl"
         >
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-[0.28em] text-white/50">展示名称</span>
+            <span className="text-xs uppercase tracking-[0.28em] text-white/45">展示名称</span>
             <input
               name="name"
               defaultValue={profile.name}
@@ -47,7 +41,7 @@ export default async function StudioProfilePage() {
 
           <div className="grid gap-6 md:grid-cols-2">
             <label className="space-y-2">
-              <span className="text-xs uppercase tracking-[0.28em] text-white/50">城市</span>
+              <span className="text-xs uppercase tracking-[0.28em] text-white/45">城市</span>
               <input
                 name="city"
                 defaultValue={profile.city}
@@ -55,7 +49,7 @@ export default async function StudioProfilePage() {
               />
             </label>
             <label className="space-y-2">
-              <span className="text-xs uppercase tracking-[0.28em] text-white/50">一句话介绍</span>
+              <span className="text-xs uppercase tracking-[0.28em] text-white/45">一句话介绍</span>
               <input
                 name="tagline"
                 defaultValue={profile.tagline}
@@ -65,7 +59,7 @@ export default async function StudioProfilePage() {
           </div>
 
           <label className="space-y-2">
-            <span className="text-xs uppercase tracking-[0.28em] text-white/50">简介</span>
+            <span className="text-xs uppercase tracking-[0.28em] text-white/45">简介</span>
             <textarea
               name="bio"
               defaultValue={profile.bio}

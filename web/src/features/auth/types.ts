@@ -1,6 +1,6 @@
 export type AuthRole = "photographer" | "model";
 
-export type SessionAccountId = `demo-account:${AuthRole}`;
+export type SessionAccountId = string;
 
 export type GuestSessionContext = {
   status: "guest";

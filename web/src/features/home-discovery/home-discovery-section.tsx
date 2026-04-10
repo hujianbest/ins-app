@@ -1,5 +1,8 @@
 import Link from "next/link";
 
+import { EditorialVisual } from "@/features/shell/editorial-visual";
+import { SectionHeading } from "@/features/shell/section-heading";
+
 import type { HomeDiscoverySection as HomeDiscoverySectionViewModel } from "./types";
 
 type HomeDiscoverySectionProps = {
@@ -11,33 +14,44 @@ export function HomeDiscoverySection({ section }: HomeDiscoverySectionProps) {
     <section
       id={`discovery-section-${section.kind}`}
       aria-labelledby={`home-discovery-${section.kind}`}
-      className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur"
+      className="rounded-[2rem] border border-white/10 bg-[rgba(14,18,28,0.62)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.22)] backdrop-blur-xl"
     >
-      <div className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.3em] text-cyan-200/80">首页发现</p>
-        <h2 id={`home-discovery-${section.kind}`} className="text-2xl font-medium text-white">
-          {section.title}
-        </h2>
-        <p className="max-w-2xl text-sm leading-7 text-slate-300">{section.description}</p>
+      <div id={`home-discovery-${section.kind}`}>
+        <SectionHeading
+          eyebrow="Discovery Section"
+          title={section.title}
+          description={section.description}
+        />
       </div>
 
       {section.items.length > 0 ? (
-        <div className="mt-6 grid gap-4 xl:grid-cols-3">
+        <div className="mt-8 grid gap-4 xl:grid-cols-3">
           {section.items.map((item) => (
             <Link
               key={item.id}
               href={item.href}
-              className="rounded-[1.5rem] border border-white/10 bg-black/20 p-5 transition hover:border-cyan-200/40 hover:bg-white/10"
+              className="group rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.01))] p-5 transition hover:-translate-y-0.5 hover:border-cyan-200/40 hover:bg-[rgba(255,255,255,0.08)]"
             >
-              <p className="text-xs uppercase tracking-[0.28em] text-cyan-200/80">{item.badge}</p>
-              <h3 className="mt-3 text-xl font-medium text-white">{item.title}</h3>
+              <EditorialVisual
+                assetRef={item.assetRef}
+                label={item.badge}
+                aspectClassName="aspect-[16/10]"
+                className="rounded-[1.25rem]"
+              />
+              <h3 className="mt-4 text-xl font-medium text-white transition group-hover:text-cyan-100">
+                {item.title}
+              </h3>
               <p className="mt-3 text-sm leading-7 text-slate-300">{item.description}</p>
-              {item.meta ? <p className="mt-4 text-xs uppercase tracking-[0.24em] text-white/50">{item.meta}</p> : null}
+              {item.meta ? (
+                <p className="mt-5 text-xs uppercase tracking-[0.24em] text-white/45">
+                  {item.meta}
+                </p>
+              ) : null}
             </Link>
           ))}
         </div>
       ) : (
-        <div className="mt-6 rounded-[1.5rem] border border-dashed border-white/15 bg-black/20 px-5 py-8">
+        <div className="mt-8 rounded-[1.5rem] border border-dashed border-white/15 bg-black/20 px-5 py-8">
           <p className="text-sm leading-7 text-slate-300">
             {section.emptyStateCopy}
           </p>

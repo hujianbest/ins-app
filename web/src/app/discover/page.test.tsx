@@ -56,9 +56,9 @@ test("discover page stays publicly accessible and keeps a stable following empty
   render(page);
 
   expect(
-    screen.getByRole("heading", { level: 1, name: /持续浏览社区中的公开作品与创作者/i })
+    screen.getByRole("heading", { level: 1, name: /持续浏览作品、创作者与值得跟进的摄影灵感/i })
   ).toBeDefined();
-  expect(screen.getByRole("heading", { level: 2, name: /关注中/ })).toBeDefined();
+  expect(screen.getAllByText(/关注中/).length).toBeGreaterThan(0);
   expect(screen.getByText(/登录后查看关注中的创作者更新/)).toBeDefined();
 });
 

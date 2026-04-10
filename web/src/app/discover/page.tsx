@@ -1,8 +1,7 @@
-import Link from "next/link";
-
 import { getSessionContext } from "@/features/auth/session";
 import { HomeDiscoverySection } from "@/features/home-discovery/home-discovery-section";
 import { resolveHomeDiscoverySections } from "@/features/home-discovery/resolver";
+import { PageHero } from "@/features/shell/page-hero";
 
 export default async function DiscoverPage() {
   const session = await getSessionContext();
@@ -12,37 +11,37 @@ export default async function DiscoverPage() {
   });
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,_#050816_0%,_#0b1020_52%,_#111827_100%)] text-white">
-      <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-12 sm:px-10 lg:px-14">
-        <div className="space-y-4">
-          <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80">
-            Discover
-          </p>
-          <h1 className="max-w-4xl text-4xl font-semibold tracking-tight sm:text-5xl">
-            持续浏览社区中的公开作品与创作者
-          </h1>
-          <p className="max-w-3xl text-base leading-8 text-slate-300 sm:text-lg">
-            在精选推荐、最新发布与关注中之间持续切换，保持未登录可浏览，同时为登录成员保留稳定的关注更新区域。
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-3 text-sm text-slate-300">
-          <Link
-            href="/"
-            className="inline-flex items-center rounded-full border border-white/15 px-4 py-2 transition hover:border-cyan-200/70 hover:bg-white/5"
-          >
-            返回首页
-          </Link>
-          <Link
-            href="/opportunities"
-            className="inline-flex items-center rounded-full border border-white/15 px-4 py-2 transition hover:border-cyan-200/70 hover:bg-white/5"
-          >
-            查看次级合作入口
-          </Link>
-        </div>
+    <main className="pb-24 text-white">
+      <section className="mx-auto w-full max-w-7xl px-6 pt-12 sm:px-10 lg:px-14">
+        <PageHero
+          eyebrow="Discover Surface"
+          title="持续浏览作品、创作者与值得跟进的摄影灵感"
+          description="发现页承接首页之后的持续浏览。未登录用户可以继续浏览精选和最新内容，已登录成员则能在同一结构里看到关注中的更新。"
+          actions={[
+            { href: "/", label: "返回首页" },
+            { href: "/studio", label: "进入工作台", variant: "primary" },
+            { href: "/opportunities", label: "查看合作入口" },
+          ]}
+          aside={
+            <div className="space-y-5">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-cyan-200/80">
+                  Browse Logic
+                </p>
+                <h2 className="mt-3 text-2xl font-medium text-white">
+                  精选、最新与关注中保持稳定层级
+                </h2>
+              </div>
+              <div className="rounded-[1.4rem] border border-white/10 bg-black/20 p-4 text-sm leading-7 text-slate-300">
+                当前登录状态：
+                {session.isAuthenticated ? " 已登录成员，可查看关注中的内容更新。" : " 访客模式，保持公开可浏览并展示稳定空态。"}
+              </div>
+            </div>
+          }
+        />
       </section>
 
-      <section className="mx-auto w-full max-w-7xl px-6 pb-20 sm:px-10 lg:px-14">
+      <section className="mx-auto w-full max-w-7xl px-6 pt-14 sm:px-10 lg:px-14">
         <div className="grid gap-6">
           {sections.map((section) => (
             <HomeDiscoverySection key={section.kind} section={section} />

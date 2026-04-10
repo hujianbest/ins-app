@@ -42,6 +42,7 @@ test("public profile page model derives showcase items from published repository
     slug: "sample-photographer",
     name: "Avery Vale",
     sectionTitle: "精选画面",
+    heroAsset: "seed:avery-hero",
   });
   expect(profile?.showcaseItems.map((item) => item.workId)).not.toContain(
     "draft-work",
@@ -50,6 +51,7 @@ test("public profile page model derives showcase items from published repository
     workId: "neon-portrait-study",
     title: "霓虹人像研究",
     subtitle: "编辑人像",
+    coverAsset: "seed:avery-hero",
   });
 
   bundle.close();
@@ -76,6 +78,12 @@ test("public work page model and static params expose published works only", asy
   });
 
   await expect(getPublicWorkPageModel("draft-work", bundle)).resolves.toBeNull();
+  await expect(getPublicWorkPageModel("neon-portrait-study", bundle)).resolves.toMatchObject(
+    {
+      id: "neon-portrait-study",
+      coverAsset: "seed:avery-hero",
+    },
+  );
   await expect(listPublicWorkPageParams(bundle)).resolves.not.toContainEqual({
     workId: "draft-work",
   });
