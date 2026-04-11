@@ -41,6 +41,9 @@ test("public profile page model derives showcase items from published repository
   expect(profile).toMatchObject({
     slug: "sample-photographer",
     name: "Avery Vale",
+    shootingFocus: "夜色编辑人像与品牌情绪片",
+    discoveryContext: "希望被上海品牌团队、长期合作模特与 editorial collaborator 反复看到",
+    externalHandoffUrl: "https://portfolio.example.com/avery",
     sectionTitle: "精选画面",
     heroAsset: "seed:avery-hero",
   });

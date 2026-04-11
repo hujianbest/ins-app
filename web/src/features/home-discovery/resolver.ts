@@ -32,17 +32,17 @@ const sectionCopy: Record<
 > = {
   featured: {
     title: "精选推荐",
-    description: "优先推荐",
+    description: "围绕高匹配发现整理的优先入口。",
     emptyStateCopy: "暂无精选。",
   },
   latest: {
     title: "最新发布",
-    description: "按时间浏览",
+    description: "按公开语境继续浏览最新作品。",
     emptyStateCopy: "暂无更新。",
   },
   following: {
     title: "关注中",
-    description: "关注更新",
+    description: "继续看你关注创作者的最新公开更新。",
     emptyStateCopy: "关注后查看更新。",
   },
 };
@@ -68,6 +68,27 @@ function getProfileHref(profile: CreatorProfileRecord) {
     : `/models/${profile.slug}`;
 }
 
+function buildDiscoveryMeta(city: string, shootingFocus: string) {
+  return [city, shootingFocus].filter(Boolean).join(" · ");
+}
+
+function getProfileDiscoveryDescription(profile: CreatorProfileRecord) {
+  return profile.discoveryContext || profile.tagline;
+}
+
+function getWorkDiscoveryMeta(
+  work: CommunityWorkRecord,
+  ownerProfile?: CreatorProfileRecord,
+) {
+  return [
+    work.ownerName,
+    getRoleLabel(work.ownerRole),
+    buildDiscoveryMeta(ownerProfile?.city ?? "", ownerProfile?.shootingFocus ?? ""),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 function adaptProfileRecordToHomeDiscoveryCard(
   profile: CreatorProfileRecord,
 ): HomeDiscoveryCard {
@@ -77,15 +98,18 @@ function adaptProfileRecordToHomeDiscoveryCard(
     contentKind: "profile",
     badge: getRoleLabel(profile.role),
     title: profile.name,
-    description: profile.tagline,
-    meta: profile.city,
+    description: getProfileDiscoveryDescription(profile),
+    meta: buildDiscoveryMeta(profile.city, profile.shootingFocus),
     assetRef: getProfileHeroAssetRef(profile.role, profile.slug),
   };
 }
 
 function adaptWorkRecordToHomeDiscoveryCard(
   work: CommunityWorkRecord,
+  profileById: Map<string, CreatorProfileRecord>,
 ): HomeDiscoveryCard {
+  const ownerProfile = profileById.get(work.ownerProfileId);
+
   return {
     id: work.id,
     href: `/works/${work.id}`,
@@ -93,7 +117,7 @@ function adaptWorkRecordToHomeDiscoveryCard(
     badge: work.category,
     title: work.title,
     description: work.description,
-    meta: `${work.ownerName} · ${getRoleLabel(work.ownerRole)}`,
+    meta: getWorkDiscoveryMeta(work, ownerProfile),
     assetRef: work.coverAsset,
   };
 }
@@ -134,9 +158,12 @@ function buildSection(
 function createFeaturedFallbackCards(
   works: CommunityWorkRecord[],
   profiles: CreatorProfileRecord[],
+  profileById: Map<string, CreatorProfileRecord>,
   opportunities: typeof opportunityPosts,
 ): HomeDiscoveryCard[] {
-  const workCards = works.map(adaptWorkRecordToHomeDiscoveryCard);
+  const workCards = works.map((work) =>
+    adaptWorkRecordToHomeDiscoveryCard(work, profileById),
+  );
   const profileCards = profiles.map(adaptProfileRecordToHomeDiscoveryCard);
   const opportunityCards = opportunities.map(adaptOpportunityPostToHomeDiscoveryCard);
   const fallbackCards: HomeDiscoveryCard[] = [];
@@ -183,7 +210,7 @@ async function resolveFeaturedSection(
       }
 
       selectedIds.add(work.id);
-      cards.push(adaptWorkRecordToHomeDiscoveryCard(work));
+      cards.push(adaptWorkRecordToHomeDiscoveryCard(work, profileById));
       continue;
     }
 
@@ -214,6 +241,7 @@ async function resolveFeaturedSection(
   const fallbackCards = createFeaturedFallbackCards(
     works,
     profiles,
+    profileById,
     opportunityPosts,
   ).filter(
     (card) => !selectedIds.has(card.id),
@@ -230,6 +258,7 @@ async function resolveFeaturedSection(
 
 function resolveLatestSection(
   works: CommunityWorkRecord[],
+  profileById: Map<string, CreatorProfileRecord>,
   featuredWorkIds: string[],
 ): HomeDiscoverySection {
   const latestWorks = works.filter((work) => !featuredWorkIds.includes(work.id));
@@ -237,7 +266,9 @@ function resolveLatestSection(
 
   return buildSection(
     "latest",
-    itemsSource.slice(0, maxSectionItems).map(adaptWorkRecordToHomeDiscoveryCard),
+    itemsSource
+      .slice(0, maxSectionItems)
+      .map((work) => adaptWorkRecordToHomeDiscoveryCard(work, profileById)),
   );
 }
 
@@ -245,6 +276,7 @@ async function resolveFollowingSection(
   accountId: string | null | undefined,
   bundle: CommunityRepositoryBundle,
   works: CommunityWorkRecord[],
+  profileById: Map<string, CreatorProfileRecord>,
 ): Promise<HomeDiscoverySection> {
   if (!accountId) {
     return buildSection(
@@ -258,7 +290,7 @@ async function resolveFollowingSection(
   const followingItems = works
     .filter((work) => followedProfileIds.includes(work.ownerProfileId))
     .slice(0, maxSectionItems)
-    .map(adaptWorkRecordToHomeDiscoveryCard);
+    .map((work) => adaptWorkRecordToHomeDiscoveryCard(work, profileById));
 
   return buildSection("following", followingItems);
 }
@@ -278,6 +310,7 @@ export async function resolveHomeDiscoverySections({
     bundle.profiles.listPublicProfiles(),
     bundle.works.listPublicWorks(),
   ]);
+  const profileById = new Map(profiles.map((profile) => [profile.id, profile]));
   const featuredResolution = await resolveFeaturedSection(
     surface,
     bundle,
@@ -290,8 +323,9 @@ export async function resolveHomeDiscoverySections({
     () => Promise<HomeDiscoverySection>
   > = {
     featured: async () => featuredResolution.section,
-    latest: async () => resolveLatestSection(works, featuredResolution.featuredWorkIds),
-    following: () => resolveFollowingSection(accountId, bundle, works),
+    latest: async () =>
+      resolveLatestSection(works, profileById, featuredResolution.featuredWorkIds),
+    following: () => resolveFollowingSection(accountId, bundle, works, profileById),
   };
 
   return Promise.all(

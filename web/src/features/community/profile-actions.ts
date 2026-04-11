@@ -23,6 +23,15 @@ function readRequiredField(
   return value;
 }
 
+function readOptionalField(
+  formData: FormData,
+  field: keyof StudioProfileEditorInput,
+) {
+  const value = formData.get(field);
+
+  return typeof value === "string" ? value : "";
+}
+
 export async function saveStudioProfileAction(formData: FormData) {
   const accessControl = await getRequestAccessControl();
   const session = accessControl.session;
@@ -35,8 +44,11 @@ export async function saveStudioProfileAction(formData: FormData) {
   const updatedProfile = await saveCreatorProfileForRole(session.primaryRole, {
     name: readRequiredField(formData, "name"),
     city: readRequiredField(formData, "city"),
+    shootingFocus: readOptionalField(formData, "shootingFocus"),
+    discoveryContext: readOptionalField(formData, "discoveryContext"),
     tagline: readRequiredField(formData, "tagline"),
     bio: readRequiredField(formData, "bio"),
+    externalHandoffUrl: readOptionalField(formData, "externalHandoffUrl"),
   });
 
   revalidatePath("/studio/profile");

@@ -15,32 +15,33 @@ export default async function Home() {
     <main className="museum-page">
       <section className="museum-shell pt-14">
         <PageHero
-          eyebrow="首页"
-          title="从作品开始浏览"
-          description="精选、创作者、诉求。"
+          eyebrow="高匹配发现"
+          title="让相关的人继续发现你的作品"
+          description="不是更多曝光，而是让城市、方向与公开语境更快对上真正相关的观众。"
           actions={[
             { href: "/discover", label: "发现", variant: "primary" },
+            { href: "/search", label: "搜索" },
             { href: "/studio", label: "工作台" },
             { href: "/opportunities", label: "诉求" },
           ]}
           supporting={
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="museum-stat p-5">
-                <p className="museum-label">精选</p>
+                <p className="museum-label">高匹配发现</p>
                 <p className="mt-3 text-base text-[color:var(--accent-strong)]">
-                  先看作品。
+                  先判断谁应该看见这组作品。
                 </p>
               </div>
               <div className="museum-stat p-5">
-                <p className="museum-label">发布</p>
+                <p className="museum-label">公开语境</p>
                 <p className="mt-3 text-base text-[color:var(--accent-strong)]">
-                  工作台发布。
+                  把城市、方向与目标人群直接写清。
                 </p>
               </div>
               <div className="museum-stat p-5">
-                <p className="museum-label">诉求</p>
+                <p className="museum-label">可信承接</p>
                 <p className="mt-3 text-base text-[color:var(--accent-strong)]">
-                  单独查看。
+                  被看见后继续进入主页、关注或联系。
                 </p>
               </div>
             </div>
@@ -57,7 +58,7 @@ export default async function Home() {
       </section>
 
       <section className="museum-shell pt-10">
-        <div className="museum-panel p-6 md:p-8">
+        <div className="museum-panel museum-panel--soft p-6 md:p-7">
           <p className="museum-label">本地素材包</p>
           <p className="mt-4 max-w-4xl text-sm leading-7 text-[color:var(--muted-strong)] sm:text-base">
             {seedContentDisclosure}

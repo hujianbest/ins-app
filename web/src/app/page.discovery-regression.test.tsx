@@ -95,7 +95,7 @@ test.each([
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: /从作品开始浏览/i,
+        name: /让相关的人继续发现你的作品/i,
       })
     ).toBeDefined();
     expect(screen.getByText(emptyStateCopy)).toBeDefined();

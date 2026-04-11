@@ -21,6 +21,10 @@ function getProfileHref(profile: PublicProfile) {
     : `/models/${profile.slug}`;
 }
 
+function buildDiscoveryMeta(city: string, shootingFocus: string) {
+  return [city, shootingFocus].filter(Boolean).join(" · ");
+}
+
 export function adaptWorkToHomeDiscoveryCard(work: PublicWork): HomeDiscoveryCard {
   return {
     id: work.id,
@@ -41,8 +45,8 @@ export function adaptProfileToHomeDiscoveryCard(profile: PublicProfile): HomeDis
     contentKind: "profile",
     badge: getRoleLabel(profile.role),
     title: profile.name,
-    description: profile.tagline,
-    meta: profile.city,
+    description: profile.discoveryContext || profile.tagline,
+    meta: buildDiscoveryMeta(profile.city, profile.shootingFocus),
     assetRef:
       profile.heroAsset ??
       getProfileHeroAssetRef(profile.role, profile.slug),

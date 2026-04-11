@@ -48,6 +48,9 @@ export type PublicProfile = {
   role: "photographer" | "model";
   name: string;
   city: string;
+  shootingFocus: string;
+  discoveryContext: string;
+  externalHandoffUrl: string;
   publishedAt: string;
   updatedAt?: string;
   tagline: string;

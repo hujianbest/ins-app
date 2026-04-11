@@ -68,8 +68,11 @@ test("studio profile page renders editable creator profile fields", async () => 
     slug: "repo-avery",
     name: "Repository Avery",
     city: "苏州",
+    shootingFocus: "编辑人像",
+    discoveryContext: "希望被华东品牌团队与固定合作模特看到",
     tagline: "repo-backed profile",
     bio: "Repo biography for studio editing.",
+    externalHandoffUrl: "https://portfolio.example.com/repo-avery",
   } satisfies StudioProfileEditorModel);
 
   const page = await StudioProfilePage();
@@ -84,8 +87,15 @@ test("studio profile page renders editable creator profile fields", async () => 
   ).toBeDefined();
   expect(screen.getByDisplayValue(/repository avery/i)).toBeDefined();
   expect(screen.getByDisplayValue(/^苏州$/)).toBeDefined();
+  expect(screen.getByDisplayValue(/^编辑人像$/)).toBeDefined();
+  expect(
+    screen.getByDisplayValue(/希望被华东品牌团队与固定合作模特看到/),
+  ).toBeDefined();
   expect(screen.getByDisplayValue(/repo-backed profile/)).toBeDefined();
   expect(screen.getByDisplayValue(/Repo biography for studio editing\./)).toBeDefined();
+  expect(
+    screen.getByDisplayValue(/https:\/\/portfolio\.example\.com\/repo-avery/),
+  ).toBeDefined();
   expect(screen.getByRole("button", { name: /^保存$/ })).toBeDefined();
 });
 

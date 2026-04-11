@@ -47,6 +47,10 @@ function getProfileHref(profile: CreatorProfileRecord) {
     : `/models/${profile.slug}`;
 }
 
+function buildDiscoveryMeta(city: string, shootingFocus: string) {
+  return [city, shootingFocus].filter(Boolean).join(" · ");
+}
+
 function toProfileResult(profile: CreatorProfileRecord): SearchResultItem {
   return {
     id: profile.id,
@@ -54,13 +58,16 @@ function toProfileResult(profile: CreatorProfileRecord): SearchResultItem {
     kind: "profile",
     badge: profile.role === "photographer" ? "摄影师" : "模特",
     title: profile.name,
-    description: profile.tagline,
-    meta: profile.city,
+    description: profile.discoveryContext || profile.tagline,
+    meta: buildDiscoveryMeta(profile.city, profile.shootingFocus),
     assetRef: getProfileHeroAssetRef(profile.role, profile.slug),
   };
 }
 
-function toWorkResult(work: CommunityWorkRecord): SearchResultItem {
+function toWorkResult(
+  work: CommunityWorkRecord,
+  ownerProfile?: CreatorProfileRecord,
+): SearchResultItem {
   return {
     id: work.id,
     href: `/works/${work.id}`,
@@ -68,7 +75,13 @@ function toWorkResult(work: CommunityWorkRecord): SearchResultItem {
     badge: work.category,
     title: work.title,
     description: work.description,
-    meta: `${work.ownerName} · ${work.ownerRole === "photographer" ? "摄影师" : "模特"}`,
+    meta: [
+      work.ownerName,
+      work.ownerRole === "photographer" ? "摄影师" : "模特",
+      buildDiscoveryMeta(ownerProfile?.city ?? "", ownerProfile?.shootingFocus ?? ""),
+    ]
+      .filter(Boolean)
+      .join(" · "),
     assetRef: work.coverAsset,
   };
 }
@@ -93,12 +106,15 @@ export async function searchCatalog(
     bundle.profiles.listPublicProfiles(),
     bundle.works.listPublicWorks(),
   ]);
+  const profileById = new Map(profiles.map((profile) => [profile.id, profile]));
 
   const matchedProfiles = profiles
     .filter((profile) =>
       includesQuery(normalizedQuery, [
         profile.name,
         profile.city,
+        profile.shootingFocus,
+        profile.discoveryContext,
         profile.tagline,
         profile.bio,
       ]),
@@ -106,16 +122,21 @@ export async function searchCatalog(
     .map(toProfileResult);
 
   const matchedWorks = works
-    .filter((work) =>
-      includesQuery(normalizedQuery, [
+    .filter((work) => {
+      const ownerProfile = profileById.get(work.ownerProfileId);
+
+      return includesQuery(normalizedQuery, [
         work.title,
         work.category,
         work.description,
         work.detailNote,
         work.ownerName,
-      ]),
-    )
-    .map(toWorkResult);
+        ownerProfile?.city,
+        ownerProfile?.shootingFocus,
+        ownerProfile?.discoveryContext,
+      ]);
+    })
+    .map((work) => toWorkResult(work, profileById.get(work.ownerProfileId)));
 
   const matchedOpportunities = opportunityPosts
     .filter((post) =>

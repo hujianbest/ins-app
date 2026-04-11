@@ -37,7 +37,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     },
     {
       key: "opportunities",
-      title: "合作内容",
+      title: "合作线索",
       items: results.opportunities,
     },
   ];
@@ -48,12 +48,12 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     <main className="museum-page">
       <section className="museum-shell pt-14">
         <PageHero
-          eyebrow="搜索"
-          title={hasQuery ? results.query : "搜索"}
+          eyebrow="高匹配发现"
+          title={hasQuery ? results.query : "搜索高匹配语境"}
           description={
             hasQuery
               ? `${results.total} 条结果`
-              : undefined
+              : "按城市、方向、创作者与合作线索搜索公开发现语境。"
           }
           actions={[
             { href: "/discover", label: "发现" },
@@ -61,13 +61,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           ]}
           aside={
             <div className="space-y-4">
-              <p className="museum-label">搜索</p>
+              <p className="museum-label">高匹配搜索</p>
               <form action="/search" className="grid gap-3">
                 <input
                   type="search"
                   name="q"
                   defaultValue={query}
-                  placeholder="上海 / Mika"
+                  placeholder="上海 / 夜色编辑人像 / 长期合作模特"
                   className="museum-field"
                 />
                 <button
@@ -147,10 +147,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           <section className="museum-panel p-6 md:p-8">
             <SectionHeading
               eyebrow="推荐"
-              title="常用词"
+              title="语境搜索词"
             />
             <div className="mt-8 flex flex-wrap gap-3">
-              {["上海", "编辑人像", "Mika", "合作"].map((suggestion) => (
+              {["夜色编辑人像", "杭州 品牌形象", "长期合作模特", "beauty 摄影"].map((suggestion) => (
                 <Link
                   key={suggestion}
                   href={`/search?q=${encodeURIComponent(suggestion)}`}

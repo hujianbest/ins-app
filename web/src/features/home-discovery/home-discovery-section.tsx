@@ -17,7 +17,7 @@ export function HomeDiscoverySection({ section }: HomeDiscoverySectionProps) {
     >
       <div id={`home-discovery-${section.kind}`}>
         <SectionHeading
-          eyebrow="Discovery Section"
+          eyebrow="高匹配发现"
           title={section.title}
           description={section.description}
         />
@@ -53,7 +53,7 @@ export function HomeDiscoverySection({ section }: HomeDiscoverySectionProps) {
                 summary={item.description}
                 footerText={item.meta}
               />
-            );
+            )
           })}
         </div>
       ) : (

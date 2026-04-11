@@ -6,6 +6,10 @@ export const photographerProfiles: PublicProfile[] = [
     role: "photographer",
     name: "Avery Vale",
     city: "上海",
+    shootingFocus: "夜色编辑人像与品牌情绪片",
+    discoveryContext:
+      "希望被上海品牌团队、长期合作模特与 editorial collaborator 反复看到",
+    externalHandoffUrl: "https://portfolio.example.com/avery",
     publishedAt: "2026-04-01T09:00:00Z",
     updatedAt: "2026-04-09T11:00:00Z",
     tagline:
@@ -53,6 +57,10 @@ export const photographerProfiles: PublicProfile[] = [
     role: "photographer",
     name: "Elio Ren",
     city: "北京",
+    shootingFocus: "建筑感 lookbook 与冷调商业 portrait",
+    discoveryContext:
+      "希望被北京服装品牌团队与需要 clean visual language 的创意制片看到",
+    externalHandoffUrl: "https://portfolio.example.com/elio",
     publishedAt: "2026-04-03T09:00:00Z",
     updatedAt: "2026-04-07T10:20:00Z",
     tagline:
@@ -100,6 +108,10 @@ export const photographerProfiles: PublicProfile[] = [
     role: "photographer",
     name: "Noa Santoro",
     city: "深圳",
+    shootingFocus: "黑白品牌片与动势 editorial",
+    discoveryContext:
+      "希望被深圳品牌团队、campaign casting 合作者与高识别度模特看到",
+    externalHandoffUrl: "https://portfolio.example.com/noa",
     publishedAt: "2026-04-04T08:30:00Z",
     updatedAt: "2026-04-06T12:10:00Z",
     tagline:
@@ -150,6 +162,9 @@ export const modelProfiles: PublicProfile[] = [
     role: "model",
     name: "Mika Rowan",
     city: "杭州",
+    shootingFocus: "编辑与品牌形象",
+    discoveryContext: "希望被杭州及周边的摄影师与品牌样片团队看到",
+    externalHandoffUrl: "https://portfolio.example.com/mika",
     publishedAt: "2026-04-02T10:00:00Z",
     updatedAt: "2026-04-08T14:00:00Z",
     tagline:
@@ -197,6 +212,10 @@ export const modelProfiles: PublicProfile[] = [
     role: "model",
     name: "Iris Luo",
     city: "北京",
+    shootingFocus: "美妆近景与封面肖像",
+    discoveryContext:
+      "希望被北京 beauty 摄影师、彩妆团队与杂志近景项目看到",
+    externalHandoffUrl: "https://portfolio.example.com/iris",
     publishedAt: "2026-04-03T11:00:00Z",
     updatedAt: "2026-04-05T16:20:00Z",
     tagline:
@@ -244,6 +263,10 @@ export const modelProfiles: PublicProfile[] = [
     role: "model",
     name: "Sora Lin",
     city: "广州",
+    shootingFocus: "街头奢感与都市 lookbook",
+    discoveryContext:
+      "希望被广州及周边品牌团队、街头 editorial 摄影师与通勤感 campaign 合作者看到",
+    externalHandoffUrl: "https://portfolio.example.com/sora",
     publishedAt: "2026-04-04T12:00:00Z",
     updatedAt: "2026-04-04T17:00:00Z",
     tagline:

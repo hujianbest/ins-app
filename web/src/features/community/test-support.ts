@@ -138,5 +138,25 @@ export function createInMemoryCommunityRepositoryBundle(
           .sort((left, right) => left.order - right.order);
       },
     },
+    discovery: {
+      async record(input) {
+        return {
+          id: input.id ?? `discovery:${input.eventType}:${input.targetId}`,
+          eventType: input.eventType,
+          actorAccountId: input.actorAccountId ?? null,
+          targetType: input.targetType,
+          targetId: input.targetId,
+          targetProfileId: input.targetProfileId,
+          surface: input.surface,
+          query: input.query,
+          success: input.success,
+          failureReason: input.failureReason,
+          createdAt: input.createdAt ?? new Date().toISOString(),
+        };
+      },
+      async listAll() {
+        return [];
+      },
+    },
   };
 }

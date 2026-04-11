@@ -23,7 +23,7 @@ const cormorant = Cormorant_Garamond({
 
 export const metadata: Metadata = {
   title: "Lens Archive",
-  description: "面向作品展示、创作者关系与合作线索的综合摄影平台。",
+  description: "让作品被更相关的观众持续发现，并进入可信主页与联系路径。",
 };
 
 export default function RootLayout({

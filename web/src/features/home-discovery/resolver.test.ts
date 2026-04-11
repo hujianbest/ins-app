@@ -69,6 +69,20 @@ test("discover resolver builds featured, latest, and following sections from the
       opportunityPosts[0].id,
     ]),
   );
+  const featuredProfileCard = sections[0].items.find(
+    (item) => item.id === "photographer:sample-photographer",
+  );
+  const featuredWorkCard = sections[0].items.find(
+    (item) => item.id === "neon-portrait-study",
+  );
+
+  expect(featuredProfileCard).toMatchObject({
+    meta: "上海 · 夜色编辑人像与品牌情绪片",
+    description:
+      "希望被上海品牌团队、长期合作模特与 editorial collaborator 反复看到",
+  });
+  expect(featuredWorkCard?.meta).toContain("上海");
+  expect(featuredWorkCard?.meta).toContain("夜色编辑人像与品牌情绪片");
   expect(sections[1].items.map((item) => item.id)).not.toContain(
     "neon-portrait-study",
   );

@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
 import { dirname } from "node:path";
@@ -24,6 +25,7 @@ import type {
   CommunityWorkRecord,
   CreatorProfileRecord,
   CuratedSlotRecord,
+  DiscoveryEventRecord,
   FollowRelationRecord,
   WorkCommentRecord,
 } from "./types";
@@ -73,6 +75,9 @@ type CreatorProfileRow = {
   slug: string;
   name: string;
   city: string;
+  shooting_focus: string;
+  discovery_context: string;
+  external_handoff_url: string;
   tagline: string;
   bio: string;
   published_at: string;
@@ -111,6 +116,20 @@ type WorkCommentRow = {
   created_at: string;
 };
 
+type DiscoveryEventRow = {
+  id: string;
+  event_type: DiscoveryEventRecord["eventType"];
+  actor_account_id: string | null;
+  target_type: DiscoveryEventRecord["targetType"];
+  target_id: string;
+  target_profile_id: string | null;
+  surface: string;
+  query: string;
+  success: number;
+  failure_reason: string | null;
+  created_at: string;
+};
+
 function mapCreatorProfileRow(row: CreatorProfileRow): CreatorProfileRecord {
   return {
     id: row.id,
@@ -118,6 +137,9 @@ function mapCreatorProfileRow(row: CreatorProfileRow): CreatorProfileRecord {
     slug: row.slug,
     name: row.name,
     city: row.city,
+    shootingFocus: row.shooting_focus,
+    discoveryContext: row.discovery_context,
+    externalHandoffUrl: row.external_handoff_url,
     tagline: row.tagline,
     bio: row.bio,
     publishedAt: row.published_at,
@@ -159,6 +181,22 @@ function mapWorkCommentRow(row: WorkCommentRow): WorkCommentRecord {
     workId: row.work_id,
     authorAccountId: row.author_account_id,
     body: row.body,
+    createdAt: row.created_at,
+  };
+}
+
+function mapDiscoveryEventRow(row: DiscoveryEventRow): DiscoveryEventRecord {
+  return {
+    id: row.id,
+    eventType: row.event_type,
+    actorAccountId: row.actor_account_id,
+    targetType: row.target_type,
+    targetId: row.target_id,
+    targetProfileId: row.target_profile_id ?? undefined,
+    surface: row.surface,
+    query: row.query,
+    success: Boolean(row.success),
+    failureReason: row.failure_reason ?? undefined,
     createdAt: row.created_at,
   };
 }
@@ -240,6 +278,9 @@ function createSchema(database: DatabaseSync) {
       slug TEXT NOT NULL,
       name TEXT NOT NULL,
       city TEXT NOT NULL,
+      shooting_focus TEXT NOT NULL DEFAULT '',
+      discovery_context TEXT NOT NULL DEFAULT '',
+      external_handoff_url TEXT NOT NULL DEFAULT '',
       tagline TEXT NOT NULL,
       bio TEXT NOT NULL,
       published_at TEXT NOT NULL,
@@ -289,7 +330,48 @@ function createSchema(database: DatabaseSync) {
       created_at TEXT NOT NULL,
       FOREIGN KEY(work_id) REFERENCES works(id)
     );
+
+    CREATE TABLE IF NOT EXISTS discovery_events (
+      id TEXT PRIMARY KEY,
+      event_type TEXT NOT NULL,
+      actor_account_id TEXT,
+      target_type TEXT NOT NULL,
+      target_id TEXT NOT NULL,
+      target_profile_id TEXT,
+      surface TEXT NOT NULL,
+      query TEXT NOT NULL DEFAULT '',
+      success INTEGER NOT NULL,
+      failure_reason TEXT,
+      created_at TEXT NOT NULL
+    );
   `);
+
+  ensureCreatorProfileColumns(database);
+}
+
+function ensureCreatorProfileColumns(database: DatabaseSync) {
+  const profileColumns = database
+    .prepare(`PRAGMA table_info(creator_profiles)`)
+    .all() as Array<{ name: string }>;
+  const existingColumns = new Set(profileColumns.map((column) => column.name));
+
+  if (!existingColumns.has("shooting_focus")) {
+    database.exec(
+      `ALTER TABLE creator_profiles ADD COLUMN shooting_focus TEXT NOT NULL DEFAULT ''`,
+    );
+  }
+
+  if (!existingColumns.has("discovery_context")) {
+    database.exec(
+      `ALTER TABLE creator_profiles ADD COLUMN discovery_context TEXT NOT NULL DEFAULT ''`,
+    );
+  }
+
+  if (!existingColumns.has("external_handoff_url")) {
+    database.exec(
+      `ALTER TABLE creator_profiles ADD COLUMN external_handoff_url TEXT NOT NULL DEFAULT ''`,
+    );
+  }
 }
 
 function resolveSqliteDatabasePath(databasePath?: string) {
@@ -340,6 +422,9 @@ function createRepositoryBundleFromDatabase(
               SET
                 name = ?,
                 city = ?,
+                shooting_focus = ?,
+                discovery_context = ?,
+                external_handoff_url = ?,
                 tagline = ?,
                 bio = ?,
                 updated_at = ?
@@ -349,6 +434,9 @@ function createRepositoryBundleFromDatabase(
           .run(
             input.name,
             input.city,
+            input.shootingFocus,
+            input.discoveryContext,
+            input.externalHandoffUrl,
             input.tagline,
             input.bio,
             input.updatedAt ?? null,
@@ -596,6 +684,73 @@ function createRepositoryBundleFromDatabase(
           );
       },
     },
+    discovery: {
+      async record(input) {
+        const event = {
+          id: input.id ?? randomUUID(),
+          eventType: input.eventType,
+          actorAccountId: input.actorAccountId ?? null,
+          targetType: input.targetType,
+          targetId: input.targetId,
+          targetProfileId: input.targetProfileId ?? null,
+          surface: input.surface,
+          query: input.query.trim().slice(0, 120),
+          success: input.success,
+          failureReason: input.failureReason ?? null,
+          createdAt: input.createdAt ?? new Date().toISOString(),
+        };
+
+        database
+          .prepare(
+            `
+              INSERT INTO discovery_events (
+                id,
+                event_type,
+                actor_account_id,
+                target_type,
+                target_id,
+                target_profile_id,
+                surface,
+                query,
+                success,
+                failure_reason,
+                created_at
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `,
+          )
+          .run(
+            event.id,
+            event.eventType,
+            event.actorAccountId,
+            event.targetType,
+            event.targetId,
+            event.targetProfileId,
+            event.surface,
+            event.query,
+            event.success ? 1 : 0,
+            event.failureReason,
+            event.createdAt,
+          );
+
+        return {
+          ...event,
+          targetProfileId: event.targetProfileId ?? undefined,
+          failureReason: event.failureReason ?? undefined,
+        };
+      },
+      async listAll() {
+        const rows = database
+          .prepare(
+            `
+              SELECT * FROM discovery_events
+              ORDER BY created_at ASC, id ASC
+            `,
+          )
+          .all() as DiscoveryEventRow[];
+
+        return rows.map(mapDiscoveryEventRow);
+      },
+    },
     close() {
       if (closed) {
         return;
@@ -665,8 +820,8 @@ function isCuratedSlotValid(
 function seedDatabase(database: DatabaseSync, seed: CommunitySqliteSeed) {
   const insertProfile = database.prepare(`
     INSERT INTO creator_profiles (
-      id, role, slug, name, city, tagline, bio, published_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      id, role, slug, name, city, shooting_focus, discovery_context, external_handoff_url, tagline, bio, published_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   const insertWork = database.prepare(`
     INSERT INTO works (
@@ -702,6 +857,7 @@ function seedDatabase(database: DatabaseSync, seed: CommunitySqliteSeed) {
   `);
 
   database.exec(`
+    DELETE FROM discovery_events;
     DELETE FROM work_comments;
     DELETE FROM follows;
     DELETE FROM curated_slots;
@@ -716,6 +872,9 @@ function seedDatabase(database: DatabaseSync, seed: CommunitySqliteSeed) {
       profile.slug,
       profile.name,
       profile.city,
+      profile.shootingFocus,
+      profile.discoveryContext,
+      profile.externalHandoffUrl,
       profile.tagline,
       profile.bio,
       profile.publishedAt,

@@ -27,7 +27,7 @@ type EditorialCardProps = {
 };
 
 const defaultTitleClassName =
-  "font-display mt-5 text-3xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)]";
+  "mt-5 text-xl font-medium leading-7 tracking-[-0.02em] text-[color:var(--accent-strong)] sm:text-2xl";
 
 function EditorialCardContent({
   assetRef,
@@ -73,7 +73,7 @@ function EditorialCardContent({
         </div>
       ) : null}
       <p
-        className={`museum-clamp-2 text-sm leading-7 text-[color:var(--muted-strong)] ${
+        className={`museum-clamp-2 text-sm leading-6 text-[color:var(--muted-strong)] ${
           detailStats?.length ? "mt-5" : "mt-3"
         }`}
       >

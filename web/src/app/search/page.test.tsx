@@ -31,11 +31,11 @@ test("search page renders suggested queries before input", async () => {
   expect(
     screen.getByRole("heading", {
       level: 1,
-      name: /^搜索$/,
+      name: /^搜索高匹配语境$/,
     }),
   ).toBeDefined();
-  expect(screen.getByRole("link", { name: "上海" }).getAttribute("href")).toBe(
-    "/search?q=%E4%B8%8A%E6%B5%B7",
+  expect(screen.getByRole("link", { name: "夜色编辑人像" }).getAttribute("href")).toBe(
+    "/search?q=%E5%A4%9C%E8%89%B2%E7%BC%96%E8%BE%91%E4%BA%BA%E5%83%8F",
   );
 });
 
@@ -89,7 +89,7 @@ test("search page renders grouped results for a keyword", async () => {
   ).toBeDefined();
   expect(screen.getByRole("heading", { level: 2, name: "作品" })).toBeDefined();
   expect(screen.getByRole("heading", { level: 2, name: "创作者" })).toBeDefined();
-  expect(screen.getByRole("heading", { level: 2, name: "合作内容" })).toBeDefined();
+  expect(screen.getByRole("heading", { level: 2, name: "合作线索" })).toBeDefined();
   expect(screen.getByRole("link", { name: /上海夜景人像/ }).getAttribute("href")).toBe(
     "/works/work-1",
   );

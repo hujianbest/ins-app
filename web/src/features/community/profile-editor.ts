@@ -9,13 +9,50 @@ import type {
 
 export type StudioProfileEditorModel = Pick<
   CreatorProfileRecord,
-  "id" | "role" | "slug" | "name" | "city" | "tagline" | "bio"
+  | "id"
+  | "role"
+  | "slug"
+  | "name"
+  | "city"
+  | "shootingFocus"
+  | "discoveryContext"
+  | "tagline"
+  | "bio"
+  | "externalHandoffUrl"
 >;
 
 export type StudioProfileEditorInput = Pick<
   CreatorProfileRecord,
-  "name" | "city" | "tagline" | "bio"
+  | "name"
+  | "city"
+  | "shootingFocus"
+  | "discoveryContext"
+  | "tagline"
+  | "bio"
+  | "externalHandoffUrl"
 >;
+
+function normalizeExternalHandoffUrl(value: string) {
+  const normalizedValue = value.trim();
+
+  if (!normalizedValue) {
+    return "";
+  }
+
+  let parsedUrl: URL;
+
+  try {
+    parsedUrl = new URL(normalizedValue);
+  } catch {
+    throw new Error("Invalid external handoff url");
+  }
+
+  if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+    throw new Error("Invalid external handoff url");
+  }
+
+  return normalizedValue;
+}
 
 function normalizeStudioProfileInput(
   input: StudioProfileEditorInput,
@@ -23,8 +60,11 @@ function normalizeStudioProfileInput(
   return {
     name: input.name.trim(),
     city: input.city.trim(),
+    shootingFocus: input.shootingFocus.trim(),
+    discoveryContext: input.discoveryContext.trim(),
     tagline: input.tagline.trim(),
     bio: input.bio.trim(),
+    externalHandoffUrl: normalizeExternalHandoffUrl(input.externalHandoffUrl),
   };
 }
 
@@ -63,8 +103,11 @@ export async function getStudioProfileEditorModel(
     slug: profile.slug,
     name: profile.name,
     city: profile.city,
+    shootingFocus: profile.shootingFocus,
+    discoveryContext: profile.discoveryContext,
     tagline: profile.tagline,
     bio: profile.bio,
+    externalHandoffUrl: profile.externalHandoffUrl,
   };
 }
 

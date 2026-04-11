@@ -1,13 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 
-import type { PublicWork } from "@/features/showcase/types";
+import type { PublicProfile, PublicWork } from "@/features/showcase/types";
 
 const {
   getSessionRoleMock,
   isWorkLikedMock,
   getWorkCommentsMock,
   notFoundMock,
+  getPublicProfilePageModelMock,
   getPublicWorkPageModelMock,
   listPublicWorkPageParamsMock,
 } = vi.hoisted(() => ({
@@ -15,6 +16,7 @@ const {
   isWorkLikedMock: vi.fn(),
   getWorkCommentsMock: vi.fn(),
   notFoundMock: vi.fn(),
+  getPublicProfilePageModelMock: vi.fn(),
   getPublicWorkPageModelMock: vi.fn(),
   listPublicWorkPageParamsMock: vi.fn(),
 }));
@@ -32,6 +34,7 @@ vi.mock("@/features/engagement/state", () => ({
 }));
 
 vi.mock("@/features/community/public-read-model", () => ({
+  getPublicProfilePageModel: getPublicProfilePageModelMock,
   getPublicWorkPageModel: getPublicWorkPageModelMock,
   listPublicWorkPageParams: listPublicWorkPageParamsMock,
 }));
@@ -53,6 +56,24 @@ const publicWork: PublicWork = {
   description: "Repository backed work description",
   detailNote: "Repository backed detail note",
   contactLabel: "联系摄影师",
+};
+
+const ownerProfile: PublicProfile = {
+  slug: "repo-photographer",
+  role: "photographer",
+  name: "Repo Avery",
+  city: "上海",
+  shootingFocus: "编辑人像",
+  discoveryContext: "希望被上海品牌团队与长期合作模特看到",
+  externalHandoffUrl: "https://portfolio.example.com/repo-avery",
+  publishedAt: "2026-04-09T09:00:00Z",
+  tagline: "repository backed profile",
+  bio: "Repo biography",
+  contactLabel: "联系摄影师",
+  sectionTitle: "精选画面",
+  sectionDescription: "只展示已发布作品。",
+  heroImageLabel: "摄影师封面视觉",
+  showcaseItems: [],
 };
 
 test("work detail generateStaticParams uses published repository work params", async () => {
@@ -78,6 +99,7 @@ test("work detail page renders repository-backed work content and owner summary"
       createdAt: "2026-04-09T09:00:00Z",
     },
   ]);
+  getPublicProfilePageModelMock.mockResolvedValue(ownerProfile);
   getPublicWorkPageModelMock.mockResolvedValue(publicWork);
 
   const page = await WorkDetailPage({
@@ -94,20 +116,28 @@ test("work detail page renders repository-backed work content and owner summary"
   ).toBeDefined();
   expect(screen.getByText(publicWork.description)).toBeDefined();
   expect(screen.getByText(publicWork.ownerName)).toBeDefined();
+  expect(screen.getAllByText(ownerProfile.shootingFocus).length).toBeGreaterThan(0);
+  expect(screen.getByText(ownerProfile.discoveryContext)).toBeDefined();
   expect(screen.getByRole("button", { name: /已点赞/ })).toBeDefined();
   expect(screen.getByRole("button", { name: /私信/ })).toBeDefined();
   expect(screen.getByRole("button", { name: /发表评论/ })).toBeDefined();
   expect(screen.getAllByText(/评论/).length).toBeGreaterThan(0);
   expect(screen.getByText("最新评论")).toBeDefined();
-  expect(screen.getByRole("link", { name: /返回主页/ }).getAttribute("href")).toBe(
-    "/photographers/repo-photographer"
-  );
+  expect(
+    screen
+      .getAllByRole("link", { name: /进入创作者主页/ })
+      .some((link) => link.getAttribute("href") === "/photographers/repo-photographer"),
+  ).toBe(true);
+  expect(
+    screen.getByRole("link", { name: /查看主外部承接/ }).getAttribute("href"),
+  ).toBe("/outbound/photographer/repo-photographer");
 });
 
 test("work detail page asks guests to log in before liking", async () => {
   getSessionRoleMock.mockResolvedValue(null);
   isWorkLikedMock.mockResolvedValue(false);
   getWorkCommentsMock.mockResolvedValue([]);
+  getPublicProfilePageModelMock.mockResolvedValue(ownerProfile);
   getPublicWorkPageModelMock.mockResolvedValue(publicWork);
 
   const page = await WorkDetailPage({

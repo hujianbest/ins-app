@@ -3,10 +3,12 @@ import { notFound } from "next/navigation";
 
 import { getSessionRole } from "@/features/auth/session";
 import {
+  getPublicProfilePageModel,
   getPublicWorkPageModel,
   listPublicWorkPageParams,
 } from "@/features/community/public-read-model";
 import { startContactThreadAction } from "@/features/contact/actions";
+import { DiscoveryViewBeacon } from "@/features/discovery/view-beacon";
 import { toggleWorkLikeAction } from "@/features/engagement/actions";
 import { isWorkLiked } from "@/features/engagement/state";
 import { EditorialVisual } from "@/features/shell/editorial-visual";
@@ -34,12 +36,26 @@ export default async function WorkDetailPage({
     notFound();
   }
 
+  const ownerProfile = await getPublicProfilePageModel(
+    work.ownerRole,
+    work.ownerSlug,
+  );
+
   const sessionRole = await getSessionRole();
   const liked = await isWorkLiked(work.id);
   const comments = await getWorkComments(work.id);
 
   return (
     <main className="museum-page">
+      <DiscoveryViewBeacon
+        eventType="work_view"
+        targetType="work"
+        targetId={work.id}
+        targetProfileId={
+          ownerProfile ? `${ownerProfile.role}:${ownerProfile.slug}` : undefined
+        }
+        surface="work_detail"
+      />
       <section className="museum-shell flex flex-col gap-10 pt-14">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <p className="museum-label">{getRoleLabel(work.ownerRole)}作品</p>
@@ -47,7 +63,7 @@ export default async function WorkDetailPage({
             href={`/${work.ownerRole}s/${work.ownerSlug}`}
             className="museum-button-quiet text-sm uppercase tracking-[0.3em]"
           >
-            返回主页
+            进入创作者主页
           </Link>
         </div>
 
@@ -120,6 +136,48 @@ export default async function WorkDetailPage({
             />
           </div>
         </div>
+
+        {ownerProfile ? (
+          <section className="museum-panel museum-panel--soft p-6 md:p-8">
+            <p className="museum-label">创作者语境</p>
+            <div className="mt-5 grid gap-4 text-sm text-[color:var(--muted-strong)] md:grid-cols-3">
+              <div className="museum-stat p-5">
+                <p className="museum-label">城市</p>
+                <p className="mt-3 text-base text-[color:var(--accent-strong)]">
+                  {ownerProfile.city}
+                </p>
+              </div>
+              <div className="museum-stat p-5">
+                <p className="museum-label">主要方向</p>
+                <p className="mt-3 text-base text-[color:var(--accent-strong)]">
+                  {ownerProfile.shootingFocus || "未填写"}
+                </p>
+              </div>
+              <div className="museum-stat p-5">
+                <p className="museum-label">可信承接</p>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  <Link
+                    href={`/${work.ownerRole}s/${work.ownerSlug}`}
+                    className="museum-button-secondary"
+                  >
+                    进入创作者主页
+                  </Link>
+                  {ownerProfile.externalHandoffUrl ? (
+                    <Link
+                      href={`/outbound/${work.ownerRole}/${work.ownerSlug}`}
+                      className="museum-button-quiet"
+                    >
+                      查看主外部承接
+                    </Link>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+            <p className="mt-5 max-w-4xl text-base leading-8 text-[color:var(--muted-strong)]">
+              {ownerProfile.discoveryContext || "当前未填写公开发现语境。"}
+            </p>
+          </section>
+        ) : null}
 
         <section className="museum-panel museum-panel--soft p-6 md:p-8">
           <p className="museum-label">说明</p>

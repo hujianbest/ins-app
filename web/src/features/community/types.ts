@@ -16,6 +16,9 @@ export type CreatorProfileRecord = {
   slug: string;
   name: string;
   city: string;
+  shootingFocus: string;
+  discoveryContext: string;
+  externalHandoffUrl: string;
   tagline: string;
   bio: string;
   publishedAt: string;
@@ -24,7 +27,14 @@ export type CreatorProfileRecord = {
 
 export type CreatorProfileUpdateInput = Pick<
   CreatorProfileRecord,
-  "name" | "city" | "tagline" | "bio" | "updatedAt"
+  | "name"
+  | "city"
+  | "shootingFocus"
+  | "discoveryContext"
+  | "externalHandoffUrl"
+  | "tagline"
+  | "bio"
+  | "updatedAt"
 >;
 
 export type CommunityWorkRecord = {
@@ -112,12 +122,45 @@ export type CurationConfigRepository = {
   listSlotsBySurface(surface: CommunitySurface): Promise<CuratedSlotRecord[]>;
 };
 
+export type DiscoveryEventType =
+  | "work_view"
+  | "profile_view"
+  | "follow"
+  | "contact_start"
+  | "external_handoff_click";
+
+export type DiscoveryEventRecord = {
+  id: string;
+  eventType: DiscoveryEventType;
+  actorAccountId: string | null;
+  targetType: CommunityTargetType;
+  targetId: string;
+  targetProfileId?: string;
+  surface: string;
+  query: string;
+  success: boolean;
+  failureReason?: string;
+  createdAt: string;
+};
+
+export type DiscoveryEventCreateInput = Omit<
+  DiscoveryEventRecord,
+  "id" | "createdAt"
+> &
+  Partial<Pick<DiscoveryEventRecord, "id" | "createdAt">>;
+
+export type DiscoveryEventRepository = {
+  record(input: DiscoveryEventCreateInput): Promise<DiscoveryEventRecord>;
+  listAll(): Promise<DiscoveryEventRecord[]>;
+};
+
 export type CommunityRepositoryBundle = {
   profiles: CreatorProfileRepository;
   works: WorkRepository;
   follows: FollowRepository;
   comments: CommentRepository;
   curation: CurationConfigRepository;
+  discovery: DiscoveryEventRepository;
 };
 
 export type CommunitySeedSnapshot = {

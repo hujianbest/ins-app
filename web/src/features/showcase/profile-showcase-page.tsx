@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { EditorialCard } from "@/features/cards/editorial-card";
+import { DiscoveryViewBeacon } from "@/features/discovery/view-beacon";
 import { EditorialVisual } from "@/features/shell/editorial-visual";
 import { startContactThreadAction } from "@/features/contact/actions";
 import { SectionHeading } from "@/features/shell/section-heading";
@@ -22,6 +23,13 @@ function getRoleLabel(role: PublicProfile["role"]) {
 export function ProfileShowcasePage({ profile, isSignedIn, isFollowing, returnPath }: ProfileShowcasePageProps) {
   return (
     <main className="museum-page">
+      <DiscoveryViewBeacon
+        eventType="profile_view"
+        targetType="profile"
+        targetId={`${profile.role}:${profile.slug}`}
+        targetProfileId={`${profile.role}:${profile.slug}`}
+        surface="profile_page"
+      />
       <section className="museum-shell flex flex-col gap-12 pt-14">
         <header className="grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] lg:items-end">
           <div className="space-y-6">
@@ -40,10 +48,16 @@ export function ProfileShowcasePage({ profile, isSignedIn, isFollowing, returnPa
               </p>
             </div>
 
-            <div className="grid gap-4 text-sm text-[color:var(--muted-strong)] sm:grid-cols-3">
+            <div className="grid gap-4 text-sm text-[color:var(--muted-strong)] sm:grid-cols-2 xl:grid-cols-5">
               <div className="museum-stat p-5">
                 <p className="museum-label">城市</p>
                 <p className="mt-3 text-base text-[color:var(--accent-strong)]">{profile.city}</p>
+              </div>
+              <div className="museum-stat p-5">
+                <p className="museum-label">主要方向</p>
+                <p className="mt-3 text-base text-[color:var(--accent-strong)]">
+                  {profile.shootingFocus || "未填写"}
+                </p>
               </div>
               <div className="museum-stat p-5">
                 <p className="museum-label">关注</p>
@@ -82,6 +96,26 @@ export function ProfileShowcasePage({ profile, isSignedIn, isFollowing, returnPa
                   </Link>
                 )}
               </div>
+              <div className="museum-stat p-5">
+                <p className="museum-label">主外部承接</p>
+                {profile.externalHandoffUrl ? (
+                  <Link
+                    href={`/outbound/${profile.role}/${profile.slug}`}
+                    className="museum-button-quiet mt-3 text-base"
+                  >
+                    查看主外部承接
+                  </Link>
+                ) : (
+                  <p className="mt-3 text-base text-[color:var(--muted)]">未设置</p>
+                )}
+              </div>
+            </div>
+
+            <div className="museum-panel museum-panel--soft p-6 md:p-7">
+              <p className="museum-label">公开发现语境</p>
+              <p className="mt-4 text-base leading-8 text-[color:var(--muted-strong)]">
+                {profile.discoveryContext || "当前未填写公开发现语境。"}
+              </p>
             </div>
           </div>
 

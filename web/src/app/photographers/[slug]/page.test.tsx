@@ -41,6 +41,9 @@ const photographerProfile: PublicProfile = {
   role: "photographer",
   name: "Repo Avery",
   city: "上海",
+  shootingFocus: "编辑人像",
+  discoveryContext: "希望被本地品牌团队与长期合作模特看到",
+  externalHandoffUrl: "https://portfolio.example.com/repo-avery",
   publishedAt: "2026-04-09T09:00:00Z",
   tagline: "repository backed profile",
   bio: "Repo biography",
@@ -88,10 +91,15 @@ test("photographer profile page renders the public showcase from repository read
       name: photographerProfile.name,
     })
   ).toBeDefined();
+  expect(screen.getAllByText(photographerProfile.shootingFocus).length).toBeGreaterThan(0);
+  expect(screen.getByText(photographerProfile.discoveryContext)).toBeDefined();
   expect(screen.getByText(photographerProfile.bio)).toBeDefined();
   expect(screen.getByText(photographerProfile.sectionTitle)).toBeDefined();
   expect(screen.getByRole("button", { name: /取消关注/ })).toBeDefined();
   expect(screen.getByRole("button", { name: /私信/ })).toBeDefined();
+  expect(
+    screen.getByRole("link", { name: /查看主外部承接/ }).getAttribute("href"),
+  ).toBe("/outbound/photographer/repo-photographer");
   expect(
     screen.getByRole("link", { name: /Repo Work/ }).getAttribute("href")
   ).toBe("/works/repo-work");

@@ -49,11 +49,42 @@ export default async function StudioProfilePage() {
               />
             </label>
             <label className="space-y-2">
+              <span className="museum-label">主要拍摄方向</span>
+              <input
+                name="shootingFocus"
+                defaultValue={profile.shootingFocus}
+                className="museum-field"
+              />
+            </label>
+          </div>
+
+          <label className="space-y-2">
+            <span className="museum-label">公开发现语境</span>
+            <textarea
+              name="discoveryContext"
+              defaultValue={profile.discoveryContext}
+              rows={4}
+              className="museum-textarea"
+            />
+          </label>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <label className="space-y-2">
               <span className="museum-label">短句</span>
               <input
                 name="tagline"
                 defaultValue={profile.tagline}
                 className="museum-field"
+              />
+            </label>
+            <label className="space-y-2">
+              <span className="museum-label">主外部承接链接</span>
+              <input
+                type="url"
+                name="externalHandoffUrl"
+                defaultValue={profile.externalHandoffUrl}
+                className="museum-field"
+                placeholder="https://portfolio.example.com/you"
               />
             </label>
           </div>
@@ -67,6 +98,10 @@ export default async function StudioProfilePage() {
               className="museum-textarea"
             />
           </label>
+
+          <div className="museum-stat p-5 text-sm leading-7 text-[color:var(--muted-strong)]">
+            未填写的方向、发现语境或外部承接链接会在公开面稳定回退为空，不会伪造默认值。
+          </div>
 
           <button
             type="submit"

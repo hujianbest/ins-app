@@ -39,6 +39,12 @@ test("profile adapter maps photographer and model profiles to distinct public ro
   expect(modelCard.title).toBe(modelProfiles[0].name);
   expect(photographerCard.badge).toBe("摄影师");
   expect(modelCard.badge).toBe("模特");
+  expect(photographerCard.description).toBe(
+    photographerProfiles[0].discoveryContext,
+  );
+  expect(photographerCard.meta).toBe(
+    `${photographerProfiles[0].city} · ${photographerProfiles[0].shootingFocus}`,
+  );
   expect(photographerCard.assetRef).toBe(photographerProfiles[0].heroAsset);
   expect(modelCard.assetRef).toBe(modelProfiles[0].heroAsset);
 });

@@ -41,6 +41,9 @@ const modelProfile: PublicProfile = {
   role: "model",
   name: "Repo Mika",
   city: "杭州",
+  shootingFocus: "品牌形象",
+  discoveryContext: "希望被杭州摄影师与样片合作团队看到",
+  externalHandoffUrl: "https://portfolio.example.com/repo-mika",
   publishedAt: "2026-04-09T09:00:00Z",
   tagline: "repository backed model profile",
   bio: "Repo model biography",
@@ -86,12 +89,17 @@ test("model profile page renders the public showcase from repository read model"
       name: modelProfile.name,
     })
   ).toBeDefined();
+  expect(screen.getAllByText(modelProfile.shootingFocus).length).toBeGreaterThan(0);
+  expect(screen.getByText(modelProfile.discoveryContext)).toBeDefined();
   expect(screen.getByText(modelProfile.bio)).toBeDefined();
   expect(screen.getByText(modelProfile.sectionTitle)).toBeDefined();
   expect(screen.getByRole("link", { name: /登录后私信/ })).toBeDefined();
   expect(screen.getByRole("link", { name: /登录后关注/ }).getAttribute("href")).toBe(
     "/login"
   );
+  expect(
+    screen.getByRole("link", { name: /查看主外部承接/ }).getAttribute("href"),
+  ).toBe("/outbound/model/repo-model");
   expect(screen.getByRole("link", { name: /Repo Model Work/ }).getAttribute("href")).toBe(
     "/works/repo-model-work"
   );

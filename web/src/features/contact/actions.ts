@@ -3,7 +3,11 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { getSessionRole } from "@/features/auth/session";
+import { getSessionContext } from "@/features/auth/session";
+import {
+  buildDiscoveryProfileTargetId,
+  recordDiscoveryEvent,
+} from "@/features/discovery/events";
 
 import {
   buildContactThread,
@@ -20,16 +24,37 @@ export async function startContactThreadAction(
   sourceType: ContactSourceType,
   sourceId: string
 ) {
-  const sessionRole = await getSessionRole();
+  const session = await getSessionContext();
+  const targetProfileId = buildDiscoveryProfileTargetId(
+    recipientRole,
+    recipientSlug,
+  );
 
-  if (!sessionRole) {
+  if (!session.primaryRole) {
+    await recordDiscoveryEvent({
+      eventType: "contact_start",
+      actorAccountId: null,
+      targetType: "profile",
+      targetId: targetProfileId,
+      targetProfileId,
+      surface: `contact:${sourceType}`,
+      query: "",
+      success: false,
+      failureReason: "unauthenticated",
+    });
     redirect("/login");
     return;
   }
 
   const cookieStore = await cookies();
   const currentThreads = parseContactThreads(cookieStore.get(contactThreadsCookieName)?.value);
-  const nextThread = buildContactThread(sessionRole, recipientRole, recipientSlug, sourceType, sourceId);
+  const nextThread = buildContactThread(
+    session.primaryRole,
+    recipientRole,
+    recipientSlug,
+    sourceType,
+    sourceId,
+  );
 
   cookieStore.set({
     name: contactThreadsCookieName,
@@ -37,6 +62,17 @@ export async function startContactThreadAction(
     httpOnly: true,
     sameSite: "lax",
     path: "/",
+  });
+
+  await recordDiscoveryEvent({
+    eventType: "contact_start",
+    actorAccountId: session.accountId,
+    targetType: "profile",
+    targetId: targetProfileId,
+    targetProfileId,
+    surface: `contact:${sourceType}`,
+    query: "",
+    success: true,
   });
 
   redirect("/inbox");

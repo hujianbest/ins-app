@@ -56,10 +56,11 @@ test("discover page stays publicly accessible and keeps a stable following empty
   render(page);
 
   expect(
-    screen.getByRole("heading", { level: 1, name: /继续发现作品与创作者/i })
+    screen.getByRole("heading", { level: 1, name: /按城市、方向与公开语境继续发现/i })
   ).toBeDefined();
   expect(screen.getAllByText(/关注中/).length).toBeGreaterThan(0);
   expect(screen.getByText(/登录后查看关注中的创作者更新/)).toBeDefined();
+  expect(screen.getAllByText(/高匹配发现/).length).toBeGreaterThan(0);
 });
 
 test("discover page shows followed updates section for authenticated members", async () => {

@@ -1,6 +1,8 @@
 import { EditorialCard, type EditorialCardStat } from "@/features/cards/editorial-card";
 import type { PublicOpportunityPost, SeedAssetRef } from "@/features/showcase/types";
 
+type OpportunityCardStat = EditorialCardStat;
+
 type OpportunityCardProps = {
   href?: string;
   assetRef?: SeedAssetRef;

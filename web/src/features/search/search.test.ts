@@ -28,13 +28,25 @@ describe("searchCatalog", () => {
 
   it("returns work matches for category or owner keywords", async () => {
     const results = await searchCatalog("编辑人像", bundle);
+    const matchedWork = results.works.find((item) => item.title === "霓虹人像研究");
 
-    expect(results.works.some((item) => item.title === "霓虹人像研究")).toBe(
-      true,
-    );
-    expect(results.works.find((item) => item.title === "霓虹人像研究")?.assetRef).toBe(
-      "seed:avery-hero",
-    );
+    expect(matchedWork).toBeDefined();
+    expect(matchedWork?.assetRef).toBe("seed:avery-hero");
+    expect(matchedWork?.meta).toContain("上海");
+    expect(matchedWork?.meta).toContain("夜色编辑人像与品牌情绪片");
+  });
+
+  it("matches creator discovery context and focus in both profile and work results", async () => {
+    const results = await searchCatalog("长期合作模特", bundle);
+    const profileMatch = results.profiles.find((item) => item.title === "Avery Vale");
+    const workMatch = results.works.find((item) => item.title === "霓虹人像研究");
+
+    expect(profileMatch).toMatchObject({
+      meta: "上海 · 夜色编辑人像与品牌情绪片",
+      description:
+        "希望被上海品牌团队、长期合作模特与 editorial collaborator 反复看到",
+    });
+    expect(workMatch).toBeDefined();
   });
 
   it("returns empty results for blank queries", async () => {
