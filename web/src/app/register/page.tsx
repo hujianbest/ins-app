@@ -12,6 +12,7 @@ export default async function RegisterPage({
     <AuthEntryGrid
       eyebrow="注册"
       title="创建账号"
+      description="选择身份后开始发布与浏览。"
       submitMode="register"
       alternateHref="/login"
       alternateLabel="登录"

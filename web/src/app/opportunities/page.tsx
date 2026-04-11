@@ -42,7 +42,7 @@ export default function OpportunitiesPage() {
               ]}
               showFooterMeta={false}
               titleTag="h2"
-              titleClassName="font-display mt-4 text-4xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)]"
+              titleClassName="mt-4 text-2xl font-medium leading-8 tracking-[-0.02em] text-[color:var(--accent-strong)] sm:text-3xl"
               cardClassName="p-6"
             />
           ))}

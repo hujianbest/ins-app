@@ -42,24 +42,6 @@ export function AuthEntryGrid({
               ) : null}
             </div>
 
-            {submitMode === "register" ? (
-              <div className="grid gap-4 md:grid-cols-2">
-                {authRoles.map((roleOption) => (
-                  <div
-                    key={roleOption.role}
-                    className="museum-stat p-5"
-                  >
-                    <p className="museum-label">
-                      {roleOption.title}
-                    </p>
-                    <p className="mt-4 text-sm leading-7 text-[color:var(--muted-strong)]">
-                      {roleOption.description}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-
             <Link
               href={alternateHref}
               className="museum-button-quiet text-sm uppercase tracking-[0.28em]"
