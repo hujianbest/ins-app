@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "prompt": "当前 active task 是 T-014：为结果列表加 status 过滤，按 HF TDD 实现。",
+    "expected": "先产出测试设计并完成确认，再做有效 RED/GREEN，最后写实现交接块和 canonical next action。"
+  },
+  {
+    "id": 2,
+    "prompt": "code-review 退回一个可定向修复 finding，请只修当前 active task 并写 fresh evidence。",
+    "expected": "按回流修订协议只处理当前任务相关问题，必要时重做测试设计确认，不切换下一任务。"
+  }
+]

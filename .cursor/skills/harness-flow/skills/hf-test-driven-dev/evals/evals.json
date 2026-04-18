@@ -1,0 +1,44 @@
+{
+  "skill_name": "hf-test-driven-dev",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "User request:\n开始实现 TASK-003\n\nProject snapshot:\n- `Workflow Profile`: standard.\n- `Execution Mode`: interactive.\n- `Current Active Task`: TASK-003.\n- Approved task plan exists and includes test-design seeds.\n- No branch signal or evidence conflict exists.\n- The current session has not yet shown the test design to the user.\n\nAs `hf-test-driven-dev`, decide what to do next.",
+      "expected_output": "Before writing failing tests or implementation, first produce the task's test design and wait for the user to confirm it, because `Execution Mode=interactive` keeps the test-design approval step as a manual pause.",
+      "files": [],
+      "expectations": [
+        "The response prioritizes producing or presenting the test design before entering Red-Green-Refactor.",
+        "The response explicitly respects `Execution Mode=interactive`.",
+        "The response does not start RED, GREEN, or implementation before the test-design approval step is complete.",
+        "The response does not skip fail-first discipline after confirmation.",
+        "The response does not claim the task can proceed straight into implementation just because the task plan is approved."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "User request:\nauto mode，继续实现 TASK-003，不用等我确认。\n\nProject snapshot:\n- `Workflow Profile`: standard.\n- `Execution Mode`: auto.\n- `Current Active Task`: TASK-003.\n- Approved task plan exists and includes test-design seeds.\n- `AGENTS.md` explicitly allows auto-resolving the test-design approval step for this repository.\n- Approval records should be written under `docs/approvals/`.\n- No branch signal or evidence conflict exists.\n\nAs `hf-test-driven-dev`, decide what to do next.",
+      "expected_output": "Produce the test design, complete the test-design approval step by writing an approval record, and only then proceed into fail-first TDD; `auto` removes the wait, not the approval semantics.",
+      "files": [],
+      "expectations": [
+        "The response explicitly respects `Execution Mode=auto`.",
+        "The response still requires the test-design approval step before RED/GREEN.",
+        "The response mentions writing or relying on an approval record rather than waiting for manual confirmation.",
+        "The response proceeds to fail-first TDD only after the approval step is resolved.",
+        "The response does not treat `auto` as permission to skip test-design review or to start coding immediately."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "User request:\nauto mode，继续实现 TASK-003，不用等我确认。\n\nProject snapshot:\n- `Workflow Profile`: standard.\n- `Execution Mode`: auto.\n- `Current Active Task`: TASK-003.\n- Approved task plan exists and includes test-design seeds.\n- The task touches a high-risk module, and `AGENTS.md` forbids auto-resolving the test-design approval step in this area.\n- No approval-record path is configured for this approval kind.\n- No other branch signal exists.\n\nAs `hf-test-driven-dev`, decide what to do next.",
+      "expected_output": "Do not start TDD automatically; produce the test design, report that the approval step cannot be auto-resolved under current policy, and stop before RED/GREEN instead of silently skipping the approval gate.",
+      "files": [],
+      "expectations": [
+        "The response explicitly keeps the test-design approval step in place even under `Execution Mode=auto`.",
+        "The response does not start RED, GREEN, or implementation when policy forbids auto resolution.",
+        "The response explicitly cites missing policy allowance or missing approval-record support as the reason for stopping automatic progression.",
+        "The response does not reinterpret `auto` as permission to skip approval semantics.",
+        "The response preserves the single-task TDD discipline rather than switching tasks or bypassing the gate."
+      ]
+    }
+  ]
+}

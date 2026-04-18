@@ -1,0 +1,78 @@
+{
+  "skill_name": "hf-code-review",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "请帮我做代码评审。通知发送逻辑现在直接写在了 HTTP handler 里，用了两个 if 嵌套判断用户类型，然后分别调用邮件和短信接口。测试是全绿的，功能也正确。",
+      "expected_output": "应识别通知逻辑耦合在 handler 层违反了设计中的模块职责边界（handler 应只处理 HTTP 协议，业务逻辑应在 service 层）；即使测试全绿，也应给出需修改结论，说明该实现偏离了设计，并建议把通知逻辑抽到 service 层。",
+      "files": [],
+      "expectations": [
+        "识别通知逻辑耦合在 handler 层违反模块边界",
+        "不因测试全绿就忽略设计偏离",
+        "给出需修改结论",
+        "建议把业务逻辑移到 service 层"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "审批通知的发送代码如下：`notifyUser(userId, msg)` 直接发邮件，但如果发送失败，函数直接 `return` 而没有任何错误记录或上层处理。请评审。",
+      "expected_output": "应识别发送失败后静默 return 是缺少错误处理的问题；应指出应至少记录错误日志，并根据设计说明是否应向上层传播错误或触发重试；给出需修改结论，说明静默失败会导致通知丢失且无法排查。",
+      "files": [],
+      "expectations": [
+        "识别静默 return 是缺少错误处理",
+        "说明至少应记录错误日志",
+        "根据设计判断是否应传播错误或重试",
+        "给出需修改结论"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "代码中有一处：`if status == 1 { ... } else if status == 2 { ... } else if status == 3 { ... }`，数字 1/2/3 没有任何常量定义或注释说明含义。功能是正确的，测试也过了。",
+      "expected_output": "应识别魔法数字是可读性问题；即使功能正确，也应要求把 1/2/3 替换为有意义的常量或枚举，并说明原因是后续维护时无法从数字本身理解含义；给出需修改结论。",
+      "files": [],
+      "expectations": [
+        "识别魔法数字是可读性问题",
+        "不因功能正确就忽略可读性问题",
+        "要求定义有意义的常量或枚举",
+        "给出需修改结论"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "我在实现审批通知功能的时候，顺手加了一个\"催办\"接口，允许申请人在审批超时后发催办通知给主管。规格和设计里没有这个功能，但我觉得用户肯定用得到。请评审。",
+      "expected_output": "应识别\"催办\"接口是规格和设计中未定义的 undocumented behavior；代码评审不是规格变更的入口，应要求先走 hf-increment 对规格和设计做变更，经过批准后再实现该功能；当前实现应返回需修改，说明不允许在未经批准的范围外引入新功能。",
+      "files": [],
+      "expectations": [
+        "识别催办接口是 undocumented behavior",
+        "说明实现不在已批准规格和设计范围内",
+        "要求先通过 hf-increment 更新规格和设计",
+        "给出需修改结论，不允许超范围实现"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "代码实现符合设计，模块边界清晰，错误处理完整，命名规范，没有魔法数字，也没有 undocumented behavior。测试全绿，覆盖率达标。请给出最终评审结论。",
+      "expected_output": "在代码质量达标、无明显问题的情况下，评审结论可以为通过；评审报告应列出主要通过依据，以及任何值得关注但不阻塞的优化建议（如有），下一步指向 hf-traceability-review。",
+      "files": [],
+      "expectations": [
+        "在代码质量达标时给出通过结论",
+        "列出通过的主要依据",
+        "可选地说明非阻塞的优化建议",
+        "下一步指向 hf-traceability-review"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "这是一个 code review 场景：\n- task-progress.md 标记当前已进入 code review\n- 但实现交接块缺失，且 test-review 记录与当前 task id 不一致\n- 代码本身表面看起来问题不大\n\n请作为 `hf-code-review` 给出结论和下一步。",
+      "expected_output": "应先识别这是输入证据冲突/范围不可稳定定位的 precheck blocker，而不是继续做正式代码质量判断；结论应为阻塞，下一步指向 hf-workflow-router，并返回 reroute_via_router=true。",
+      "files": [],
+      "expectations": [
+        "识别实现交接块缺失和上游记录不一致属于 precheck blocker",
+        "给出阻塞结论",
+        "下一步指向 hf-workflow-router",
+        "返回 reroute_via_router=true",
+        "不继续展开正式代码质量判断"
+      ]
+    }
+  ]
+}
