@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "prompt": "test review 通过了，请正式 review 当前实现代码，看能不能进入 traceability review。",
+    "expected": "基于实现交接块、代码变更和测试记录做多维代码评审，输出 findings、verdict 和唯一下一步。"
+  },
+  {
+    "id": 2,
+    "prompt": "功能测过了，但我担心状态转换和错误处理，请按 HF code review 的方式审一下。",
+    "expected": "重点检查正确性、设计一致性、状态/错误/安全，识别实现层风险，不改代码。"
+  }
+]
