@@ -104,3 +104,48 @@ describe("observability/metrics snapshot completeness + safety", () => {
     }
   });
 });
+
+describe("observability/metrics recommendations namespace (Discovery Intelligence V1)", () => {
+  it("emits zeroed recommendations namespace at startup", () => {
+    const snap = createMetricsRegistry().snapshot();
+    expect(snap.recommendations).toEqual({
+      related_creators: { cards_rendered: 0, empty: 0 },
+      related_works: { cards_rendered: 0, empty: 0 },
+    });
+  });
+
+  it("incrementCounter under recommendations.* increments the matching snapshot field", () => {
+    registry.incrementCounter(
+      "recommendations.related_creators.cards_rendered",
+      undefined,
+      3,
+    );
+    registry.incrementCounter("recommendations.related_creators.empty");
+    registry.incrementCounter(
+      "recommendations.related_works.cards_rendered",
+      undefined,
+      2,
+    );
+
+    const snap = registry.snapshot();
+    expect(snap.recommendations).toEqual({
+      related_creators: { cards_rendered: 3, empty: 1 },
+      related_works: { cards_rendered: 2, empty: 0 },
+    });
+  });
+
+  it("does not pollute existing http/sqlite/business namespaces", () => {
+    registry.incrementCounter(
+      "recommendations.related_creators.cards_rendered",
+    );
+    registry.incrementCounter("recommendations.related_works.empty");
+
+    const snap = registry.snapshot();
+    expect(snap.http.requests_total).toBe(0);
+    expect(snap.http.errors_total).toBe(0);
+    expect(snap.sqlite.queries_total).toBe(0);
+    expect(snap.sqlite.errors_total).toBe(0);
+    expect(snap.sqlite.slow_queries).toBe(0);
+    expect(snap.business).toEqual({});
+  });
+});

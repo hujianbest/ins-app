@@ -11,6 +11,7 @@ import { startContactThreadAction } from "@/features/contact/actions";
 import { DiscoveryViewBeacon } from "@/features/discovery/view-beacon";
 import { toggleWorkLikeAction } from "@/features/engagement/actions";
 import { isWorkLiked } from "@/features/engagement/state";
+import { RelatedWorksSection } from "@/features/recommendations/related-works-section";
 import { EditorialVisual } from "@/features/shell/editorial-visual";
 import { SectionHeading } from "@/features/shell/section-heading";
 import { addWorkCommentAction } from "@/features/social/comment-actions";
@@ -185,6 +186,8 @@ export default async function WorkDetailPage({
             {work.detailNote}
           </p>
         </section>
+
+        <RelatedWorksSection seed={{ workId: work.id }} />
 
         <section className="museum-panel p-6 md:p-8">
           <div className="flex flex-wrap items-center justify-between gap-4">

@@ -11,6 +11,16 @@ export type HistogramSnapshot = {
 
 export type BusinessSnapshot = Record<string, { success: number; failure: number }>;
 
+export type RecommendationsSectionSnapshot = {
+  cards_rendered: number;
+  empty: number;
+};
+
+export type RecommendationsSnapshot = {
+  related_creators: RecommendationsSectionSnapshot;
+  related_works: RecommendationsSectionSnapshot;
+};
+
 export type MetricsSnapshot = {
   http: {
     requests_total: number;
@@ -24,6 +34,12 @@ export type MetricsSnapshot = {
     query_duration_ms: HistogramSnapshot;
   };
   business: BusinessSnapshot;
+  /**
+   * Phase 2 — Discovery Intelligence V1 (ADR-3): purely additive
+   * top-level namespace. Always emitted (zeroed at startup) so
+   * consumers can rely on the field existing per FR-006 #1.
+   */
+  recommendations: RecommendationsSnapshot;
   gauges?: Record<string, number>;
   labels?: Record<string, Record<string, number>>;
 };
@@ -37,6 +53,20 @@ const COUNTER_NAMES = [
 ] as const;
 
 type CounterName = (typeof COUNTER_NAMES)[number];
+
+/**
+ * Phase 2 — Discovery Intelligence V1 (FR-006): pre-registered so
+ * the snapshot reports zeroed values from process start, even if the
+ * recommendations module never increments them.
+ */
+const RECOMMENDATIONS_COUNTER_NAMES = [
+  "recommendations.related_creators.cards_rendered",
+  "recommendations.related_creators.empty",
+  "recommendations.related_works.cards_rendered",
+  "recommendations.related_works.empty",
+] as const;
+
+type RecommendationsCounterName = (typeof RECOMMENDATIONS_COUNTER_NAMES)[number];
 
 const HISTOGRAM_NAMES = [
   "http.request_duration_ms",
@@ -93,6 +123,9 @@ export function createMetricsRegistry(): MetricsRegistry {
   for (const name of COUNTER_NAMES) {
     counters.set(name, 0);
   }
+  for (const name of RECOMMENDATIONS_COUNTER_NAMES) {
+    counters.set(name, 0);
+  }
   for (const name of HISTOGRAM_NAMES) {
     histograms.set(name, emptyHistogram());
   }
@@ -142,6 +175,8 @@ export function createMetricsRegistry(): MetricsRegistry {
       const counterValue = (name: CounterName) => counters.get(name) ?? 0;
       const histogramSummary = (name: HistogramName) =>
         summarizeHistogram(histograms.get(name)?.values ?? []);
+      const recommendationsCounterValue = (name: RecommendationsCounterName) =>
+        counters.get(name) ?? 0;
 
       return {
         http: {
@@ -156,6 +191,24 @@ export function createMetricsRegistry(): MetricsRegistry {
           query_duration_ms: histogramSummary("sqlite.query_duration_ms"),
         },
         business,
+        recommendations: {
+          related_creators: {
+            cards_rendered: recommendationsCounterValue(
+              "recommendations.related_creators.cards_rendered",
+            ),
+            empty: recommendationsCounterValue(
+              "recommendations.related_creators.empty",
+            ),
+          },
+          related_works: {
+            cards_rendered: recommendationsCounterValue(
+              "recommendations.related_works.cards_rendered",
+            ),
+            empty: recommendationsCounterValue(
+              "recommendations.related_works.empty",
+            ),
+          },
+        },
         gauges: Object.keys(gaugesOut).length > 0 ? gaugesOut : undefined,
         labels: Object.keys(labels).length > 0 ? labels : undefined,
       };

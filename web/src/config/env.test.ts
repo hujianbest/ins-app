@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   readBackupConfig,
   readObservabilityConfig,
+  readRecommendationsConfig,
 } from "./env";
 
 describe("env / readObservabilityConfig", () => {
@@ -80,5 +81,32 @@ describe("env / readBackupConfig", () => {
     expect(readBackupConfig({ SQLITE_BACKUP_DIR: "/tmp/some-path-xyz" })).toEqual({
       backupDir: "/tmp/some-path-xyz",
     });
+  });
+});
+
+describe("env / readRecommendationsConfig (Discovery Intelligence V1)", () => {
+  it("defaults to relatedEnabled=true with no warnings when env unset", () => {
+    const result = readRecommendationsConfig({});
+    expect(result.config).toEqual({ relatedEnabled: true });
+    expect(result.warnings).toEqual([]);
+  });
+
+  it("respects explicit false", () => {
+    const result = readRecommendationsConfig({
+      RECOMMENDATIONS_RELATED_ENABLED: "false",
+    });
+    expect(result.config.relatedEnabled).toBe(false);
+  });
+
+  it("falls back to true on invalid value with warning", () => {
+    const result = readRecommendationsConfig({
+      RECOMMENDATIONS_RELATED_ENABLED: "maybe",
+    });
+    expect(result.config.relatedEnabled).toBe(true);
+    expect(
+      result.warnings.some(
+        (w) => w.slug === "recommendations-related-enabled-invalid",
+      ),
+    ).toBe(true);
   });
 });

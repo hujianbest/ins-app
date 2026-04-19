@@ -1,9 +1,14 @@
 import { getSessionContext } from "@/features/auth/session";
+import type { DiscoveryEventType } from "@/features/community/types";
 import { recordDiscoveryEvent } from "@/features/discovery/events";
 import { wrapRouteHandler } from "@/features/observability/server-boundary";
 
 type DiscoveryEventRequestBody = {
-  eventType: "work_view" | "profile_view";
+  // Phase 2 — Discovery Intelligence V1 (FR-005): widened to the full
+  // DiscoveryEventType union so the recommendations module can post
+  // `related_card_view` events through the same endpoint without
+  // schema changes.
+  eventType: DiscoveryEventType;
   targetType: "work" | "profile";
   targetId: string;
   targetProfileId?: string;

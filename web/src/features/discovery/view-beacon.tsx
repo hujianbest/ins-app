@@ -8,7 +8,7 @@ import type {
 } from "@/features/community/types";
 
 type DiscoveryViewBeaconProps = {
-  eventType: Extract<DiscoveryEventType, "work_view" | "profile_view">;
+  eventType: DiscoveryEventType;
   targetType: CommunityTargetType;
   targetId: string;
   targetProfileId?: string;
