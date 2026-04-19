@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getRequestAccessControl } from "@/features/auth/access-control";
+import { wrapServerAction } from "@/features/observability/server-boundary";
 
 import {
   saveCreatorProfileForRole,
@@ -32,7 +33,7 @@ function readOptionalField(
   return typeof value === "string" ? value : "";
 }
 
-export async function saveStudioProfileAction(formData: FormData) {
+async function saveStudioProfileActionImpl(formData: FormData) {
   const accessControl = await getRequestAccessControl();
   const session = accessControl.session;
 
@@ -60,3 +61,8 @@ export async function saveStudioProfileAction(formData: FormData) {
       : `/models/${updatedProfile.slug}`,
   );
 }
+
+export const saveStudioProfileAction = wrapServerAction(
+  "community/saveStudioProfileAction",
+  saveStudioProfileActionImpl,
+);

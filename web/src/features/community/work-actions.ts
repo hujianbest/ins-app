@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getRequestAccessControl } from "@/features/auth/access-control";
+import { wrapServerAction } from "@/features/observability/server-boundary";
 
 import {
   saveCreatorWorkForRole,
@@ -34,7 +35,7 @@ function readIntent(formData: FormData): StudioWorkSaveIntent {
   throw new Error("Missing work intent");
 }
 
-export async function saveStudioWorkAction(formData: FormData) {
+async function saveStudioWorkActionImpl(formData: FormData) {
   const accessControl = await getRequestAccessControl();
   const session = accessControl.session;
 
@@ -63,3 +64,8 @@ export async function saveStudioWorkAction(formData: FormData) {
   );
   revalidatePath(`/works/${updatedWork.id}`);
 }
+
+export const saveStudioWorkAction = wrapServerAction(
+  "community/saveStudioWorkAction",
+  saveStudioWorkActionImpl,
+);

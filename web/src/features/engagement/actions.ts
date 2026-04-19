@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getSessionRole } from "@/features/auth/session";
+import { wrapServerAction } from "@/features/observability/server-boundary";
 
 import {
   parseCookieList,
@@ -27,7 +28,7 @@ async function toggleCookieValue(cookieName: string, value: string) {
   });
 }
 
-export async function toggleWorkLikeAction(workId: string, returnTo: string) {
+async function toggleWorkLikeActionImpl(workId: string, returnTo: string) {
   const sessionRole = await getSessionRole();
 
   if (!sessionRole) {
@@ -39,7 +40,7 @@ export async function toggleWorkLikeAction(workId: string, returnTo: string) {
   redirect(returnTo);
 }
 
-export async function toggleProfileFavoriteAction(profileSlug: string, returnTo: string) {
+async function toggleProfileFavoriteActionImpl(profileSlug: string, returnTo: string) {
   const sessionRole = await getSessionRole();
 
   if (!sessionRole) {
@@ -50,3 +51,12 @@ export async function toggleProfileFavoriteAction(profileSlug: string, returnTo:
   await toggleCookieValue(profileFavoritesCookieName, profileSlug);
   redirect(returnTo);
 }
+
+export const toggleWorkLikeAction = wrapServerAction(
+  "engagement/toggleWorkLikeAction",
+  toggleWorkLikeActionImpl,
+);
+export const toggleProfileFavoriteAction = wrapServerAction(
+  "engagement/toggleProfileFavoriteAction",
+  toggleProfileFavoriteActionImpl,
+);

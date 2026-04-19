@@ -3,6 +3,8 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { wrapServerAction } from "@/features/observability/server-boundary";
+
 import {
   authenticateAuthAccount,
   createAuthSession,
@@ -42,7 +44,7 @@ function redirectWithError(pathname: "/login" | "/register", error: unknown) {
   redirect(`${pathname}?error=${encodeURIComponent(errorCode)}`);
 }
 
-export async function loginAccountAction(formData: FormData) {
+async function loginAccountActionImpl(formData: FormData) {
   const cookieStore = await cookies();
 
   let sessionToken: string;
@@ -70,7 +72,7 @@ export async function loginAccountAction(formData: FormData) {
   redirect("/studio");
 }
 
-export async function registerAccountAction(formData: FormData) {
+async function registerAccountActionImpl(formData: FormData) {
   const cookieStore = await cookies();
 
   let sessionToken: string;
@@ -103,7 +105,7 @@ export async function registerAccountAction(formData: FormData) {
   redirect("/studio");
 }
 
-export async function logoutAction() {
+async function logoutActionImpl() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get(authSessionCookieName)?.value;
 
@@ -114,3 +116,13 @@ export async function logoutAction() {
   cookieStore.delete(authSessionCookieName);
   redirect("/");
 }
+
+export const loginAccountAction = wrapServerAction(
+  "auth/loginAccountAction",
+  loginAccountActionImpl,
+);
+export const registerAccountAction = wrapServerAction(
+  "auth/registerAccountAction",
+  registerAccountActionImpl,
+);
+export const logoutAction = wrapServerAction("auth/logoutAction", logoutActionImpl);

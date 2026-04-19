@@ -8,6 +8,7 @@ import {
   buildDiscoveryProfileTargetId,
   recordDiscoveryEvent,
 } from "@/features/discovery/events";
+import { wrapServerAction } from "@/features/observability/server-boundary";
 
 import {
   buildContactThread,
@@ -18,7 +19,7 @@ import {
   upsertContactThread,
 } from "./state";
 
-export async function startContactThreadAction(
+async function startContactThreadActionImpl(
   recipientRole: "photographer" | "model",
   recipientSlug: string,
   sourceType: ContactSourceType,
@@ -77,3 +78,8 @@ export async function startContactThreadAction(
 
   redirect("/inbox");
 }
+
+export const startContactThreadAction = wrapServerAction(
+  "contact/startContactThreadAction",
+  startContactThreadActionImpl,
+);

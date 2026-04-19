@@ -4,10 +4,11 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getSessionContext } from "@/features/auth/session";
+import { wrapServerAction } from "@/features/observability/server-boundary";
 
 import { saveWorkCommentForViewer } from "./comments";
 
-export async function addWorkCommentAction(
+async function addWorkCommentActionImpl(
   workId: string,
   returnPath: string,
   formData: FormData,
@@ -28,3 +29,8 @@ export async function addWorkCommentAction(
   await saveWorkCommentForViewer(session.accountId, workId, body);
   revalidatePath(returnPath);
 }
+
+export const addWorkCommentAction = wrapServerAction(
+  "social/addWorkCommentAction",
+  addWorkCommentActionImpl,
+);

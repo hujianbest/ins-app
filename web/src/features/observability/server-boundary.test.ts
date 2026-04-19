@@ -1,12 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
+import { AppError } from "./errors";
 import {
+  installFreshMetricsRegistry,
   installInMemoryLogger,
+  installInMemoryReporter,
   resetObservabilityForTesting,
 } from "./init";
-import { getCurrentTraceId, isValidTraceId } from "./trace";
-import { wrapRouteHandler } from "./server-boundary";
 import type { InMemoryLogger } from "./logger";
+import { wrapRouteHandler, wrapServerAction } from "./server-boundary";
+import { getCurrentTraceId, isValidTraceId, runWithTrace } from "./trace";
 
 describe("observability/server-boundary wrapRouteHandler", () => {
   let logger: InMemoryLogger;
@@ -107,5 +110,114 @@ describe("observability/server-boundary wrapRouteHandler", () => {
 
     const completed = logger.records.find((r) => r.event === "http.request.completed");
     expect(completed?.status).toBe(503);
+  });
+});
+
+describe("observability/server-boundary wrapServerAction", () => {
+  beforeEach(() => {
+    installInMemoryLogger({ level: "debug" });
+    installInMemoryReporter();
+    installFreshMetricsRegistry();
+  });
+
+  afterEach(() => {
+    resetObservabilityForTesting();
+  });
+
+  it("returns underlying value unchanged on success and emits server-action.completed", async () => {
+    const original = async (a: number, b: number) => a + b;
+    const wrapped = wrapServerAction("math/add", original);
+
+    const result = await wrapped(2, 3);
+    expect(result).toBe(5);
+
+    // I-7: name + length + async preserved
+    expect(wrapped.length).toBe(original.length);
+    expect(typeof wrapped).toBe("function");
+  });
+
+  it("propagates trace id from runWithTrace through to logger", async () => {
+    const logger = installInMemoryLogger({ level: "debug" });
+    installInMemoryReporter();
+    installFreshMetricsRegistry();
+
+    const wrapped = wrapServerAction("math/add", async (a: number, b: number) => a + b);
+
+    await runWithTrace("trace-server-action", async () => {
+      await wrapped(2, 3);
+    });
+
+    const completed = logger.records.find(
+      (r) => r.event === "server-action.completed",
+    );
+    expect(completed?.traceId).toBe("trace-server-action");
+    expect(completed?.actionName).toBe("math/add");
+    expect(typeof completed?.durationMs).toBe("number");
+  });
+
+  it("on throw, normalizes via reporter+logger and rethrows", async () => {
+    const logger = installInMemoryLogger({ level: "debug" });
+    const reporter = installInMemoryReporter();
+    installFreshMetricsRegistry();
+
+    const wrapped = wrapServerAction(
+      "math/blowup",
+      async (): Promise<void> => {
+        throw new Error("kaboom");
+      },
+    );
+
+    await expect(wrapped()).rejects.toMatchObject({
+      code: "internal_error",
+      status: 500,
+    });
+
+    const errored = logger.records.find(
+      (r) => r.event === "server-action.error",
+    );
+    expect(errored).toBeDefined();
+    expect(errored?.actionName).toBe("math/blowup");
+    expect(errored?.errorClass).toBe("Error");
+
+    // normalizeError emits a warn 'error.normalized' too
+    const normalized = logger.records.find(
+      (r) => r.event === "error.normalized",
+    );
+    expect(normalized).toBeDefined();
+
+    expect(reporter.reports).toHaveLength(1);
+  });
+
+  it("preserves AppError code/status when the action throws an AppError", async () => {
+    installInMemoryLogger({ level: "debug" });
+    installInMemoryReporter();
+    installFreshMetricsRegistry();
+
+    const wrapped = wrapServerAction(
+      "auth/forbidden",
+      async (): Promise<void> => {
+        throw new AppError({ code: "forbidden", status: 403, message: "Nope" });
+      },
+    );
+
+    await expect(wrapped()).rejects.toMatchObject({
+      code: "forbidden",
+      status: 403,
+      message: "Nope",
+    });
+  });
+
+  it("works without active trace context and falls back to traceId='unknown'", async () => {
+    const logger = installInMemoryLogger({ level: "debug" });
+    installInMemoryReporter();
+    installFreshMetricsRegistry();
+
+    const wrapped = wrapServerAction("math/identity", async (x: number) => x);
+    await wrapped(7);
+
+    const completed = logger.records.find(
+      (r) => r.event === "server-action.completed",
+    );
+    expect(completed?.traceId).toBe("unknown");
   });
 });
