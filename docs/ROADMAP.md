@@ -103,6 +103,26 @@
 
 **验收 / Acceptance**：相关推荐模块在不损害「高匹配」叙事的前提下，可量化提升下游承接动作（关注 / 联系 / 外链跳转）。
 
+**V1 已交付 / V1 delivered（2026-04-19）**
+
+- ✅ 规则化「相关创作者」：创作者公开主页底部新增 `RelatedCreatorsSection`，最多 4 张卡片，按 `weight(city)=0.6 / weight(shootingFocus)=0.4` 评分（满足 SRS §8.3 不变量 `weight(city) >= weight(shootingFocus)`）+ tie-breaker `updatedAt desc → targetKey asc`。
+- ✅ 规则化「相关作品」：作品详情页评论区上方新增 `RelatedWorksSection`，最多 4 张卡片，按 `weight(sameOwner)=0.55 / weight(ownerCity)=0.3 / weight(category)=0.15` 评分（满足 SRS §8.3 不变量 `sameOwner > ownerCity >= category`）。
+- ✅ Feature flag `RECOMMENDATIONS_RELATED_ENABLED`（默认 `true`，非法值降级 + warning），关闭时 SSR 层 DOM 无 panel、无 beacon、不计 metrics。
+- ✅ 新事件类型 `related_card_view`（`DiscoveryEventType` 扩展 + view-beacon 类型放宽 + `/api/discovery-events` route handler 类型放宽 + 4 surface 端到端用例）。
+- ✅ Metrics 加性扩展：`MetricsSnapshot.recommendations.{related_creators,related_works}.{cards_rendered,empty}` 共 4 个 counter，纯加性，不破坏既有 `http` / `sqlite` / `business` 命名空间消费者。
+- ✅ NFR-001 性能：`getRelatedCreators` P95 = 0.05ms（100 candidates），`getRelatedWorks` P95 = 0.04ms（200 works + 50 owner profiles），均远低于 30ms 预算。
+- ✅ FR-008 #3 单次 repository 读 spy 断言；soft-fail 安全降级（repository 异常 → warn log + counter empty + 稳定空态文案）。
+
+**仍未做 / Still deferred to later slices**
+
+- 向量检索 / pgvector / ML 排序（与 §3.1 PostgreSQL + 数据上量评估一起做）
+- A/B 框架与流量分桶（先采集 `related_card_view` 事件作为基线，下一 slice 评估）
+- 基于用户行为的个性化推荐（`discovery_events` 个性化通路）
+- 首页 / 发现页 / 搜索页注入 Related 模块（首期仅创作者主页 + 作品详情页两处）
+- 跨角色推荐（摄影师推模特 / 反之）
+- `dwell time` / `scroll depth` 事件扩展（隐私评估后再补）
+- 「为什么推荐」解释面（NFR-002 + SRS A-003 显式不展示 score / breakdown）
+
 ### 3.7 搜索升级 / Search upgrade
 
 **目标 / Goal**：从关键词命中升级到带过滤面的搜索，并评估独立检索服务。
@@ -176,7 +196,7 @@
 1. §3.1 生产数据与持久化 → §3.8 可观测性与运维（**任何上量都先做这两件**；§3.8 V1 已交付，§3.1 待启动）。
 2. §3.2 运营后台 V1 → §3.3 线程式消息中心。
 3. §3.4 合作线索到履约 → §3.5 支付 / 订单 / 会员（履约语义先于付费语义）。
-4. §3.6 Discovery 智能化 → §3.7 搜索升级（共享相似度与事件管道）。
+4. §3.6 Discovery 智能化 → §3.7 搜索升级（共享相似度与事件管道；§3.6 V1 已交付）。
 5. §3.9 可访问性与国际化（贯穿，与每个新模块同步建设）。
 6. §3.10 原生体验探索（评估为主，不阻塞主线）。
 
