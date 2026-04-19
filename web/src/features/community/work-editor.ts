@@ -1,4 +1,5 @@
 import { type AuthRole } from "@/features/auth/types";
+import { AppError } from "@/features/observability/errors";
 import { getStudioProfileSlugForRole } from "@/features/showcase/sample-data";
 
 import { getDefaultCommunityRepositoryBundle } from "./runtime";
@@ -108,6 +109,19 @@ function resolveNextVisibility(
   currentWork: CommunityWorkRecord | null,
   intent: StudioWorkSaveIntent,
 ) {
+  // Phase 2 — Ops Back Office V1 (FR-004 #6 / I-14):
+  // Owner-side editor MUST NOT mutate moderated works. Any intent
+  // (save_draft / publish / revert_to_draft) on a moderated work is
+  // rejected so only the admin restoreWork path can flip
+  // `moderated → published`.
+  if (currentWork?.status === "moderated") {
+    throw new AppError({
+      code: "moderated_work_owner_locked",
+      message: "Moderated work cannot be edited by owner.",
+      status: 403,
+    });
+  }
+
   if (intent === "revert_to_draft") {
     return {
       status: "draft" as const,
