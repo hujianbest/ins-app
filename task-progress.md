@@ -4,8 +4,8 @@
 - **Workflow Profile:** full
 - **Execution Mode:** auto
 - **Current Stage:** `hf-specify`
-- **Current Status:** `Phase 2 — Observability & Ops V1` 增量记录已落盘（`docs/reviews/increment-phase2-observability-ops-v1.md`），由 `hf-workflow-router` 派发到 `hf-specify` 起草新规格；`Lens Archive Discovery Quality` 已 finalized 的工件全部保留有效。
-- **Current Spec:** `pending（docs/specs/2026-04-19-observability-ops-v1-srs.md 起草中）`
+- **Current Status:** `Phase 2 — Observability & Ops V1` 规格草稿已落盘（`docs/specs/2026-04-19-observability-ops-v1-srs.md`），等待 `hf-spec-review` 派发；`Lens Archive Discovery Quality` 已 finalized 的工件全部保留有效。
+- **Current Spec:** `docs/specs/2026-04-19-observability-ops-v1-srs.md`
 - **Current Review Record:** `docs/reviews/increment-phase2-observability-ops-v1.md`
 - **Current Design:** `pending（docs/designs/2026-04-19-observability-ops-v1-design.md 待起草）`
 - **Current Task Plan:** `pending（docs/tasks/2026-04-19-observability-ops-v1-tasks.md 待起草）`
