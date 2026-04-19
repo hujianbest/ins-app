@@ -127,7 +127,8 @@ export type DiscoveryEventType =
   | "profile_view"
   | "follow"
   | "contact_start"
-  | "external_handoff_click";
+  | "external_handoff_click"
+  | "related_card_view";
 
 export type DiscoveryEventRecord = {
   id: string;

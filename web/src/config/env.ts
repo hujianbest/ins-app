@@ -261,3 +261,45 @@ export function getObservabilityConfig(): ObservabilityConfig {
 export function getBackupConfig(): BackupConfig {
   return readBackupConfig();
 }
+
+// ---------------------------------------------------------------------------
+// Phase 2 — Discovery Intelligence V1 env extensions (FR-004 / FR-006)
+// Defaults and degradation rules per spec FR-004 + design §9.9 / §11.
+// Failures are degradation-with-warning; nothing is a hard-stop.
+// ---------------------------------------------------------------------------
+
+export type RecommendationsConfig = {
+  relatedEnabled: boolean;
+};
+
+export type RecommendationsConfigResult = {
+  config: RecommendationsConfig;
+  warnings: ConfigWarning[];
+};
+
+export function readRecommendationsConfig(
+  env: AppConfigEnv = process.env,
+): RecommendationsConfigResult {
+  const warnings: ConfigWarning[] = [];
+
+  const raw = env.RECOMMENDATIONS_RELATED_ENABLED?.trim().toLowerCase();
+  let relatedEnabled = true;
+  if (raw !== undefined && raw !== "") {
+    if (raw === "true") {
+      relatedEnabled = true;
+    } else if (raw === "false") {
+      relatedEnabled = false;
+    } else {
+      warnings.push({
+        slug: "recommendations-related-enabled-invalid",
+        message: `RECOMMENDATIONS_RELATED_ENABLED="${env.RECOMMENDATIONS_RELATED_ENABLED}" is not "true"/"false"; falling back to true.`,
+      });
+    }
+  }
+
+  return { config: { relatedEnabled }, warnings };
+}
+
+export function getRecommendationsConfig(): RecommendationsConfig {
+  return readRecommendationsConfig().config;
+}
