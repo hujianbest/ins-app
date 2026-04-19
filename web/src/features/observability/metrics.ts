@@ -42,6 +42,13 @@ export type AdminSnapshot = {
   audit: AdminAuditSnapshot;
 };
 
+export type MessagingSnapshot = {
+  threads_created: number;
+  messages_sent: number;
+  threads_read: number;
+  system_notifications_listed: number;
+};
+
 export type MetricsSnapshot = {
   http: {
     requests_total: number;
@@ -68,6 +75,12 @@ export type MetricsSnapshot = {
    * on the field existing per FR-008 #1.
    */
   admin: AdminSnapshot;
+  /**
+   * Phase 2 — Threaded Messaging V1 (ADR-3): purely additive
+   * top-level namespace, same shape pattern as `admin` /
+   * `recommendations`. Always emitted (zeroed at startup).
+   */
+  messaging: MessagingSnapshot;
   gauges?: Record<string, number>;
   labels?: Record<string, Record<string, number>>;
 };
@@ -111,6 +124,19 @@ const ADMIN_COUNTER_NAMES = [
 ] as const;
 
 type AdminCounterName = (typeof ADMIN_COUNTER_NAMES)[number];
+
+/**
+ * Phase 2 — Threaded Messaging V1 (FR-008): pre-registered so the
+ * snapshot reports zeroed messaging counters from process start.
+ */
+const MESSAGING_COUNTER_NAMES = [
+  "messaging.threads_created",
+  "messaging.messages_sent",
+  "messaging.threads_read",
+  "messaging.system_notifications_listed",
+] as const;
+
+type MessagingCounterName = (typeof MESSAGING_COUNTER_NAMES)[number];
 
 const HISTOGRAM_NAMES = [
   "http.request_duration_ms",
@@ -173,6 +199,9 @@ export function createMetricsRegistry(): MetricsRegistry {
   for (const name of ADMIN_COUNTER_NAMES) {
     counters.set(name, 0);
   }
+  for (const name of MESSAGING_COUNTER_NAMES) {
+    counters.set(name, 0);
+  }
   for (const name of HISTOGRAM_NAMES) {
     histograms.set(name, emptyHistogram());
   }
@@ -226,6 +255,8 @@ export function createMetricsRegistry(): MetricsRegistry {
         counters.get(name) ?? 0;
       const adminCounterValue = (name: AdminCounterName) =>
         counters.get(name) ?? 0;
+      const messagingCounterValue = (name: MessagingCounterName) =>
+        counters.get(name) ?? 0;
 
       return {
         http: {
@@ -271,6 +302,14 @@ export function createMetricsRegistry(): MetricsRegistry {
           audit: {
             appended: adminCounterValue("admin.audit.appended"),
           },
+        },
+        messaging: {
+          threads_created: messagingCounterValue("messaging.threads_created"),
+          messages_sent: messagingCounterValue("messaging.messages_sent"),
+          threads_read: messagingCounterValue("messaging.threads_read"),
+          system_notifications_listed: messagingCounterValue(
+            "messaging.system_notifications_listed",
+          ),
         },
         gauges: Object.keys(gaugesOut).length > 0 ? gaugesOut : undefined,
         labels: Object.keys(labels).length > 0 ? labels : undefined,

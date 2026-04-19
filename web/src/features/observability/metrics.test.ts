@@ -189,3 +189,39 @@ describe("observability/metrics admin namespace (Ops Back Office V1)", () => {
     });
   });
 });
+
+describe("observability/metrics messaging namespace (Threaded Messaging V1)", () => {
+  it("emits zeroed messaging namespace at startup", () => {
+    const snap = createMetricsRegistry().snapshot();
+    expect(snap.messaging).toEqual({
+      threads_created: 0,
+      messages_sent: 0,
+      threads_read: 0,
+      system_notifications_listed: 0,
+    });
+  });
+
+  it("incrementCounter under messaging.* increments the matching snapshot field", () => {
+    registry.incrementCounter("messaging.threads_created");
+    registry.incrementCounter("messaging.messages_sent", undefined, 3);
+    registry.incrementCounter("messaging.threads_read");
+    registry.incrementCounter("messaging.system_notifications_listed", undefined, 5);
+    const snap = registry.snapshot();
+    expect(snap.messaging).toEqual({
+      threads_created: 1,
+      messages_sent: 3,
+      threads_read: 1,
+      system_notifications_listed: 5,
+    });
+  });
+
+  it("does not pollute existing http/sqlite/business/recommendations/admin namespaces", () => {
+    registry.incrementCounter("messaging.threads_created");
+    const snap = registry.snapshot();
+    expect(snap.http.requests_total).toBe(0);
+    expect(snap.sqlite.queries_total).toBe(0);
+    expect(snap.business).toEqual({});
+    expect(snap.recommendations.related_creators.cards_rendered).toBe(0);
+    expect(snap.admin.curation.added).toBe(0);
+  });
+});
