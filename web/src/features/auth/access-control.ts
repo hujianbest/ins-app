@@ -1,3 +1,5 @@
+import { getAdminAccountEmails } from "@/config/env";
+
 import { getSessionContext } from "./session";
 
 import type {
@@ -44,13 +46,33 @@ export function createStudioGuard(
   };
 }
 
-export function createAccessControl(session: SessionContext): AccessControl {
+// Phase 2 — Ops Back Office V1 (FR-001):
+// admin policy / guard live in features/admin so they can be unit
+// tested without dragging in `auth-store.ts` (which imports
+// `node:sqlite` and currently breaks the vite test bundler).
+export {
+  createAdminCapabilityPolicy,
+  createAdminGuard,
+} from "@/features/admin/admin-policy";
+import {
+  createAdminCapabilityPolicy as createAdminCapabilityPolicyImpl,
+  createAdminGuard as createAdminGuardImpl,
+} from "@/features/admin/admin-policy";
+
+export function createAccessControl(
+  session: SessionContext,
+  adminEmails: ReadonlySet<string> = getAdminAccountEmails(),
+): AccessControl {
   const creatorCapability = createCreatorCapabilityPolicy(session);
+  const adminCapability = createAdminCapabilityPolicyImpl(session, adminEmails);
+  const adminGuard = createAdminGuardImpl(session, adminCapability);
 
   return {
     session,
     creatorCapability,
     studioGuard: createStudioGuard(session, creatorCapability),
+    adminCapability,
+    adminGuard,
   };
 }
 

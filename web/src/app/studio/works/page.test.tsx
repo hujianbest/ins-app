@@ -43,6 +43,7 @@ function createAuthenticatedAccessControl(
       isAuthenticated: true,
       accountId: `demo-account:${primaryRole}`,
       primaryRole,
+      email: `${primaryRole}@test.lens-archive.local`,
     },
     creatorCapability: {
       isCreator: true,
@@ -53,6 +54,12 @@ function createAuthenticatedAccessControl(
       allowed: true,
       redirectTo: null,
       reason: "allowed",
+    },
+    adminCapability: { isAdmin: false, email: null },
+    adminGuard: {
+      allowed: false,
+      redirectTo: "/studio",
+      reason: "not_admin",
     },
   };
 }
@@ -84,7 +91,7 @@ test("studio works page renders the signed-in creator work list", async () => {
     },
   ] satisfies StudioManagedWork[]);
 
-  const page = await StudioWorksPage();
+  const page = await StudioWorksPage({});
 
   render(page);
 
@@ -122,9 +129,68 @@ test("studio works page redirects unauthenticated visitors to login", async () =
       redirectTo: "/login",
       reason: "unauthenticated",
     },
+    adminCapability: { isAdmin: false, email: null },
+    adminGuard: {
+      allowed: false,
+      redirectTo: "/login",
+      reason: "unauthenticated",
+    },
   } satisfies AccessControl);
 
-  await StudioWorksPage();
+  await StudioWorksPage({});
 
   expect(redirectMock).toHaveBeenCalledWith("/login");
+});
+
+test("studio works page renders moderated works as read-only with the appeal copy and no submit buttons (Phase 2 §3.2 FR-004 #6)", async () => {
+  redirectMock.mockReset();
+  getRequestAccessControlMock.mockResolvedValue(
+    createAuthenticatedAccessControl("photographer"),
+  );
+  getStudioWorksEditorModelMock.mockResolvedValue([
+    {
+      id: "moderated-one",
+      title: "Hidden by Ops",
+      category: "编辑人像",
+      description: "Hidden description",
+      detailNote: "Hidden detail",
+      coverAsset: "work:moderated:cover",
+      status: "moderated",
+      publishedAt: "2026-04-01T00:00:00Z",
+    },
+  ] satisfies StudioManagedWork[]);
+
+  const page = await StudioWorksPage({});
+  const { container } = render(page);
+
+  expect(screen.getByText("Hidden by Ops")).toBeDefined();
+  expect(screen.getByText(/已隐藏（运营处置）/)).toBeDefined();
+  expect(screen.getByText(/请联系管理员/)).toBeDefined();
+  // moderated row must NOT render publish / save_draft / revert_to_draft buttons
+  const intentButtons = Array.from(container.querySelectorAll("button[name='intent']"));
+  // Only the top "新建" form should still have submit buttons; the moderated work row should not add any.
+  const hiddenWorkSection = Array.from(container.querySelectorAll("article")).find((el) =>
+    el.textContent?.includes("Hidden by Ops"),
+  );
+  expect(hiddenWorkSection).toBeDefined();
+  expect(hiddenWorkSection?.querySelectorAll("button").length).toBe(0);
+  // top-of-page "新建" form still has its 2 intent buttons
+  expect(intentButtons.length).toBe(2);
+});
+
+test("studio works page surfaces moderated_work_owner_locked alert when ?error= is set", async () => {
+  redirectMock.mockReset();
+  getRequestAccessControlMock.mockResolvedValue(
+    createAuthenticatedAccessControl("photographer"),
+  );
+  getStudioWorksEditorModelMock.mockResolvedValue([] satisfies StudioManagedWork[]);
+
+  const page = await StudioWorksPage({
+    searchParams: Promise.resolve({ error: "moderated_work_owner_locked" }),
+  });
+  render(page);
+
+  const alert = screen.getByRole("alert");
+  expect(alert.textContent).toContain("该作品已被运营隐藏");
+  expect(alert.textContent).toContain("moderated_work_owner_locked");
 });

@@ -81,6 +81,33 @@ test("getPublicWorkRecords excludes draft works from public reads", () => {
   ]);
 });
 
+test("getPublicWorkRecords also excludes moderated works from public reads (Ops Back Office V1)", () => {
+  const snapshot = createShowcaseSeedSnapshot(
+    [...photographerProfiles, ...modelProfiles],
+    works,
+  );
+
+  const moderatedWork: CommunityWorkRecord = {
+    ...snapshot.works[1],
+    id: "moderated-work",
+    status: "moderated",
+  };
+  const draftWork: CommunityWorkRecord = {
+    ...snapshot.works[2],
+    id: "draft-work-y",
+    status: "draft",
+    publishedAt: undefined,
+  };
+
+  const publicWorks = getPublicWorkRecords([
+    moderatedWork,
+    draftWork,
+    snapshot.works[0],
+  ]);
+
+  expect(publicWorks.map((w) => w.id)).toEqual(["neon-portrait-study"]);
+});
+
 test("isCommunitySurface only accepts home and discover", () => {
   expect(isCommunitySurface("home")).toBe(true);
   expect(isCommunitySurface("discover")).toBe(true);

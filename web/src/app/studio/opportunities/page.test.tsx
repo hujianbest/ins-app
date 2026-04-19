@@ -28,6 +28,7 @@ function createAuthenticatedAccessControl(
       isAuthenticated: true,
       accountId: `demo-account:${primaryRole}`,
       primaryRole,
+      email: `${primaryRole}@test.lens-archive.local`,
     },
     creatorCapability: {
       isCreator: true,
@@ -38,6 +39,12 @@ function createAuthenticatedAccessControl(
       allowed: true,
       redirectTo: null,
       reason: "allowed",
+    },
+    adminCapability: { isAdmin: false, email: null },
+    adminGuard: {
+      allowed: false,
+      redirectTo: "/studio",
+      reason: "not_admin",
     },
   };
 }
@@ -84,6 +91,12 @@ test("studio opportunities page redirects unauthenticated visitors to login", as
       canPublishWorks: false,
     },
     studioGuard: {
+      allowed: false,
+      redirectTo: "/login",
+      reason: "unauthenticated",
+    },
+    adminCapability: { isAdmin: false, email: null },
+    adminGuard: {
       allowed: false,
       redirectTo: "/login",
       reason: "unauthenticated",

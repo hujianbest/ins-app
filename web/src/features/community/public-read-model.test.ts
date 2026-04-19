@@ -96,3 +96,43 @@ test("public work page model and static params expose published works only", asy
 
   bundle.close();
 });
+
+test("public read paths hide moderated works the same way as drafts (Phase 2 §3.2 ADR-5)", async () => {
+  const snapshot = createShowcaseSeedSnapshot(
+    [...photographerProfiles, ...modelProfiles],
+    works,
+  );
+  const moderatedWork: CommunityWorkRecord = {
+    ...snapshot.works[0],
+    id: "moderated-work",
+    status: "moderated",
+  };
+  const bundle = createSqliteCommunityRepositoryBundle({
+    databasePath: ":memory:",
+    seed: {
+      profiles: snapshot.profiles,
+      works: [...snapshot.works, moderatedWork],
+      curation: [],
+    },
+  });
+
+  // moderated work cannot be fetched as a public work
+  await expect(getPublicWorkPageModel(moderatedWork.id, bundle)).resolves.toBeNull();
+
+  // moderated work id must not appear in the static params list
+  await expect(listPublicWorkPageParams(bundle)).resolves.not.toContainEqual({
+    workId: moderatedWork.id,
+  });
+
+  // owner profile showcase must not surface moderated works
+  const profile = await getPublicProfilePageModel(
+    moderatedWork.ownerRole,
+    moderatedWork.ownerSlug,
+    bundle,
+  );
+  expect(profile?.showcaseItems.map((item) => item.workId)).not.toContain(
+    moderatedWork.id,
+  );
+
+  bundle.close();
+});

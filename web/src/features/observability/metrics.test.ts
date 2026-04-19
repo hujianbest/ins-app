@@ -149,3 +149,43 @@ describe("observability/metrics recommendations namespace (Discovery Intelligenc
     expect(snap.business).toEqual({});
   });
 });
+
+describe("observability/metrics admin namespace (Ops Back Office V1)", () => {
+  it("emits zeroed admin namespace at startup", () => {
+    const snap = createMetricsRegistry().snapshot();
+    expect(snap.admin).toEqual({
+      curation: { added: 0, removed: 0, reordered: 0 },
+      work_moderation: { hidden: 0, restored: 0 },
+      audit: { appended: 0 },
+    });
+  });
+
+  it("incrementCounter under admin.* increments the matching snapshot field", () => {
+    registry.incrementCounter("admin.curation.added", undefined, 2);
+    registry.incrementCounter("admin.curation.removed");
+    registry.incrementCounter("admin.curation.reordered");
+    registry.incrementCounter("admin.work_moderation.hidden", undefined, 3);
+    registry.incrementCounter("admin.work_moderation.restored");
+    registry.incrementCounter("admin.audit.appended", undefined, 5);
+
+    const snap = registry.snapshot();
+    expect(snap.admin).toEqual({
+      curation: { added: 2, removed: 1, reordered: 1 },
+      work_moderation: { hidden: 3, restored: 1 },
+      audit: { appended: 5 },
+    });
+  });
+
+  it("does not pollute existing http/sqlite/business/recommendations namespaces", () => {
+    registry.incrementCounter("admin.curation.added");
+    registry.incrementCounter("admin.audit.appended");
+    const snap = registry.snapshot();
+    expect(snap.http.requests_total).toBe(0);
+    expect(snap.sqlite.queries_total).toBe(0);
+    expect(snap.business).toEqual({});
+    expect(snap.recommendations).toEqual({
+      related_creators: { cards_rendered: 0, empty: 0 },
+      related_works: { cards_rendered: 0, empty: 0 },
+    });
+  });
+});

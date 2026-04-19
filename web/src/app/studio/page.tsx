@@ -63,6 +63,17 @@ export default async function StudioPage() {
               打开收件箱
             </p>
           </Link>
+          {accessControl.adminCapability.isAdmin ? (
+            <Link
+              href="/studio/admin"
+              className="museum-card block p-5"
+            >
+              <p className="museum-label">运营后台</p>
+              <p className="font-display mt-4 text-3xl leading-none tracking-[-0.03em] text-[color:var(--accent-strong)]">
+                进入运营后台
+              </p>
+            </Link>
+          ) : null}
         </div>
       </section>
     </main>

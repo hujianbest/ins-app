@@ -303,3 +303,60 @@ export function readRecommendationsConfig(
 export function getRecommendationsConfig(): RecommendationsConfig {
   return readRecommendationsConfig().config;
 }
+
+// ---------------------------------------------------------------------------
+// Phase 2 — Ops Back Office V1 env extensions (FR-007)
+// Defaults and degradation rules per spec FR-007 + design §9.3.
+// Failures are degradation-with-warning; nothing is a hard-stop.
+// Empty admin list ⇒ no account is admin (fail-closed default).
+// ---------------------------------------------------------------------------
+
+export type AdminAccountsConfig = {
+  emails: ReadonlySet<string>;
+};
+
+export type AdminAccountsConfigResult = {
+  config: AdminAccountsConfig;
+  warnings: ConfigWarning[];
+};
+
+function isShallowValidEmail(value: string): boolean {
+  // Loose validation; we only need to reject obvious garbage entries
+  // (no `@`, leading `@`, trailing `@`, multiple `@`).
+  if (!value.includes("@") || value.startsWith("@") || value.endsWith("@")) {
+    return false;
+  }
+  const atCount = value.split("@").length - 1;
+  return atCount === 1;
+}
+
+export function readAdminAccountsConfig(
+  env: AppConfigEnv = process.env,
+): AdminAccountsConfigResult {
+  const warnings: ConfigWarning[] = [];
+  const raw = env.ADMIN_ACCOUNT_EMAILS?.trim();
+
+  if (!raw) {
+    return { config: { emails: new Set() }, warnings };
+  }
+
+  const valid = new Set<string>();
+  for (const piece of raw.split(",")) {
+    const candidate = piece.trim().toLowerCase();
+    if (!candidate) continue;
+    if (!isShallowValidEmail(candidate)) {
+      warnings.push({
+        slug: "admin-account-email-invalid",
+        message: `ADMIN_ACCOUNT_EMAILS contains invalid email "${piece.trim()}"; dropped.`,
+      });
+      continue;
+    }
+    valid.add(candidate);
+  }
+
+  return { config: { emails: valid }, warnings };
+}
+
+export function getAdminAccountEmails(): ReadonlySet<string> {
+  return readAdminAccountsConfig().config.emails;
+}

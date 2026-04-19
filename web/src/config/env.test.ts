@@ -2,6 +2,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  readAdminAccountsConfig,
   readBackupConfig,
   readObservabilityConfig,
   readRecommendationsConfig,
@@ -81,6 +82,46 @@ describe("env / readBackupConfig", () => {
     expect(readBackupConfig({ SQLITE_BACKUP_DIR: "/tmp/some-path-xyz" })).toEqual({
       backupDir: "/tmp/some-path-xyz",
     });
+  });
+});
+
+describe("env / readAdminAccountsConfig (Ops Back Office V1)", () => {
+  it("returns an empty set when env unset", () => {
+    const result = readAdminAccountsConfig({});
+    expect(Array.from(result.config.emails)).toEqual([]);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it("returns an empty set when env is whitespace-only", () => {
+    const result = readAdminAccountsConfig({ ADMIN_ACCOUNT_EMAILS: "   " });
+    expect(Array.from(result.config.emails)).toEqual([]);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it("parses CSV with trim + lower + dedup", () => {
+    const result = readAdminAccountsConfig({
+      ADMIN_ACCOUNT_EMAILS: "Alice@Example.com, bob@example.com,   alice@EXAMPLE.com  ",
+    });
+    expect(Array.from(result.config.emails).sort()).toEqual([
+      "alice@example.com",
+      "bob@example.com",
+    ]);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it("drops invalid pieces and emits warning", () => {
+    const result = readAdminAccountsConfig({
+      ADMIN_ACCOUNT_EMAILS: "carol@example.com,not-an-email,@bad,d@example.com,a@",
+    });
+    expect(Array.from(result.config.emails).sort()).toEqual([
+      "carol@example.com",
+      "d@example.com",
+    ]);
+    expect(
+      result.warnings.filter(
+        (w) => w.slug === "admin-account-email-invalid",
+      ).length,
+    ).toBe(3);
   });
 });
 

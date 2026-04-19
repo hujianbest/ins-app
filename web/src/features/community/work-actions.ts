@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getRequestAccessControl } from "@/features/auth/access-control";
+import { AppError } from "@/features/observability/errors";
 import { wrapServerAction } from "@/features/observability/server-boundary";
 
 import {
@@ -44,15 +45,30 @@ async function saveStudioWorkActionImpl(formData: FormData) {
     return;
   }
 
-  const updatedWork = await saveCreatorWorkForRole(session.primaryRole, {
-    workId: typeof formData.get("workId") === "string" ? String(formData.get("workId")) : undefined,
-    title: readRequiredField(formData, "title"),
-    category: readRequiredField(formData, "category"),
-    description: readRequiredField(formData, "description"),
-    detailNote: readRequiredField(formData, "detailNote"),
-    coverAsset: readRequiredField(formData, "coverAsset"),
-    intent: readIntent(formData),
-  });
+  let updatedWork;
+  try {
+    updatedWork = await saveCreatorWorkForRole(session.primaryRole, {
+      workId: typeof formData.get("workId") === "string" ? String(formData.get("workId")) : undefined,
+      title: readRequiredField(formData, "title"),
+      category: readRequiredField(formData, "category"),
+      description: readRequiredField(formData, "description"),
+      detailNote: readRequiredField(formData, "detailNote"),
+      coverAsset: readRequiredField(formData, "coverAsset"),
+      intent: readIntent(formData),
+    });
+  } catch (error) {
+    // Phase 2 — Ops Back Office V1 (FR-004 #6 / I-14):
+    // Owner attempted to mutate a moderated work; surface the error
+    // back to /studio/works as a URL-bound alert without leaking
+    // internals to the page boundary.
+    if (
+      error instanceof AppError &&
+      error.code === "moderated_work_owner_locked"
+    ) {
+      redirect("/studio/works?error=moderated_work_owner_locked");
+    }
+    throw error;
+  }
 
   revalidatePath("/studio/works");
   revalidatePath("/");

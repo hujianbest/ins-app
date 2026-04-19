@@ -94,8 +94,9 @@ Lens Archive 是一个面向**摄影师 / 模特双主身份**的创作者社区
 | Discovery 最小事件记录 | Discovery Quality | 已完成 | 不依赖推荐算法 |
 | 规则化「相关创作者」「相关作品」 | 阶段 2 §3.6 V1 | 已完成 | `RelatedCreatorsSection` 挂在创作者主页底部、`RelatedWorksSection` 挂在作品详情页评论区上方；P95 ≤ 30ms |
 | 可观测性 / 备份恢复 / 内部 metrics | 阶段 2 §3.8 V1 | 已完成 | 详见 `RELEASE_NOTES.md` 2026-04-19 §3.8 章节 |
+| 运营 / 审核后台 V1（精选位维护 + 作品违规处置 + 审计日志） | 阶段 2 §3.2 V1 | 已完成 | `/studio/admin/{,curation,works,audit}` 四页 + admin 名单 env + audit_log 表；详见 `RELEASE_NOTES.md` 2026-04-19 §3.2 章节 |
 | 初始引流内容 | 阶段 1 | 已完成 | 授权来源 + 本地化 |
-| 运营后台 / 消息中心 / 支付 / 向量检索 | 阶段 2 | 未开始 | 显式延后 |
+| 消息中心 / 支付 / 向量检索 / 账号管理 | 阶段 2 | 未开始 | 显式延后 |
 
 总体：**阶段 1 + Discovery Quality 已 finalized**（详见 `docs/verification/finalize-lens-archive-discovery-quality.md` 与 `RELEASE_NOTES.md`），可作为可云端部署的产品基线。
 
@@ -231,8 +232,9 @@ Full ops / moderation back office, threaded in-app messaging, payments / orders 
 | Discovery minimal event log | Discovery Quality | Done | No recommender dependency |
 | Rule-based related creators / related works | Phase 2 §3.6 V1 | Done | `RelatedCreatorsSection` on profile pages, `RelatedWorksSection` above comments on work detail pages; P95 ≤ 30ms |
 | Observability / backup-restore / internal metrics | Phase 2 §3.8 V1 | Done | See `RELEASE_NOTES.md` 2026-04-19 §3.8 |
+| Ops / moderation back office V1 (curation + work moderation + audit log) | Phase 2 §3.2 V1 | Done | `/studio/admin/{,curation,works,audit}` 4 pages + env-driven admin allowlist + `audit_log` table; see `RELEASE_NOTES.md` 2026-04-19 §3.2 |
 | Seeded launch content | Phase 1 | Done | Licensed sources + local assets |
-| Ops back office / messaging / payments / vector retrieval | Phase 2 | Not started | Explicitly deferred |
+| Threaded messaging / payments / vector retrieval / account admin | Phase 2 | Not started | Explicitly deferred |
 
 Overall: **Phase 1 + Discovery Quality is finalized** (see `docs/verification/finalize-lens-archive-discovery-quality.md` and `RELEASE_NOTES.md`); the codebase is a credible cloud-deployable product baseline.
 

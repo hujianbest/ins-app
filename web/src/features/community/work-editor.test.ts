@@ -208,3 +208,54 @@ test("studio works editor resolves repository-backed works for the current creat
 
   bundle.close();
 });
+
+test("owner cannot mutate moderated works via any save intent (Phase 2 §3.2 FR-004 #6 / I-14)", async () => {
+  const snapshot = createShowcaseSeedSnapshot(
+    [...photographerProfiles, ...modelProfiles],
+    works,
+  );
+  // Pick the first published work belonging to a photographer and force it to moderated
+  const targetWork = snapshot.works.find(
+    (w) => w.ownerRole === "photographer" && w.status === "published",
+  );
+  if (!targetWork) throw new Error("expected at least one published photographer work in seed");
+  const moderatedWork = { ...targetWork, status: "moderated" as const };
+  const bundle = createSqliteCommunityRepositoryBundle({
+    databasePath: ":memory:",
+    seed: {
+      profiles: snapshot.profiles,
+      works: [
+        moderatedWork,
+        ...snapshot.works.filter((w) => w.id !== targetWork.id),
+      ],
+      curation: [],
+    },
+  });
+
+  for (const intent of ["save_draft", "publish", "revert_to_draft"] as const) {
+    await expect(
+      saveCreatorWorkForRole(
+        "photographer",
+        {
+          workId: targetWork.id,
+          title: targetWork.title,
+          category: targetWork.category,
+          description: targetWork.description,
+          detailNote: targetWork.detailNote,
+          coverAsset: targetWork.coverAsset ?? "x",
+          intent,
+        },
+        bundle,
+      ),
+    ).rejects.toMatchObject({
+      code: "moderated_work_owner_locked",
+      status: 403,
+    });
+  }
+
+  // Confirm the work status is still moderated after the failed attempts
+  const after = await bundle.works.getById(targetWork.id);
+  expect(after?.status).toBe("moderated");
+
+  bundle.close();
+});
