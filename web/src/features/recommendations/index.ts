@@ -15,6 +15,14 @@ export {
 } from "./signals";
 
 export {
+  rankCandidates,
+  scoreCreator,
+  scoreWork,
+  type ScoreOutput,
+  type RankOptions,
+} from "./scoring";
+
+export {
   RECOMMENDATIONS_COUNTER_NAMES,
   incrementRelatedCreatorsCardsRendered,
   incrementRelatedCreatorsEmpty,
