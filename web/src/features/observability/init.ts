@@ -1,4 +1,8 @@
 import {
+  type ErrorReporter,
+  createNoopReporter,
+} from "./error-reporter";
+import {
   type InMemoryLogger,
   type Logger,
   type LoggerOptions,
@@ -8,12 +12,14 @@ import {
 
 export type ObservabilityRuntime = {
   logger: Logger;
+  errorReporter: ErrorReporter;
 };
 
 let runtime: ObservabilityRuntime | undefined;
 
 export type ObservabilityRuntimeOptions = {
   logger?: Logger | LoggerOptions;
+  errorReporter?: ErrorReporter;
 };
 
 function instantiate(options: ObservabilityRuntimeOptions = {}): ObservabilityRuntime {
@@ -26,7 +32,9 @@ function instantiate(options: ObservabilityRuntimeOptions = {}): ObservabilityRu
     logger = createLogger((loggerInput as LoggerOptions | undefined) ?? {});
   }
 
-  return { logger };
+  const errorReporter = options.errorReporter ?? createNoopReporter();
+
+  return { logger, errorReporter };
 }
 
 export function getObservability(): ObservabilityRuntime {
@@ -49,10 +57,49 @@ export function resetObservabilityForTesting(): void {
   runtime = undefined;
 }
 
-export type InstallInMemoryLoggerOptions = LoggerOptions;
-
-export function installInMemoryLogger(options: InstallInMemoryLoggerOptions = {}): InMemoryLogger {
+export function installInMemoryLogger(options: LoggerOptions = {}): InMemoryLogger {
   const logger = createInMemoryLogger(options);
-  runtime = { logger };
+  if (runtime) {
+    runtime = { ...runtime, logger };
+  } else {
+    runtime = { logger, errorReporter: createNoopReporter() };
+  }
   return logger;
+}
+
+export type InMemoryReporter = ErrorReporter & {
+  readonly reports: ReadonlyArray<unknown>;
+  reset(): void;
+};
+
+export type InMemoryReporterOptions = {
+  onReport?: (error: unknown) => void;
+};
+
+export function createInMemoryReporter(
+  options: InMemoryReporterOptions = {},
+): InMemoryReporter {
+  const reports: unknown[] = [];
+  return {
+    report(error) {
+      reports.push(error);
+      options.onReport?.(error);
+    },
+    reports,
+    reset() {
+      reports.length = 0;
+    },
+  };
+}
+
+export function installInMemoryReporter(
+  options: InMemoryReporterOptions = {},
+): InMemoryReporter {
+  const reporter = createInMemoryReporter(options);
+  if (runtime) {
+    runtime = { ...runtime, errorReporter: reporter };
+  } else {
+    runtime = { logger: createLogger(), errorReporter: reporter };
+  }
+  return reporter;
 }
