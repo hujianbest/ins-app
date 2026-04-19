@@ -145,3 +145,119 @@ export function readStorageConfig(env: AppConfigEnv = process.env): StorageConfi
 export function getStorageConfig(): StorageConfig {
   return readStorageConfig();
 }
+
+// ---------------------------------------------------------------------------
+// Phase 2 — Observability & Ops V1 env extensions (FR-006)
+// Defaults and degradation rules per spec §6 FR-006 + design §11/§12.
+// Failures are degradation-with-warning; the only hard-stop is
+// OBSERVABILITY_METRICS_ENABLED=true without OBSERVABILITY_METRICS_TOKEN.
+// ---------------------------------------------------------------------------
+
+export type LogLevelLiteral = "debug" | "info" | "warn" | "error";
+
+const VALID_LOG_LEVELS: ReadonlySet<string> = new Set([
+  "debug",
+  "info",
+  "warn",
+  "error",
+]);
+
+export type ObservabilityConfig = {
+  logLevel: LogLevelLiteral;
+  metricsEnabled: boolean;
+  metricsToken: string | undefined;
+  slowQueryMs: number;
+  errorReporterProvider: string;
+  sentryDsn: string | undefined;
+};
+
+export type BackupConfig = {
+  backupDir: string | undefined;
+};
+
+export type ConfigWarning = {
+  slug: string;
+  message: string;
+};
+
+export type ObservabilityConfigResult = {
+  config: ObservabilityConfig;
+  warnings: ConfigWarning[];
+};
+
+export function readObservabilityConfig(
+  env: AppConfigEnv = process.env,
+): ObservabilityConfigResult {
+  const warnings: ConfigWarning[] = [];
+
+  const rawLevel = env.OBSERVABILITY_LOG_LEVEL?.trim().toLowerCase();
+  let logLevel: LogLevelLiteral = "info";
+  if (rawLevel) {
+    if (VALID_LOG_LEVELS.has(rawLevel)) {
+      logLevel = rawLevel as LogLevelLiteral;
+    } else {
+      warnings.push({
+        slug: "log-level-invalid",
+        message: `OBSERVABILITY_LOG_LEVEL="${rawLevel}" is not one of debug/info/warn/error; falling back to info.`,
+      });
+    }
+  }
+
+  const rawMetricsEnabled = env.OBSERVABILITY_METRICS_ENABLED?.trim().toLowerCase();
+  const metricsEnabled = rawMetricsEnabled === "true";
+  const metricsToken = env.OBSERVABILITY_METRICS_TOKEN?.trim();
+
+  if (metricsEnabled && (!metricsToken || metricsToken.length === 0)) {
+    throw new Error(
+      "OBSERVABILITY_METRICS_ENABLED=true requires OBSERVABILITY_METRICS_TOKEN to be set; refusing to expose /api/metrics without auth.",
+    );
+  }
+
+  const rawSlow = env.OBSERVABILITY_SLOW_QUERY_MS?.trim();
+  let slowQueryMs = 100;
+  if (rawSlow !== undefined && rawSlow !== "") {
+    const parsed = Number(rawSlow);
+    if (
+      !Number.isFinite(parsed) ||
+      !Number.isInteger(parsed) ||
+      parsed <= 0
+    ) {
+      warnings.push({
+        slug: "slow-query-ms-invalid",
+        message: `OBSERVABILITY_SLOW_QUERY_MS="${rawSlow}" is not a positive integer; falling back to 100ms.`,
+      });
+    } else {
+      slowQueryMs = parsed;
+    }
+  }
+
+  const rawProvider = env.ERROR_REPORTER_PROVIDER?.trim().toLowerCase();
+  const errorReporterProvider =
+    rawProvider && rawProvider.length > 0 ? rawProvider : "noop";
+  const sentryDsn = env.SENTRY_DSN?.trim() || undefined;
+
+  return {
+    config: {
+      logLevel,
+      metricsEnabled,
+      metricsToken: metricsToken && metricsToken.length > 0 ? metricsToken : undefined,
+      slowQueryMs,
+      errorReporterProvider,
+      sentryDsn,
+    },
+    warnings,
+  };
+}
+
+export function readBackupConfig(env: AppConfigEnv = process.env): BackupConfig {
+  const raw = env.SQLITE_BACKUP_DIR?.trim();
+  return { backupDir: raw && raw.length > 0 ? raw : undefined };
+}
+
+export function getObservabilityConfig(): ObservabilityConfig {
+  return readObservabilityConfig().config;
+}
+
+export function getBackupConfig(): BackupConfig {
+  return readBackupConfig();
+}
