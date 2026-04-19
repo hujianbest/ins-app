@@ -103,4 +103,31 @@ describe("auth-store", () => {
 
     expect(resolveAuthSession(session.token, { databasePath })).toBeNull();
   });
+
+  it("propagates the lowercase account email through resolveAuthSession (Ops Back Office V1)", () => {
+    process.env = {
+      ...originalEnv,
+      NODE_ENV: "test",
+      APP_BASE_URL: "http://localhost:3000",
+      SESSION_COOKIE_SECRET: "test-secret-2",
+      SQLITE_DATABASE_PATH: ":memory:",
+    };
+
+    const databasePath = createDatabasePath();
+    const account = registerAuthAccount(
+      {
+        email: "Admin@Example.com",
+        password: "strong-pass-456",
+        primaryRole: "photographer",
+      },
+      { databasePath },
+    );
+
+    const session = createAuthSession(account, { databasePath });
+    const resolved = resolveAuthSession(session.token, { databasePath });
+
+    expect(account.email).toBe("admin@example.com");
+    expect(resolved?.email).toBe("admin@example.com");
+    expect(session.email).toBe("admin@example.com");
+  });
 });

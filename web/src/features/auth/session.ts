@@ -34,12 +34,14 @@ export function buildSessionAccountId(
 export function createAuthenticatedSessionContext(
   accountId: SessionAccountId,
   primaryRole: AuthRole,
+  email: string,
 ): SessionContext {
   return {
     status: "authenticated",
     isAuthenticated: true,
     accountId,
     primaryRole,
+    email,
   };
 }
 
@@ -52,14 +54,21 @@ function createGuestSessionContext(): SessionContext {
   };
 }
 
+/**
+ * Phase 2 — Ops Back Office V1: synthetic helper for tests / fallback
+ * paths that previously did not carry an email (the test seed builds
+ * a stable lowercase email derived from the role).
+ */
 export function resolveSessionContext(sessionRole: string | undefined): SessionContext {
   if (!isAuthRole(sessionRole)) {
     return createGuestSessionContext();
   }
 
+  const accountId = buildSessionAccountId(sessionRole, "test");
   return createAuthenticatedSessionContext(
-    buildSessionAccountId(sessionRole, "test"),
+    accountId,
     sessionRole,
+    `${sessionRole}@test.lens-archive.local`,
   );
 }
 
@@ -84,6 +93,7 @@ export async function getSessionContext(): Promise<SessionContext> {
   return createAuthenticatedSessionContext(
     resolvedSession.accountId,
     resolvedSession.primaryRole,
+    resolvedSession.email,
   );
 }
 

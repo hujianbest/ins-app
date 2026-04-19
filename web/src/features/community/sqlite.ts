@@ -20,6 +20,7 @@ import {
 } from "./contracts";
 
 import type {
+  AuditLogEntry,
   CommunityRepositoryBundle,
   CommunitySurface,
   CommunityWorkRecord,
@@ -57,6 +58,13 @@ type GetDefaultSqliteCommunityRepositoryBundleOptions = {
 export type SqliteCommunityRepositoryBundle = CommunityRepositoryBundle & {
   databasePath: string;
   close(): void;
+  /**
+   * Phase 2 — Ops Back Office V1 (ADR-2). Runs `fn` inside a single
+   * sqlite transaction (`BEGIN IMMEDIATE / COMMIT / ROLLBACK`) so
+   * admin server actions can keep "business write + audit append"
+   * atomic.
+   */
+  withTransaction<T>(fn: () => Promise<T> | T): Promise<T>;
 };
 
 let defaultBundle: SqliteCommunityRepositoryBundle | null = null;
@@ -130,6 +138,17 @@ type DiscoveryEventRow = {
   created_at: string;
 };
 
+type AuditLogRow = {
+  id: string;
+  created_at: string;
+  actor_account_id: string;
+  actor_email: string;
+  action: AuditLogEntry["action"];
+  target_kind: AuditLogEntry["targetKind"];
+  target_id: string;
+  note: string | null;
+};
+
 function mapCreatorProfileRow(row: CreatorProfileRow): CreatorProfileRecord {
   return {
     id: row.id,
@@ -198,6 +217,19 @@ function mapDiscoveryEventRow(row: DiscoveryEventRow): DiscoveryEventRecord {
     success: Boolean(row.success),
     failureReason: row.failure_reason ?? undefined,
     createdAt: row.created_at,
+  };
+}
+
+function mapAuditLogRow(row: AuditLogRow): AuditLogEntry {
+  return {
+    id: row.id,
+    createdAt: row.created_at,
+    actorAccountId: row.actor_account_id,
+    actorEmail: row.actor_email,
+    action: row.action,
+    targetKind: row.target_kind,
+    targetId: row.target_id,
+    note: row.note ?? undefined,
   };
 }
 
@@ -344,6 +376,20 @@ function createSchema(database: DatabaseSync) {
       failure_reason TEXT,
       created_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS audit_log (
+      id TEXT PRIMARY KEY,
+      created_at TEXT NOT NULL,
+      actor_account_id TEXT NOT NULL,
+      actor_email TEXT NOT NULL,
+      action TEXT NOT NULL,
+      target_kind TEXT NOT NULL,
+      target_id TEXT NOT NULL,
+      note TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_audit_log_created_at_desc
+      ON audit_log(created_at DESC, id DESC);
   `);
 
   ensureCreatorProfileColumns(database);
@@ -485,6 +531,18 @@ function createRepositoryBundleFromDatabase(
             `
               SELECT * FROM works
               WHERE status = 'published'
+              ORDER BY COALESCE(updated_at, published_at) DESC, id ASC
+            `,
+          )
+          .all() as CommunityWorkRow[];
+
+        return rows.map(mapCommunityWorkRow);
+      },
+      async listAllForAdmin() {
+        const rows = database
+          .prepare(
+            `
+              SELECT * FROM works
               ORDER BY COALESCE(updated_at, published_at) DESC, id ASC
             `,
           )
@@ -683,6 +741,82 @@ function createRepositoryBundleFromDatabase(
               left.targetKey.localeCompare(right.targetKey),
           );
       },
+      async upsertSlot(slot) {
+        database
+          .prepare(
+            `
+              INSERT INTO curated_slots (
+                surface, section_kind, target_type, target_key, order_index
+              ) VALUES (?, ?, ?, ?, ?)
+              ON CONFLICT(surface, section_kind, target_key) DO UPDATE SET
+                target_type = excluded.target_type,
+                order_index = excluded.order_index
+            `,
+          )
+          .run(
+            slot.surface,
+            slot.sectionKind,
+            slot.targetType,
+            slot.targetKey,
+            slot.order,
+          );
+
+        const row = database
+          .prepare(
+            `
+              SELECT * FROM curated_slots
+              WHERE surface = ? AND section_kind = ? AND target_key = ?
+            `,
+          )
+          .get(slot.surface, slot.sectionKind, slot.targetKey) as
+          | CuratedSlotRow
+          | undefined;
+
+        if (!row) {
+          throw new Error(
+            `Curation slot vanished after upsert: ${slot.surface}/${slot.sectionKind}/${slot.targetKey}`,
+          );
+        }
+        return mapCuratedSlotRow(row);
+      },
+      async removeSlot(key) {
+        database
+          .prepare(
+            `
+              DELETE FROM curated_slots
+              WHERE surface = ? AND section_kind = ? AND target_key = ?
+            `,
+          )
+          .run(key.surface, key.sectionKind, key.targetKey);
+      },
+      async reorderSlot(key) {
+        const result = database
+          .prepare(
+            `
+              UPDATE curated_slots
+              SET order_index = ?
+              WHERE surface = ? AND section_kind = ? AND target_key = ?
+            `,
+          )
+          .run(key.order, key.surface, key.sectionKind, key.targetKey);
+
+        if (result.changes === 0) {
+          return null;
+        }
+
+        const row = database
+          .prepare(
+            `
+              SELECT * FROM curated_slots
+              WHERE surface = ? AND section_kind = ? AND target_key = ?
+            `,
+          )
+          .get(key.surface, key.sectionKind, key.targetKey) as
+          | CuratedSlotRow
+          | undefined;
+
+        return row ? mapCuratedSlotRow(row) : null;
+      },
     },
     discovery: {
       async record(input) {
@@ -750,6 +884,71 @@ function createRepositoryBundleFromDatabase(
 
         return rows.map(mapDiscoveryEventRow);
       },
+    },
+    audit: {
+      async record(input) {
+        const id = input.id ?? randomUUID();
+        const createdAt = input.createdAt ?? new Date().toISOString();
+
+        database
+          .prepare(
+            `
+              INSERT INTO audit_log (
+                id, created_at, actor_account_id, actor_email,
+                action, target_kind, target_id, note
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `,
+          )
+          .run(
+            id,
+            createdAt,
+            input.actorAccountId,
+            input.actorEmail,
+            input.action,
+            input.targetKind,
+            input.targetId,
+            input.note ?? null,
+          );
+
+        return {
+          id,
+          createdAt,
+          actorAccountId: input.actorAccountId,
+          actorEmail: input.actorEmail,
+          action: input.action,
+          targetKind: input.targetKind,
+          targetId: input.targetId,
+          note: input.note,
+        };
+      },
+      async listLatest(limit) {
+        const rows = database
+          .prepare(
+            `
+              SELECT * FROM audit_log
+              ORDER BY created_at DESC, id DESC
+              LIMIT ?
+            `,
+          )
+          .all(limit) as AuditLogRow[];
+
+        return rows.map(mapAuditLogRow);
+      },
+    },
+    async withTransaction(fn) {
+      database.exec("BEGIN IMMEDIATE");
+      try {
+        const result = await fn();
+        database.exec("COMMIT");
+        return result;
+      } catch (error) {
+        try {
+          database.exec("ROLLBACK");
+        } catch {
+          // ignore rollback errors so the original error propagates
+        }
+        throw error;
+      }
     },
     close() {
       if (closed) {

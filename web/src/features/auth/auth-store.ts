@@ -30,6 +30,12 @@ export type AuthSession = {
   token: string;
   accountId: SessionAccountId;
   primaryRole: AuthRole;
+  /**
+   * Phase 2 — Ops Back Office V1 (ADR-4): lowercase account email,
+   * mirrored from `auth_accounts.email` so callers can derive admin
+   * status without an additional sqlite query.
+   */
+  email: string;
   expiresAt: string;
 };
 
@@ -260,6 +266,7 @@ export function createAuthSession(
       token,
       accountId: account.id,
       primaryRole: account.primaryRole,
+      email: account.email,
       expiresAt: expiresAt.toISOString(),
     };
   } finally {
@@ -280,7 +287,8 @@ export function resolveAuthSession(
           SELECT
             auth_sessions.account_id,
             auth_sessions.expires_at,
-            auth_accounts.primary_role
+            auth_accounts.primary_role,
+            auth_accounts.email
           FROM auth_sessions
           INNER JOIN auth_accounts
             ON auth_accounts.id = auth_sessions.account_id
@@ -292,6 +300,7 @@ export function resolveAuthSession(
           account_id: SessionAccountId;
           expires_at: string;
           primary_role: AuthRole;
+          email: string;
         }
       | undefined;
 
@@ -308,6 +317,7 @@ export function resolveAuthSession(
       token,
       accountId: sessionRow.account_id,
       primaryRole: sessionRow.primary_role,
+      email: sessionRow.email,
       expiresAt: sessionRow.expires_at,
     };
   } finally {

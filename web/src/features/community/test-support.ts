@@ -1,6 +1,9 @@
+import { randomUUID } from "node:crypto";
+
 import { getPublicWorkRecords } from "./contracts";
 
 import type {
+  AuditLogEntry,
   CommunityRepositoryBundle,
   CommunityWorkRecord,
   CreatorProfileRecord,
@@ -15,6 +18,7 @@ type InMemoryCommunityRepositoryFixtures = {
   follows?: FollowRelationRecord[];
   comments?: WorkCommentRecord[];
   curation?: CuratedSlotRecord[];
+  audit?: AuditLogEntry[];
 };
 
 export function createInMemoryCommunityRepositoryBundle(
@@ -23,6 +27,7 @@ export function createInMemoryCommunityRepositoryBundle(
   const follows = fixtures.follows ?? [];
   const comments = fixtures.comments ?? [];
   const curation = fixtures.curation ?? [];
+  const auditLog: AuditLogEntry[] = [...(fixtures.audit ?? [])];
 
   return {
     profiles: {
@@ -65,6 +70,16 @@ export function createInMemoryCommunityRepositoryBundle(
       },
       async listPublicWorks() {
         return getPublicWorkRecords(fixtures.works);
+      },
+      async listAllForAdmin() {
+        return [...fixtures.works].sort((left, right) => {
+          const leftKey = left.updatedAt ?? left.publishedAt ?? "";
+          const rightKey = right.updatedAt ?? right.publishedAt ?? "";
+          if (leftKey === rightKey) return left.id.localeCompare(right.id);
+          if (leftKey === "") return 1;
+          if (rightKey === "") return -1;
+          return rightKey.localeCompare(leftKey);
+        });
       },
       async save(input) {
         const index = fixtures.works.findIndex((work) => work.id === input.id);
@@ -137,6 +152,41 @@ export function createInMemoryCommunityRepositoryBundle(
           .filter((slot) => slot.surface === surface)
           .sort((left, right) => left.order - right.order);
       },
+      async upsertSlot(slot) {
+        const idx = curation.findIndex(
+          (existing) =>
+            existing.surface === slot.surface &&
+            existing.sectionKind === slot.sectionKind &&
+            existing.targetKey === slot.targetKey,
+        );
+        if (idx === -1) {
+          curation.push({ ...slot });
+        } else {
+          curation[idx] = { ...slot };
+        }
+        return { ...slot };
+      },
+      async removeSlot(key) {
+        const idx = curation.findIndex(
+          (slot) =>
+            slot.surface === key.surface &&
+            slot.sectionKind === key.sectionKind &&
+            slot.targetKey === key.targetKey,
+        );
+        if (idx !== -1) curation.splice(idx, 1);
+      },
+      async reorderSlot(key) {
+        const idx = curation.findIndex(
+          (slot) =>
+            slot.surface === key.surface &&
+            slot.sectionKind === key.sectionKind &&
+            slot.targetKey === key.targetKey,
+        );
+        if (idx === -1) return null;
+        const updated: CuratedSlotRecord = { ...curation[idx], order: key.order };
+        curation[idx] = updated;
+        return { ...updated };
+      },
     },
     discovery: {
       async record(input) {
@@ -156,6 +206,33 @@ export function createInMemoryCommunityRepositoryBundle(
       },
       async listAll() {
         return [];
+      },
+    },
+    audit: {
+      async record(input) {
+        const entry: AuditLogEntry = {
+          id: input.id ?? randomUUID(),
+          createdAt: input.createdAt ?? new Date().toISOString(),
+          actorAccountId: input.actorAccountId,
+          actorEmail: input.actorEmail,
+          action: input.action,
+          targetKind: input.targetKind,
+          targetId: input.targetId,
+          note: input.note,
+        };
+        auditLog.push(entry);
+        return { ...entry };
+      },
+      async listLatest(limit) {
+        return [...auditLog]
+          .sort((a, b) => {
+            if (a.createdAt === b.createdAt) {
+              if (a.id === b.id) return 0;
+              return a.id < b.id ? 1 : -1;
+            }
+            return a.createdAt < b.createdAt ? 1 : -1;
+          })
+          .slice(0, Math.max(0, limit));
       },
     },
   };

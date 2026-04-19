@@ -21,6 +21,27 @@ export type RecommendationsSnapshot = {
   related_works: RecommendationsSectionSnapshot;
 };
 
+export type AdminCurationSnapshot = {
+  added: number;
+  removed: number;
+  reordered: number;
+};
+
+export type AdminWorkModerationSnapshot = {
+  hidden: number;
+  restored: number;
+};
+
+export type AdminAuditSnapshot = {
+  appended: number;
+};
+
+export type AdminSnapshot = {
+  curation: AdminCurationSnapshot;
+  work_moderation: AdminWorkModerationSnapshot;
+  audit: AdminAuditSnapshot;
+};
+
 export type MetricsSnapshot = {
   http: {
     requests_total: number;
@@ -40,6 +61,13 @@ export type MetricsSnapshot = {
    * consumers can rely on the field existing per FR-006 #1.
    */
   recommendations: RecommendationsSnapshot;
+  /**
+   * Phase 2 — Ops Back Office V1 (ADR-3): purely additive top-level
+   * namespace, same shape pattern as `recommendations`. Always
+   * emitted with zeroed counters at startup so consumers can rely
+   * on the field existing per FR-008 #1.
+   */
+  admin: AdminSnapshot;
   gauges?: Record<string, number>;
   labels?: Record<string, Record<string, number>>;
 };
@@ -67,6 +95,22 @@ const RECOMMENDATIONS_COUNTER_NAMES = [
 ] as const;
 
 type RecommendationsCounterName = (typeof RECOMMENDATIONS_COUNTER_NAMES)[number];
+
+/**
+ * Phase 2 — Ops Back Office V1 (FR-008): pre-registered so the
+ * snapshot reports zeroed admin counters from process start, even
+ * if no admin server action ever runs.
+ */
+const ADMIN_COUNTER_NAMES = [
+  "admin.curation.added",
+  "admin.curation.removed",
+  "admin.curation.reordered",
+  "admin.work_moderation.hidden",
+  "admin.work_moderation.restored",
+  "admin.audit.appended",
+] as const;
+
+type AdminCounterName = (typeof ADMIN_COUNTER_NAMES)[number];
 
 const HISTOGRAM_NAMES = [
   "http.request_duration_ms",
@@ -126,6 +170,9 @@ export function createMetricsRegistry(): MetricsRegistry {
   for (const name of RECOMMENDATIONS_COUNTER_NAMES) {
     counters.set(name, 0);
   }
+  for (const name of ADMIN_COUNTER_NAMES) {
+    counters.set(name, 0);
+  }
   for (const name of HISTOGRAM_NAMES) {
     histograms.set(name, emptyHistogram());
   }
@@ -177,6 +224,8 @@ export function createMetricsRegistry(): MetricsRegistry {
         summarizeHistogram(histograms.get(name)?.values ?? []);
       const recommendationsCounterValue = (name: RecommendationsCounterName) =>
         counters.get(name) ?? 0;
+      const adminCounterValue = (name: AdminCounterName) =>
+        counters.get(name) ?? 0;
 
       return {
         http: {
@@ -207,6 +256,20 @@ export function createMetricsRegistry(): MetricsRegistry {
             empty: recommendationsCounterValue(
               "recommendations.related_works.empty",
             ),
+          },
+        },
+        admin: {
+          curation: {
+            added: adminCounterValue("admin.curation.added"),
+            removed: adminCounterValue("admin.curation.removed"),
+            reordered: adminCounterValue("admin.curation.reordered"),
+          },
+          work_moderation: {
+            hidden: adminCounterValue("admin.work_moderation.hidden"),
+            restored: adminCounterValue("admin.work_moderation.restored"),
+          },
+          audit: {
+            appended: adminCounterValue("admin.audit.appended"),
           },
         },
         gauges: Object.keys(gaugesOut).length > 0 ? gaugesOut : undefined,

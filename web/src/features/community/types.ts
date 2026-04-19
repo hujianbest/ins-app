@@ -8,7 +8,7 @@ export type CommunitySectionKind = "works" | "profiles" | "opportunities";
 
 export type CommunityTargetType = "profile" | "work" | "opportunity";
 
-export type CommunityWorkStatus = "draft" | "published";
+export type CommunityWorkStatus = "draft" | "published" | "moderated";
 
 export type CreatorProfileRecord = {
   id: string;
@@ -94,6 +94,14 @@ export type WorkRepository = {
   getById(id: string): Promise<CommunityWorkRecord | null>;
   listByOwnerProfileId(ownerProfileId: string): Promise<CommunityWorkRecord[]>;
   listPublicWorks(): Promise<CommunityWorkRecord[]>;
+  /**
+   * Phase 2 — Ops Back Office V1 (FR-006 / ADR-5).
+   * Returns every work in the system regardless of status (draft /
+   * published / moderated). The ONLY consumer should be admin SSR
+   * pages and admin server actions; public read paths must use
+   * `listPublicWorks` (which filters non-published).
+   */
+  listAllForAdmin(): Promise<CommunityWorkRecord[]>;
   save(input: CommunityWorkSaveInput): Promise<CommunityWorkRecord>;
 };
 
@@ -118,8 +126,29 @@ export type CommentRepository = {
   add(input: WorkCommentRecord): Promise<WorkCommentRecord>;
 };
 
+export type CurationSlotKey = {
+  surface: CommunitySurface;
+  sectionKind: CommunitySectionKind;
+  targetKey: string;
+};
+
 export type CurationConfigRepository = {
   listSlotsBySurface(surface: CommunitySurface): Promise<CuratedSlotRecord[]>;
+  /**
+   * Phase 2 — Ops Back Office V1 (FR-003).
+   * INSERT or UPDATE by primary key (surface, sectionKind, targetKey).
+   * Returns the persisted row.
+   */
+  upsertSlot(slot: CuratedSlotRecord): Promise<CuratedSlotRecord>;
+  /**
+   * Idempotent: removing a non-existent slot is not an error.
+   */
+  removeSlot(key: CurationSlotKey): Promise<void>;
+  /**
+   * Updates only `order_index`. Returns the updated row, or `null`
+   * if no slot matched the key.
+   */
+  reorderSlot(key: CurationSlotKey & { order: number }): Promise<CuratedSlotRecord | null>;
 };
 
 export type DiscoveryEventType =
@@ -155,6 +184,41 @@ export type DiscoveryEventRepository = {
   listAll(): Promise<DiscoveryEventRecord[]>;
 };
 
+// ---------------------------------------------------------------------------
+// Phase 2 — Ops Back Office V1: AuditLog (FR-005)
+// ---------------------------------------------------------------------------
+
+export type AuditAction =
+  | "curation.upsert"
+  | "curation.remove"
+  | "curation.reorder"
+  | "work_moderation.hide"
+  | "work_moderation.restore";
+
+export type AuditTargetKind = "curation_slot" | "work";
+
+export type AuditLogEntry = {
+  id: string;
+  createdAt: string;
+  actorAccountId: string;
+  actorEmail: string;
+  action: AuditAction;
+  targetKind: AuditTargetKind;
+  targetId: string;
+  note?: string;
+};
+
+export type AuditLogCreateInput = Omit<
+  AuditLogEntry,
+  "id" | "createdAt"
+> &
+  Partial<Pick<AuditLogEntry, "id" | "createdAt">>;
+
+export type AuditLogRepository = {
+  record(input: AuditLogCreateInput): Promise<AuditLogEntry>;
+  listLatest(limit: number): Promise<AuditLogEntry[]>;
+};
+
 export type CommunityRepositoryBundle = {
   profiles: CreatorProfileRepository;
   works: WorkRepository;
@@ -162,6 +226,13 @@ export type CommunityRepositoryBundle = {
   comments: CommentRepository;
   curation: CurationConfigRepository;
   discovery: DiscoveryEventRepository;
+  /**
+   * Phase 2 — Ops Back Office V1 (FR-005). Every bundle must
+   * implement an audit repository (sqlite uses the `audit_log`
+   * table; in-memory test bundle keeps a real array so tests can
+   * assert "record then listLatest").
+   */
+  audit: AuditLogRepository;
 };
 
 export type CommunitySeedSnapshot = {

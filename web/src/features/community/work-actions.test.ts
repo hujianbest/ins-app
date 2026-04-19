@@ -58,6 +58,7 @@ function createAuthenticatedAccessControl(): AccessControl {
       isAuthenticated: true,
       accountId: "account:photographer",
       primaryRole: "photographer",
+      email: "photographer@test.lens-archive.local",
     },
     creatorCapability: {
       canManageStudio: true,
