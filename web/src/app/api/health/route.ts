@@ -3,10 +3,11 @@ import {
   createReadonlyCommunityRepositoryBundle,
   getCommunityRuntimeInfo,
 } from "@/features/community/runtime";
+import { wrapRouteHandler } from "@/features/observability/server-boundary";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+async function healthHandler(): Promise<Response> {
   const config = getAppConfig();
 
   if (!config.healthcheckEnabled) {
@@ -46,3 +47,8 @@ export async function GET() {
     );
   }
 }
+
+export const GET = wrapRouteHandler("health", async (_request: Request) => {
+  void _request;
+  return healthHandler();
+});
