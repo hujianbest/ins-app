@@ -128,6 +128,23 @@
 
 **验收 / Acceptance**：线上事故可以在 30 分钟内定位到代码位置；恢复演练有最近 30 天内的成功记录。
 
+**V1 已交付 / V1 delivered（2026-04-19）**
+
+- ✅ 结构化日志 + trace id（`x-trace-id` header + AsyncLocalStorage + 受控键集合 + 8 KiB 截断；详见 `docs/specs/2026-04-19-observability-ops-v1-srs.md` FR-001/FR-002）
+- ✅ 统一错误对象（`AppError` + `normalizeError` + `appErrorToHttpBody`，I-2 不泄漏栈）
+- ✅ 错误上报抽象（`noop` 默认；`console`；`sentry` 占位 + 安全降级）
+- ✅ 指标：HTTP / SQLite / 业务命名空间 + 内部 `/api/metrics`（disabled→404 / unauth→401 / ok→200）
+- ✅ 备份 / 恢复 CLI（`node:sqlite` 模块级 `backup` 主路径 + WAL checkpoint 兜底；原子 rename restore）
+- ✅ `/api/health` 字段扩展（observability + backup 命名空间，向后兼容）
+- ✅ NFR-001 性能：`/api/health` P95 = 3.099ms（含全部观测开销）远低于 5ms 预算
+
+**仍未做 / Still deferred to later slices**
+
+- 接入真实 Sentry SDK 与 dashboards / alerts
+- 远端日志归档（Loki / OpenSearch / SLS）
+- 自动化 cron 调度备份脚本（V1 仅提供脚本本身）
+- 运营审计日志（与 §3.2 运营后台一起做）
+
 ### 3.9 可访问性与国际化 / Accessibility & i18n
 
 **目标 / Goal**：让站点可被英文用户使用，并满足基本可访问性。
@@ -156,7 +173,7 @@
 
 技术依赖意义上的推进顺序（不带时间估计）：
 
-1. §3.1 生产数据与持久化 → §3.8 可观测性与运维（**任何上量都先做这两件**）。
+1. §3.1 生产数据与持久化 → §3.8 可观测性与运维（**任何上量都先做这两件**；§3.8 V1 已交付，§3.1 待启动）。
 2. §3.2 运营后台 V1 → §3.3 线程式消息中心。
 3. §3.4 合作线索到履约 → §3.5 支付 / 订单 / 会员（履约语义先于付费语义）。
 4. §3.6 Discovery 智能化 → §3.7 搜索升级（共享相似度与事件管道）。
