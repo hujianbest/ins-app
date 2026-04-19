@@ -101,6 +101,25 @@ describe("recommendations/related-works", () => {
     expect(result.reason).toBe("no-candidates");
   });
 
+  it("excludes moderated works from the candidate pool (Phase 2 §3.2 ADR-5)", async () => {
+    const deps = createRecommendationsTestDeps({
+      profiles: [fakeCreatorProfile({ id: "photographer:A", slug: "owner-a" })],
+      works: [
+        fakeWork({ id: "seed", ownerProfileId: "photographer:A" }),
+        fakeWork({
+          id: "moderated-one",
+          ownerProfileId: "photographer:A",
+          status: "moderated",
+        }),
+      ],
+    });
+
+    const result = await getRelatedWorks({ workId: "seed" }, deps);
+    expect(result?.kind).toBe("empty");
+    if (result?.kind !== "empty") return;
+    expect(result.reason).toBe("no-candidates");
+  });
+
   it("returns empty (no-candidates) when only the seed work is published", async () => {
     const deps = createRecommendationsTestDeps({
       profiles: [fakeCreatorProfile({ id: "photographer:A", slug: "owner-a" })],
