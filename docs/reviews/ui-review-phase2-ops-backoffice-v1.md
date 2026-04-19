@@ -110,3 +110,64 @@ precheck 通过 → 进入正式审查。
 ## 记录位置
 
 - `docs/reviews/ui-review-phase2-ops-backoffice-v1.md`（本文件）
+
+## 复审 (2026-04-19)
+
+针对首轮 5 条 `important` + 4 条 `minor` 发现项逐项复核修订后的 §10。
+
+### 5 个 focus point 解决状态
+
+| # | Focus | 修订位置 | 状态 | 备注 |
+|---|---|---|---|---|
+| 1 | 状态矩阵（U3 / AU1） | §10.2 | ✅ 已闭合 | 4 个 admin 页面 × `loading / empty / happy / invalid / error / partial` 6 列矩阵；`/studio/admin/works` empty 双态（全库 0 件 / 全库仅 draft）已枚举；`curation` partial 态（targetKey 解析不到 display name）已写入；通用规则段说明 loading 由浏览器原生 spinner 接管、empty 保留视觉锚点、error/invalid 走 §10.4 协议。 |
+| 2 | a11y 落地表（U5 / AU5） | §10.3 | ✅ 已闭合 | 9 行表覆盖 heading 层级（h1/h2 不跳级）、focus-visible（继承 globals.css 4px ring 不局部覆盖）、目标大小（按钮/输入 ≥ 40px）、错误条 `role="alert" aria-live="polite"` 不夺焦、status 文本承载（中文区分，符合 WCAG 1.4.1）、二次确认（hide/restore 可逆故 V1 不强制 + 在 alert 文案中提示反向操作通道）、skip link（沿用既有 layout）、`<table>` 语义（`<th scope="col">` + `<caption className="sr-only">`）、reduced motion（无新动效，无需新增降级）。每行可冷读出落地方式。 |
+| 3 | 错误码字典（U2） | §10.4 | ✅ 已闭合 | 6 条 `AppError.code` → 中文文案 + 触发场景表（含 `moderated_work_owner_locked` 与 owner 端 fail-closed 闭环 §9.8.1 / I-14）；URL 参数命名空间固定为 `error`，明确不引入 `?adminError=` / `?errorAction=`；alert 条不消失 + 刷新清空 + 不抢占主体布局；表外 code 走默认「操作失败，请稍后重试」。 |
+| 4 | 移动端 (U6) | §10.5 | ✅ 已闭合 | `<table>` 外包 `overflow-x-auto` wrapper；列宽策略（title `min-w-[12rem]` / updatedAt `min-w-[10rem]` / 操作 `min-w-[8rem]` + nowrap）；断点 ≥ md 用桌面排版、< md 表格横滚 + curation form 字段 stack；显式声明 V1 不引入响应式 stack-as-card。 |
+| 5 | UI ADR (U7 / AU9) | §10.8 | ✅ 已闭合 | 5 条 UI-ADR：status 标签视觉（3 候选，选 a 文本区分）、错误反馈通道（3 候选，选 a URL `?error=`）、移动端表格策略（3 候选，选 a 横滚）、写动作 loading 反馈（3 候选，选 a 浏览器原生 spinner）、audit 列表分页（3 候选，选 a 不分页 100 条）。每条含候选 + 选定 + 理由 + 可逆性评估。 |
+
+### 4 个 minor 状态
+
+| # | Minor | 修订位置 | 状态 |
+|---|---|---|---|
+| M1 | `museum-stat` 与 `<table>` 行语义解耦（U4） | §10.1 第 3 / 5 bullet | ✅ 已闭合：明确「`<tr>` 使用 hairline border + `museum-stat` 风格化的 padding/typography，**不**把 `museum-stat` 的卡片化容器直接当 `<tr>`」；audit 列表型显式选 `museum-stat` 卡片（与表格形态按用途区分）。 |
+| M2 | curation add-slot 表单字段控件类型（U2） | §10.1 第 4 sub-bullet | ✅ 已闭合：`<select>` 限定 surface/sectionKind/targetType 枚举，`<input type="number" min="0">` 写 order，`<input type="text">` 写 targetKey；明确不做客户端校验，依赖 server action + URL `?error=` 回流。 |
+| M3 | `noindex`（U6 SEO） | §10.6 | ✅ 已闭合：`metadata.robots = { index: false, follow: false }` 显式 noindex,nofollow；明确 sitemap 排除策略。 |
+| M4 | 非 admin 用户视图（U3） | §10.7 | ✅ 已闭合：guest → `/login`、非 admin → `/studio` 服务端 redirect；非 admin 在 `/studio` 主页 DOM 不渲染入口卡（与 §9.7 / §9.8 / FR-002 #5 / I-8 一致）。 |
+
+### 多维评分变化
+
+| ID | 维度 | 首轮 | 复审 | 变化 |
+|---|---|---|---|---|
+| U1 | 需求覆盖与追溯 | 8 | 9 | §10.4 通过 `moderated_work_owner_locked` 反向覆盖 §9.8.1 / I-14 / FR-004 #6 |
+| U2 | IA 与用户流完整性 | 7 | 9 | 错误码字典 + 表单控件类型 + 非 admin 视图 |
+| U3 | 交互状态覆盖 | 5 | 9 | 4×6 状态矩阵 + 通用规则 |
+| U4 | 视觉一致性与 token | 8 | 9 | `museum-stat` 与 `<table>` 行语义解耦 |
+| U5 | 可访问性 | 5 | 9 | 9 行 a11y 落地表，关键项均逐项落地 |
+| U6 | 响应式 / i18n / 性能 | 6 | 8 | overflow-x-auto + 列宽 + 断点 + noindex（i18n 仍仅状态三标签 + 错误文案，复杂多语种留 V2，可接受） |
+| U7 | 决策质量与 trade-offs | 5 | 9 | 5 条 UI-ADR + ADR-6 把 CON 闭合点归集 |
+| U8 | 任务规划准备度与 peer 交接 | 7 | 9 | a11y / 状态矩阵 / 错误码字典稳定，hf-tasks 可拆解 |
+
+无关键维度低于 6/10；最低 8/10。
+
+### peer 交接增量校验
+
+- 与 hf-design 的新增对齐：`moderated_work_owner_locked` 在 §10.4 错误字典 + §9.8.1（隐含）+ §11 I-14 三处一致；in-memory bundle 的 `audit.record / listLatest` 行为契约（§12 已统一为「真实实现，不是 noop」）与 §10.2 audit 页面 empty / happy 态一致；UI-ADR-4 浏览器原生 spinner 与 §3.8 V1 + form action + redirect 链路一致。
+- 双 log（外层 `wrapServerAction` + 内层 `runAdminAction`）在 §12 已显式说明设计意图（NFR-003），与 §10 一致。
+- 未发现新的 peer 不一致。
+
+### 复审结论
+
+**通过**
+
+- 5 个 focus point + 4 个 minor 全部闭合；无新增 important/critical 发现。
+- 视觉决策 100% 走既有 `museum-*` token，未引入新视觉系统。
+- a11y 关键项（heading 层级、focus-visible、目标大小、错误反馈语义、非颜色依赖、reduced motion、skip link、table 语义）均按 WCAG 2.2 AA 逐项落地，可冷读。
+- UI 决策（status 标签 / 错误通道 / 移动端表格 / loading 反馈 / audit 分页）均有候选 + 理由 + 可逆性。
+- 与 hf-design 的 peer 交接块在 §3 / §10 / §11 / §12 均显式且一致。
+- 任务规划准备度足以支撑 hf-tasks 拆解，不会留 UI 空洞给下游猜。
+
+### 下一步
+
+`设计真人确认`（`needs_human_confirmation=true`；联合 approval 需等 `hf-design-review` 同样通过后由父会话发起）。
+
+
