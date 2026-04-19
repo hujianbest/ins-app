@@ -1,7 +1,6 @@
 import { performance } from "node:perf_hooks";
 
 import { getAdminAccountEmails } from "@/config/env";
-import { getSessionContext } from "@/features/auth/session";
 
 import { createAdminCapabilityPolicy } from "./admin-policy";
 import type {
@@ -14,7 +13,6 @@ import { getObservability } from "@/features/observability/init";
 import type { Logger } from "@/features/observability/logger";
 import type { MetricsRegistry } from "@/features/observability/metrics";
 import type { CommunityRepositoryBundle } from "@/features/community/types";
-import { getDefaultCommunityRepositoryBundle } from "@/features/community/runtime";
 
 /**
  * Phase 2 — Ops Back Office V1 (FR-001 / I-3 / I-4).
@@ -72,10 +70,22 @@ function bundleWithTransaction(
  * NEVER includes `actorEmail` in log fields (NFR-002 / I-7);
  * `actorEmail` only ever lands in `audit_log.actor_email`.
  */
+async function loadDefaultSession(): Promise<SessionContext> {
+  const { getSessionContext } = await import("@/features/auth/session");
+  return getSessionContext();
+}
+
+async function loadDefaultBundle(): Promise<CommunityRepositoryBundle> {
+  const { getDefaultCommunityRepositoryBundle } = await import(
+    "@/features/community/runtime"
+  );
+  return getDefaultCommunityRepositoryBundle();
+}
+
 export async function runAdminAction<T>(
   opts: RunAdminActionOptions<T>,
 ): Promise<T> {
-  const session = opts.session ?? (await getSessionContext());
+  const session = opts.session ?? (await loadDefaultSession());
   const adminEmails = opts.adminEmails ?? getAdminAccountEmails();
   const capability = createAdminCapabilityPolicy(session, adminEmails);
 
@@ -90,7 +100,7 @@ export async function runAdminAction<T>(
   const observability = opts.bundle || opts.metrics || opts.logger
     ? null
     : getObservability();
-  const bundle = opts.bundle ?? getDefaultCommunityRepositoryBundle();
+  const bundle = opts.bundle ?? (await loadDefaultBundle());
   const metrics = opts.metrics ?? observability?.metrics ?? getObservability().metrics;
   const logger = opts.logger ?? observability?.logger ?? getObservability().logger;
 
