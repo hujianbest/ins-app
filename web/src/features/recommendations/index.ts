@@ -35,3 +35,18 @@ export {
   readRecommendationsConfig,
   type RecommendationsConfig,
 } from "./config";
+
+export {
+  getRelatedCreators,
+  type GetRelatedCreatorsDeps,
+  type RelatedCreatorsSeed,
+} from "./related-creators";
+
+export {
+  getRelatedWorks,
+  type GetRelatedWorksDeps,
+  type RelatedWorksSeed,
+} from "./related-works";
+
+export { RelatedCreatorsSection } from "./related-creators-section";
+export { RelatedWorksSection } from "./related-works-section";
