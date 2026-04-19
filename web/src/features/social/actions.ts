@@ -9,10 +9,11 @@ import {
   buildDiscoveryProfileTargetId,
   recordDiscoveryEvent,
 } from "@/features/discovery/events";
+import { wrapServerAction } from "@/features/observability/server-boundary";
 
 import { toggleProfileFollowForViewer } from "./follows";
 
-export async function toggleProfileFollowAction(
+async function toggleProfileFollowActionImpl(
   role: CommunityRole,
   slug: string,
   returnPath: string,
@@ -54,3 +55,8 @@ export async function toggleProfileFollowAction(
   revalidatePath(returnPath);
   revalidatePath("/discover");
 }
+
+export const toggleProfileFollowAction = wrapServerAction(
+  "social/toggleProfileFollowAction",
+  toggleProfileFollowActionImpl,
+);

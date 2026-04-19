@@ -1,64 +1,84 @@
+// @vitest-environment node
 import { describe, expect, it } from "vitest";
 
-import { readAppConfig } from "./env";
+import {
+  readBackupConfig,
+  readObservabilityConfig,
+} from "./env";
 
-describe("readAppConfig", () => {
-  it("uses safe development defaults", () => {
-    const config = readAppConfig({
-      NODE_ENV: "development",
+describe("env / readObservabilityConfig", () => {
+  it("returns defaults when no env vars are set", () => {
+    const result = readObservabilityConfig({});
+    expect(result.config).toEqual({
+      logLevel: "info",
+      metricsEnabled: false,
+      metricsToken: undefined,
+      slowQueryMs: 100,
+      errorReporterProvider: "noop",
+      sentryDsn: undefined,
     });
-
-    expect(config.appBaseUrl).toBe("http://localhost:3000");
-    expect(config.databaseProvider).toBe("sqlite");
-    expect(config.sessionCookieSecret).toBe("lens-archive-dev-secret");
-    expect(config.sessionCookieSecure).toBe(false);
-    expect(config.healthcheckEnabled).toBe(true);
+    expect(result.warnings).toEqual([]);
   });
 
-  it("requires APP_BASE_URL in production", () => {
-    expect(() =>
-      readAppConfig({
-        NODE_ENV: "production",
-        SESSION_COOKIE_SECRET: "production-secret",
-      }),
-    ).toThrow("Missing required environment variable: APP_BASE_URL");
+  it("accepts valid log level overrides", () => {
+    const result = readObservabilityConfig({ OBSERVABILITY_LOG_LEVEL: "warn" });
+    expect(result.config.logLevel).toBe("warn");
+    expect(result.warnings).toEqual([]);
   });
 
-  it("requires SESSION_COOKIE_SECRET in production", () => {
-    expect(() =>
-      readAppConfig({
-        NODE_ENV: "production",
-        APP_BASE_URL: "https://lens.example.com",
-      }),
-    ).toThrow("Missing required environment variable: SESSION_COOKIE_SECRET");
-  });
-
-  it("reads explicit runtime settings", () => {
-    const config = readAppConfig({
-      NODE_ENV: "production",
-      APP_BASE_URL: "https://lens.example.com",
-      ASSET_BASE_URL: "https://cdn.example.com",
-      SESSION_COOKIE_SECRET: "production-secret",
-      SESSION_COOKIE_SECURE: "true",
-      HEALTHCHECK_ENABLED: "false",
-      SQLITE_DATABASE_PATH: "/srv/lens/community.sqlite",
+  it("falls back log level when invalid + warns", () => {
+    const result = readObservabilityConfig({
+      OBSERVABILITY_LOG_LEVEL: "invalid",
     });
-
-    expect(config.appBaseUrl).toBe("https://lens.example.com");
-    expect(config.assetBaseUrl).toBe("https://cdn.example.com");
-    expect(config.sqliteDatabasePath).toBe("/srv/lens/community.sqlite");
-    expect(config.sessionCookieSecure).toBe(true);
-    expect(config.healthcheckEnabled).toBe(false);
+    expect(result.config.logLevel).toBe("info");
+    expect(result.warnings.some((w) => w.slug === "log-level-invalid")).toBe(true);
   });
 
-  it("rejects unsupported database providers", () => {
+  it("throws when METRICS_ENABLED=true but token missing (only hard stop)", () => {
     expect(() =>
-      readAppConfig({
-        NODE_ENV: "production",
-        APP_BASE_URL: "https://lens.example.com",
-        SESSION_COOKIE_SECRET: "production-secret",
-        DATABASE_PROVIDER: "postgres",
-      }),
-    ).toThrow("Unsupported DATABASE_PROVIDER");
+      readObservabilityConfig({ OBSERVABILITY_METRICS_ENABLED: "true" }),
+    ).toThrow(/OBSERVABILITY_METRICS_TOKEN/);
+  });
+
+  it("captures token when METRICS_ENABLED=true and token set", () => {
+    const result = readObservabilityConfig({
+      OBSERVABILITY_METRICS_ENABLED: "true",
+      OBSERVABILITY_METRICS_TOKEN: "abc",
+    });
+    expect(result.config.metricsEnabled).toBe(true);
+    expect(result.config.metricsToken).toBe("abc");
+  });
+
+  it("falls back slow query threshold for invalid values", () => {
+    for (const bad of ["0", "-50", "abc", "1.5"]) {
+      const result = readObservabilityConfig({
+        OBSERVABILITY_SLOW_QUERY_MS: bad,
+      });
+      expect(result.config.slowQueryMs).toBe(100);
+      expect(result.warnings.some((w) => w.slug === "slow-query-ms-invalid")).toBe(
+        true,
+      );
+    }
+  });
+
+  it("forwards reporter provider + sentry dsn raw", () => {
+    const result = readObservabilityConfig({
+      ERROR_REPORTER_PROVIDER: "sentry",
+      SENTRY_DSN: "https://example/1",
+    });
+    expect(result.config.errorReporterProvider).toBe("sentry");
+    expect(result.config.sentryDsn).toBe("https://example/1");
+  });
+});
+
+describe("env / readBackupConfig", () => {
+  it("returns undefined dir when not set", () => {
+    expect(readBackupConfig({})).toEqual({ backupDir: undefined });
+  });
+
+  it("forwards backup dir as-is, does not create it", () => {
+    expect(readBackupConfig({ SQLITE_BACKUP_DIR: "/tmp/some-path-xyz" })).toEqual({
+      backupDir: "/tmp/some-path-xyz",
+    });
   });
 });

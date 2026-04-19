@@ -1,5 +1,6 @@
 import { getSessionContext } from "@/features/auth/session";
 import { recordDiscoveryEvent } from "@/features/discovery/events";
+import { wrapRouteHandler } from "@/features/observability/server-boundary";
 
 type DiscoveryEventRequestBody = {
   eventType: "work_view" | "profile_view";
@@ -10,7 +11,7 @@ type DiscoveryEventRequestBody = {
   query?: string;
 };
 
-export async function POST(request: Request) {
+async function discoveryEventsHandler(request: Request): Promise<Response> {
   const payload = (await request.json()) as DiscoveryEventRequestBody;
   const session = await getSessionContext();
 
@@ -27,3 +28,5 @@ export async function POST(request: Request) {
 
   return Response.json({ ok: true });
 }
+
+export const POST = wrapRouteHandler("discovery-events", discoveryEventsHandler);
