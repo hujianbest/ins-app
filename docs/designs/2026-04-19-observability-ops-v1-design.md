@@ -1,6 +1,7 @@
 # Phase 2 — Observability & Ops V1 实现设计
 
-- 状态: 草稿
+- 状态: 已批准
+- 批准记录: `docs/verification/design-approval-phase2-observability-ops-v1.md`
 - 主题: Phase 2 — Observability & Ops V1（可观测性与运维 V1）
 - 已批准规格: `docs/specs/2026-04-19-observability-ops-v1-srs.md`
 - 关联增量: `docs/reviews/increment-phase2-observability-ops-v1.md`
@@ -42,11 +43,11 @@
 | FR-007 backup / restore CLI | `web/scripts/backup-sqlite.mjs`、`web/scripts/restore-sqlite.mjs` | 调用 `node:sqlite` `db.backup()`；restore 走 atomic rename。 |
 | FR-008 `/api/health` 字段扩展 | `web/src/app/api/health/route.ts` | 新增 `observability` / `backup` 命名空间；保留旧字段。 |
 | FR-009 boundary 接入 | `@/features/observability/server-boundary` + 各 actions / route handlers 的 1 行包装 | 所有现有 server action 替换为 `wrapServerAction(name, fn)`；route handler 替换为 `wrapRouteHandler(handler)`。 |
-| NFR-001 性能开销 | logger / metrics 内部使用 `node:perf_hooks.performance.now()`，避免 `Date.now()` 漂移；trace id 用 `crypto.randomUUID()`。 |
-| NFR-002 无新 runtime 依赖 | 设计选项均限定为内置模块。 |
-| NFR-003 安全边界 | logger 接受白名单键；error reporter `noop` 默认；token 仅在请求头比对，不写日志。 |
-| NFR-004 启动鲁棒性 | env loader 在解析失败时降级 + warn，仅 `OBSERVABILITY_METRICS_ENABLED=true` 缺 token 时硬性中止。 |
-| NFR-005 可测试性 | 所有 primitives 暴露 `createXxx({...})` 工厂；server boundary 接受可选注入参数。 |
+| NFR-001 性能开销 | `@/features/observability/{logger,metrics,trace}` | logger / metrics 内部使用 `node:perf_hooks.performance.now()`，避免 `Date.now()` 漂移；trace id 用 `crypto.randomUUID()`。 |
+| NFR-002 无新 runtime 依赖 | `web/package.json` + 全部 observability 模块 | 设计选项均限定为 Node 22+ 内置模块；CI 阶段加 `dependencies` diff 断言。 |
+| NFR-003 安全边界 | `@/features/observability/{logger,error-reporter}` + `app/api/metrics/route.ts` | logger 接受白名单键；error reporter `noop` 默认；token 仅在请求头比对，不写日志，不进入 health 响应。 |
+| NFR-004 启动鲁棒性 | `web/src/config/env.ts` `readObservabilityConfig()` | env loader 在解析失败时降级 + warn，仅 `OBSERVABILITY_METRICS_ENABLED=true` 缺 token 时硬性中止。 |
+| NFR-005 可测试性 | 全部 observability 模块 + `@/features/observability/init` | 所有 primitives 暴露 `createXxx({...})` 工厂；server boundary 接受可选注入参数；提供 `resetObservabilityForTesting()`。 |
 
 ## 4. 架构模式选择
 
@@ -76,31 +77,36 @@
 
 ### 6.1 Trace ID + Boundary 接入
 
+> **Next 16 重要约束**（实测 + 官方文档 `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md`）：原 `middleware.ts` 在 Next 16 已被重命名为 `proxy.ts`；官方明确写道："Proxy is meant to be invoked separately of your render code … you should not attempt relying on shared modules or globals." 这意味着 **proxy 与 route handler / server action 处于隔离边界**，proxy 内 `AsyncLocalStorage.run()` 包出来的上下文**不会**自然传到 route handler / server action。所以 trace id 必须通过请求/响应**头部**作为跨边界载体；ALS `run()` 必须在 boundary wrapper 内部发起，而不是在 proxy 内发起。
+
 | 方案 | 核心思路 | 优点 | 主要代价 / 风险 | NFR / 约束适配 | 可逆性 |
 | --- | --- | --- | --- | --- | --- |
-| A | middleware 生成 trace id → `AsyncLocalStorage` 维护 → boundary decorator 自动取用 | 业务代码完全不感知；trace id 自动贯穿 logger / error / metrics；与 Next.js App Router 原生兼容（middleware + Edge runtime 在 Node runtime 下均可用 ALS） | `AsyncLocalStorage` 在某些边缘场景（嵌套 `setImmediate` 与第三方库）可能丢失上下文，但本项目 server action 均为 async/await 链，风险很低 | NFR-001（开销极低，`AsyncLocalStorage.run()` 单次约 ~1μs）、NFR-005（容易在测试里手动 `als.run()` 注入 trace id） | 高（封装在 `@/features/observability/trace`，未来切到 `cls-hooked` / OpenTelemetry context 不影响业务） |
-| B | trace id 通过参数显式传递到所有 server action | 完全无魔法，调试直观 | 必须修改所有现存 server action 签名（>20 个），打穿 CON-004（"现有 UI 与 server action 的对外行为契约不允许在本增量中变更"）；且 client → server action 调用链没有自然透传 trace id 的位置 | 严重违反 CON-004；NFR-001 也会因为大量参数传递而退化 | 低 |
+| A | proxy.ts 仅负责生成 / 继承 trace id 并写入入站请求头（`x-trace-id`）+ 透传响应头；boundary wrapper（`wrapRouteHandler` / `wrapServerAction`）首条动作是从请求头 / `headers()` 读取 trace id 并 `als.run(traceId, () => actualHandler())`；ALS 的生命周期完全在 wrapper 内 | 与 Next 16 proxy 隔离边界相容；业务代码完全不感知；trace id 自动贯穿 logger / error / metrics；fallback 行为（拿不到 traceId 时退化为 `unknown`）天然友好；测试可在 wrapper 注入点直接 `als.run` | proxy 与 wrapper 协议固定下来；server action 必须由 `wrapServerAction` 包装（FR-009 已要求）；从 form action 调用过来的 server action 通过 Next 注入的 `headers()` API 获取 trace id（实测可用，详见 §13.1 walking skeleton 验证） | NFR-001（开销极低，单次 `AsyncLocalStorage.run()` 约 ~1μs；header 解析 1 次）、NFR-005（test 内可直接 `runWithTrace(testId, fn)`）、CON-004（业务代码 0 修改）、Next 16 proxy 模型契约 | 高（封装在 `@/features/observability/trace` + `server-boundary`） |
+| B | trace id 通过参数显式传递到所有 server action | 完全无魔法，调试直观 | 必须修改所有现存 server action 签名（>20 个），打穿 CON-004；form action 没有自然透传 trace id 的位置 | 严重违反 CON-004；NFR-001 也会因为大量参数传递而退化 | 低 |
 | C | 引入 awilix 或自实现 request-scoped DI | 测试隔离最好 | 引入运行时复杂度；很可能需要新依赖（违反 NFR-002 / CON-001）；与 Next.js App Router 当前 ergonomics 反向 | 违反 NFR-002 / CON-001 | 中 |
+| D | 完全不做 trace id，仅每条 log 自带 nanoid | 实现最小 | 无法跨 logger / metrics / errors 串联，FR-001 验收第 1、2、3 条全部不通过 | 直接违反 FR-001 | 高（但不达标） |
 
-**选定**：方案 A。可逆性最高、对 CON-004 / NFR-002 / NFR-005 全部满足。
+**选定**：方案 A。proxy 与 boundary wrapper 通过 `x-trace-id` header 协议解耦；ALS 在 wrapper 内启动，避免 Next 16 proxy 隔离边界的陷阱。
 
 ### 6.2 SQLite 备份策略
 
+> **node:sqlite 实测 API 形态**（在仓库 Node 22.22.2 实测，2026-04-19）：`require('node:sqlite')` 顶层导出包含 `DatabaseSync`、`StatementSync`、`constants`、`backup` 四项；`DatabaseSync.prototype` **不含** `.backup()` 方法。Online Backup 是**模块级函数** `sqlite.backup(sourceDb, destPath, options?)`，签名为 `backup(source: DatabaseSync, destinationPath: string, options?: { source?, target?, rate?, progress? }): Promise<number>`，返回总写入页数。设计需以此为唯一基线。
+
 | 方案 | 核心思路 | 优点 | 主要代价 / 风险 | NFR / 约束适配 | 可逆性 |
 | --- | --- | --- | --- | --- | --- |
-| X | `node:sqlite` 提供的 `db.backup(destPath, { rate, progress })` Online Backup API | Node 22+ 内置（无新依赖）；可在写入中产出一致快照；自带分页备份不长时间持锁；`rate` 控制每步页数，能满足 FR-007 验收（`/api/health` 1Hz 探测、不连续 2 秒不可用） | API 是较新的 Node 22 内置能力，需在设计阶段验证当前运行时支持（README 已声明 Node 22+） | NFR-002（无新依赖）、NFR-001（备份在独立脚本进程内运行，不影响主应用）、FR-007 全部验收 | 高 |
+| X | 模块级 `sqlite.backup(srcDb, destPath, { rate: 256 })` Online Backup API | Node 22+ 内置（无新依赖）；可在写入中产出一致快照；自带分页备份不长时间持锁；`rate` 控制每步页数；返回 promise + total pages，可写入结构化日志 | 仍是 experimental 模块（启动时打 `ExperimentalWarning`），需在脚本初始化抑制或降噪；Node 边缘 patch 版本若不导出 `backup` 字段需 fallback | NFR-002（无新依赖）、NFR-001（备份在独立脚本进程内运行，不影响主应用）、FR-007 全部验收（实测证实可在写入态运行） | 高 |
 | Y | `PRAGMA wal_checkpoint(TRUNCATE)` + `fs.copyFile` | 实现简单，纯文件 IO | 在并发写入时可能产出不一致快照，违反 FR-007 第 1 条「重新打开应能正常读取所有现有表结构」；并且 `wal_checkpoint(TRUNCATE)` 会短暂阻塞写入，可能命中 FR-007 第 2 条「不超过 2 秒不可用窗口」边界 | NFR-002 满足；FR-007 风险较高 | 高 |
 | Z | 应用停服 + 冷 copy | 最简单、最安全 | 必须停服，FR-007 第 2 条隐含「在线备份」语义无法满足 | 部分违反 FR-007 第 2 条 | 高 |
 
-**选定**：方案 X，回退路径 → 方案 Y（若 Node 22 内置 `db.backup()` 在当前部署环境实测不稳定时，按 ASM-002 在 hf-design 阶段调整设计为方案 Y，而无需回到 hf-specify）。
+**选定**：方案 X，回退路径 → 方案 Y（脚本启动时若 `typeof require('node:sqlite').backup !== 'function'`，自动 fallback 到 Y，并在结构化日志写 `event=sqlite.backup.fallback` + `reason=module-backup-unavailable`）。本设计阶段已通过 `node -e` smoke 实证 `typeof sqlite.backup === 'function'`（结果记入 §13.3 与本节脚注），不会发生主路径"永远不触发"的退化情形。
 
 ## 7. 选定方案与关键决策
 
-- **D-1**：使用 `AsyncLocalStorage` + Next.js middleware 维护 trace id（方案 A）。
-- **D-2**：使用 `node:sqlite` `db.backup()` 作为主备份路径，方案 Y 作为 fallback ADR。
+- **D-1**：使用 `AsyncLocalStorage` + Next.js **`proxy.ts`** 协作维护 trace id；proxy 仅生成 / 继承 trace id 并通过请求 / 响应 `x-trace-id` 头部传播，ALS 的 `run()` 在 `wrapRouteHandler` / `wrapServerAction` 内部发起（方案 A，见 §6.1 Next 16 边界说明）。
+- **D-2**：使用 `node:sqlite` 模块级 `sqlite.backup(srcDb, destPath, { rate })` 作为主备份路径，方案 Y 作为 fallback ADR。
 - **D-3**：自实现极简 logger / metrics / errorReporter，**不**引入 pino / winston / prom-client / sentry SDK（NFR-002）。
 - **D-4**：`/api/metrics` 在 `OBSERVABILITY_METRICS_ENABLED=false` 时通过 **route handler 动态返回 404**（不通过条件导出 module，避免冷启动时序耦合）；同时在响应头不带任何能力指纹。
-- **D-5**：所有现存 server action / route handler 在「**最薄包装层**」接入观测；不重写业务函数本身。具体形态：原 server action 文件保留，在 export 处包一层 `wrapServerAction("work-actions/publishWork", publishWork)`。
+- **D-5**：所有现存 server action / route handler 在「**最薄包装层**」接入观测；不重写业务函数本身。具体形态：原 server action 文件保留，在 export 处包一层 `wrapServerAction("work-actions/publishWork", publishWork)`。Wrapper 必须在原模块（带 `'use server'`）export 现场调用，并保留 `length` / `name` / `this` / async 形态，详见 §11.2 不变量 I-7。
 - **D-6**：env 解析失败默认走「降级 + warn 启动日志」，仅 `OBSERVABILITY_METRICS_ENABLED=true` 缺 token 时硬性中止启动（FR-006 第 2 条）。
 
 ADR 摘要详见 §16。
@@ -157,22 +163,24 @@ flowchart LR
 ```mermaid
 sequenceDiagram
   participant Browser
-  participant Middleware as Next middleware
+  participant Proxy as Next 16 proxy.ts
   participant Action as wrapServerAction(publishWork)
   participant Logger
   participant Metrics
   participant Repo as community.sqlite
 
-  Browser->>Middleware: POST /studio/works (form action)
-  Middleware->>Middleware: trace = randomUUID() / inherit x-trace-id
-  Middleware->>Action: als.run(trace, () => action())
+  Browser->>Proxy: POST /studio/works (form action)
+  Proxy->>Proxy: trace = randomUUID() OR inherit x-trace-id
+  Proxy->>Action: forward request with x-trace-id header
+  Action->>Action: traceId = headers().get('x-trace-id')
+  Action->>Action: als.run(traceId, () => actualAction())
   Action->>Logger: info event=server-action.started actionName=publishWork
   Action->>Repo: bundle.works.save(...)
   Repo-->>Action: result
   Action->>Metrics: business.work_publish.success += 1
   Action->>Logger: info event=server-action.completed durationMs=42
-  Action-->>Middleware: { ok: true } / redirect
-  Middleware-->>Browser: response with x-trace-id header
+  Action-->>Proxy: { ok: true } / redirect
+  Proxy-->>Browser: response with x-trace-id header
 ```
 
 ### 8.3 失败路径
@@ -208,7 +216,7 @@ sequenceDiagram
 | `config/env`（扩展） | `web/src/config/env.ts` | 增加 `ObservabilityConfig` / `BackupConfig`；保持 `AppConfig` 单源解析 | 不在 env 解析时启动 logger（避免循环） |
 | `app/api/metrics/route` | `web/src/app/api/metrics/route.ts` | 受控 JSON 出口；disabled→404、unauth→401、ok→200 | 不返回任何与业务实体相关的具体 id 或邮箱 |
 | `app/api/health/route`（扩展） | `web/src/app/api/health/route.ts` | 维持现有响应；附加 `observability` / `backup` 命名空间 | 不依赖磁盘扫描结果导致响应阻塞 > 500ms |
-| `app/middleware`（新建） | `web/src/middleware.ts` | 在请求进入时生成 / 继承 trace id 并 als.run；写 `x-trace-id` 响应头 | 不做鉴权 / 路由重写 |
+| `app/proxy`（新建，Next 16 命名） | `web/src/proxy.ts`（或 `web/proxy.ts`） | 在请求进入时生成 / 继承 trace id（`x-trace-id` 入站头）；改写 `request.headers.set('x-trace-id', traceId)` 后透传；在响应阶段写 `x-trace-id` 响应头。**不**在 proxy 内 `als.run`（Next 16 proxy 与 render code 是隔离边界，ALS 不会跨边界透传）；ALS 由 boundary wrapper 在 route handler / server action 入口发起 | 不做鉴权 / 路由重写；不依赖共享模块 / 全局；不直接调用 logger / metrics（避免 proxy 边界 import 业务模块） |
 | `scripts/backup-sqlite.mjs` | `web/scripts/backup-sqlite.mjs` | CLI；`db.backup()` 主路径 + 文件名 `community-YYYYMMDDHHmmss.sqlite`；自身用 logger 输出结构化 log；失败退出码非零 | 不在脚本里启动 Next.js / app context |
 | `scripts/restore-sqlite.mjs` | `web/scripts/restore-sqlite.mjs` | CLI；接受备份文件路径；atomic rename（`fs.copyFile` + `fs.rename`）替换当前 db；失败退出码非零 | 不在 db 仍被打开时写入 |
 
@@ -228,15 +236,24 @@ sequenceDiagram
   participant CLI as backup-sqlite.mjs
   participant CFG as readBackupConfig()
   participant LOG as logger
-  participant DB as new sqlite.DatabaseSync(srcPath, { readOnly: false })
+  participant SQ as require('node:sqlite')
+  participant DB as new SQ.DatabaseSync(srcPath)
 
   CLI->>CFG: load env / argv
   CFG-->>CLI: { srcPath, backupDir }
   CLI->>LOG: info event=sqlite.backup.started srcPath dest
-  CLI->>DB: open in WAL / no-mutate mode
-  CLI->>DB: db.backup(destPath, { rate: 256 })
-  DB-->>CLI: progress callbacks (best-effort)
-  CLI->>LOG: info event=sqlite.backup.completed durationMs sizeBytes
+  CLI->>SQ: capability check typeof SQ.backup === 'function'
+  alt module-level backup available (主路径)
+    CLI->>DB: open
+    CLI->>SQ: await sqlite.backup(db, destPath, { rate: 256, progress: (p) => ... })
+    SQ-->>CLI: total pages written
+    CLI->>LOG: info event=sqlite.backup.completed durationMs sizeBytes pages
+  else fallback (Y) - sqlite.backup unavailable
+    CLI->>LOG: warn event=sqlite.backup.fallback reason=module-backup-unavailable
+    CLI->>DB: db.exec('PRAGMA wal_checkpoint(TRUNCATE)')
+    CLI->>CLI: fs.copyFile(srcPath, destPath)
+    CLI->>LOG: info event=sqlite.backup.completed mode=fallback durationMs sizeBytes
+  end
   CLI->>process: exit 0
 ```
 
@@ -309,7 +326,9 @@ export function wrapRouteHandler<H extends (req: Request, ...rest: unknown[]) =>
   name: string,
   handler: H,
 ): H;
-export function wrapServerAction<F extends (...args: unknown[]) => unknown>(
+// MUST be called inside the same module that carries `'use server'` directive
+// (i.e. at server-action export site), MUST be async, MUST preserve length/name/this.
+export function wrapServerAction<F extends (...args: any[]) => Promise<any>>(
   name: string,
   action: F,
 ): F;
@@ -323,6 +342,7 @@ export function wrapServerAction<F extends (...args: unknown[]) => unknown>(
 - I-4：单条 log 体积 ≤ 8 KiB；超过则截断 `error.stack`、`context` 多余键，并附 `truncated=true`。
 - I-5：`OBSERVABILITY_METRICS_TOKEN` 与 `SENTRY_DSN` 绝不出现在任何 log / metrics / health 响应。
 - I-6：`/api/health` 字段格式向后兼容，新增字段位于独立命名空间 `observability` / `backup`。
+- I-7：`wrapServerAction(name, action)` 必须满足以下硬约束：(a) 仅允许在原模块顶部带 `'use server'` 指令的文件 export 现场调用；(b) 包装目标必须为 `async function`（Server Action 契约）；(c) 包装结果必须保持 `name === action.name`（或显式同名）、`length === action.length`、调用时 `this` 透传；(d) 包装结果作为 export 必须可被 Next.js 推导出稳定的 server action ID（即 wrapper 必须与原 action 在同一文件且为 named export，**不**在另一个文件包装后再 re-export）。
 
 ## 12. 非功能需求与约束落地
 
@@ -339,10 +359,15 @@ export function wrapServerAction<F extends (...args: unknown[]) => unknown>(
 
 ### 13.1 最薄端到端验证路径（Walking Skeleton）
 
-`hf-test-driven-dev` 的第一项实现任务（建议是 T1，详见 §15）：
+`hf-test-driven-dev` 的第一项实现任务（建议是 T46，详见 §15）：
 
-1. 新增 `middleware.ts` + `observability/trace.ts` + `observability/logger.ts` 极简版本，使现有 `/api/health` 请求**带回 `x-trace-id` 头部**且终端出现一条 `event=http.request.completed` 的 JSON 日志。
-2. 通过此一条 vitest 测试 + 一条手工 `curl` 验证可证明 trace id 链路成立。
+1. 新增 `web/src/proxy.ts`（Next 16 命名）+ `observability/trace.ts` + `observability/logger.ts` + `observability/server-boundary.ts` 的 minimum：
+   - proxy 生成 / 继承 trace id 并写入 `x-trace-id` 入站头与响应头；
+   - `wrapRouteHandler` 从 `Request.headers.get('x-trace-id')` 读 trace id 后 `runWithTrace(traceId, () => handler(req))`；
+   - `/api/health` 的 `route.ts` 改为 `export const GET = wrapRouteHandler('health', healthHandler)`。
+2. 验证：
+   - vitest 集成测试：构造带 `x-trace-id: walking-skeleton-001` 的 Request 请求 health handler，断言响应头存在 `x-trace-id` 且与入站值一致；同时断言 in-memory logger 收到一条 `event=http.request.completed` + `traceId='walking-skeleton-001'` 的事件。
+   - 手工 `curl -i http://localhost:3000/api/health`：响应头有 `x-trace-id`；终端有一条 JSON 日志含同值 traceId。
 
 ### 13.2 测试层次
 
@@ -359,6 +384,7 @@ export function wrapServerAction<F extends (...args: unknown[]) => unknown>(
   - `app/api/metrics/route.test.ts`（新建）：disabled→404、unauth→401、ok→200 + payload schema。
 - **现有业务回归（Vitest + 各 server action 测试）**
   - 现有 `work-actions.test.ts` / `profile-editor.test.ts` / `follow-action.test.ts` 等不允许出现新失败；通过 `wrapServerAction` 包装后行为应完全一致。
+  - 可执行 gate（每个 task 收尾时执行 + `hf-regression-gate` 阶段最终执行）：在 `web/` 目录下运行 `npm run test`、`npm run typecheck`、`npm run lint`、`npm run build`，期望全部 exit code 0（与 `hf-test-driven-dev` 现有 chain 完全一致）。
 - **Playwright e2e**
   - 复用现有 e2e；新增不阻塞，但增加一项：访问首页，断言响应头存在 `x-trace-id`（仅作为 smoke）。
 - **CLI 脚本**
@@ -366,7 +392,18 @@ export function wrapServerAction<F extends (...args: unknown[]) => unknown>(
 
 ### 13.3 性能验证（NFR-001）
 
-详见规格 §7 NFR-001 验收第 2 条「基线采集协议」。`hf-regression-gate` 阶段执行；记录在 `docs/verification/regression-T<X>.md`。
+绑定节点：**`hf-regression-gate` 阶段一次性执行**（在 §15 列出的全部任务实现完成、completion-gate 之前）。**不**绑定到任何单个 fail-first task；单 task 阶段不要求复跑性能基线，避免噪声放大。
+
+执行口径严格依规格 §7 NFR-001 验收第 2 条「基线采集协议」：分别在 `master` 基线 commit 与本增量最终 commit 上启动应用 → 等待 10s 预热 → 对 `/api/health` 顺序 1000 次请求 → 取 P95 → 记录差值。证据写入 `docs/verification/regression-gate-phase2-observability-ops-v1.md`。
+
+### 13.4 设计阶段已完成的 smoke 实证
+
+设计阶段已通过 `node -e` 在仓库 Node 22.22.2 实测：
+- `Object.keys(require('node:sqlite'))` → `['DatabaseSync','StatementSync','constants','backup']`
+- `typeof require('node:sqlite').backup` → `'function'`
+- `Object.getOwnPropertyNames(Object.getPrototypeOf(new sqlite.DatabaseSync(':memory:')))` 不含 `backup`
+
+证明 ADR-2 主路径（模块级 `sqlite.backup`）在当前 Node 运行时确实可用；同时 §14 fallback 自检条件改为 `typeof require('node:sqlite').backup !== 'function'`。
 
 ## 14. 失败模式与韧性策略
 
@@ -375,7 +412,7 @@ export function wrapServerAction<F extends (...args: unknown[]) => unknown>(
 | middleware 注入 trace id | middleware 因任何异常 throw 导致整个请求 503 | middleware 内部 try/catch；trace id 注入失败时退化为不写 header，请求继续；记录一条 warn |
 | `wrapServerAction` 包装的业务 throw | 业务 throw 被吞导致回归 | normalize 后**继续向上抛**（保留原行为），仅在边界处「记一笔」并归一化；redirect / form action 的现有语义不变 |
 | logger 写 stdout 阻塞 | 巨型对象导致单条 log > 8 KiB 触发慢写 | I-4 截断；超大 stack 直接截尾 |
-| `node:sqlite` `db.backup()` API 不可用 | Node 22 边缘版本未导出该 API | 备份脚本自检：若 `typeof db.backup !== 'function'`，按 ADR-2 fallback 切到 PRAGMA wal_checkpoint + fs.copyFile，并在 log 中标记 `event=sqlite.backup.fallback` |
+| `node:sqlite` 模块级 `sqlite.backup` API 不可用 | Node 22 边缘 patch 版本未导出该字段 | 备份脚本自检：若 `typeof require('node:sqlite').backup !== 'function'`，按 ADR-2 fallback 切到 PRAGMA wal_checkpoint + fs.copyFile，并在 log 中标记 `event=sqlite.backup.fallback reason=module-backup-unavailable` |
 | `restore` 在 db 仍被打开时执行 | 文件 rename 在 Linux 上仍可生效，但旧进程持有的 fd 仍指向旧 inode；新进程才看到新文件 | 文档要求停服后执行；脚本启动时检测 `lsof` 不可行（不引入新依赖），改为 readlink 检查 + `--force` 显式覆盖标志 |
 | `/api/metrics` token 泄漏 | logger 误把 Authorization 头入日志 | logger 白名单 + 集成测试断言响应日志中不含 Authorization 字串 |
 | ErrorReporter 内部 throw | reporter 故障导致请求失败 | reporter 调用包裹在 try/catch；reporter 内部异常仅 console.error，不冒泡 |
@@ -394,7 +431,7 @@ export function wrapServerAction<F extends (...args: unknown[]) => unknown>(
 
 预计任务划分（仅作 task planner 输入参考，**不**在本设计中拆任务清单）：
 
-- T46 trace + logger Walking Skeleton（middleware + `/api/health` x-trace-id 验证）
+- T46 trace + logger Walking Skeleton（`proxy.ts` + `wrapRouteHandler` + `/api/health` x-trace-id 验证）
 - T47 errors + error-reporter
 - T48 metrics + `/api/metrics` route handler
 - T49 server-boundary + 改造现有 server actions / route handlers 接入
@@ -403,16 +440,16 @@ export function wrapServerAction<F extends (...args: unknown[]) => unknown>(
 
 ## 16. 关键决策记录（ADR 摘要）
 
-### ADR-1 trace id 通过 AsyncLocalStorage 跨 server boundary
-- 上下文：需要 trace id 在 logger / errors / metrics 三处共用而不污染业务签名。
-- 决策：使用 Node 内置 `AsyncLocalStorage` + Next.js middleware 注入。
-- 后果：业务无感；测试可手动 `als.run()`；与未来 OpenTelemetry context 兼容。
-- 可逆性：高（封装在 `observability/trace`，可整体替换为 `cls-hooked` / OTel context API）。
+### ADR-1 trace id 通过 AsyncLocalStorage 跨 server boundary（在 Next 16 proxy 边界下采用 header 协议传播）
+- 上下文：需要 trace id 在 logger / errors / metrics 三处共用而不污染业务签名。Next 16 已将 `middleware.ts` 重命名为 `proxy.ts`，且官方明确 proxy 与 render code 是隔离边界，**proxy 内 `AsyncLocalStorage.run()` 包出来的上下文不会自然透传到 route handler / server action**。
+- 决策：proxy.ts 仅生成或继承 trace id，并通过 `request.headers.set('x-trace-id', traceId)` 将其作为 inbound header 传给下游；同时在响应阶段写 `x-trace-id` 响应头。`AsyncLocalStorage.run(traceId, () => actualHandler())` 由 `wrapRouteHandler` / `wrapServerAction` 在 boundary 入口发起；trace id 来源于 Next 16 提供的 `headers()`（server action）或 `Request.headers`（route handler）。
+- 后果：proxy 与 boundary wrapper 通过 header 协议解耦，与 Next 16 隔离边界一致；业务无感；测试可手动 `runWithTrace(testId, fn)`；fallback 行为天然友好（拿不到 traceId 时 logger 用 `traceId='unknown'`）。
+- 可逆性：高（封装在 `observability/trace` + `server-boundary`，可整体替换为 `cls-hooked` / OTel context API）。
 
-### ADR-2 SQLite 在线备份首选 `node:sqlite` `db.backup()`，回退 `PRAGMA wal_checkpoint(TRUNCATE) + fs.copyFile`
-- 上下文：FR-007 要求在线备份不阻塞实例；不允许引入新 npm 依赖。
-- 决策：主路径 `db.backup()`；脚本启动自检不可用 → 自动 fallback。
-- 后果：备份脚本两条路径一份代码；日志能区分 `event=sqlite.backup.completed` vs `event=sqlite.backup.fallback`。
+### ADR-2 SQLite 在线备份首选模块级 `sqlite.backup(srcDb, destPath, options)`，回退 `PRAGMA wal_checkpoint(TRUNCATE) + fs.copyFile`
+- 上下文：FR-007 要求在线备份不阻塞实例；不允许引入新 npm 依赖。设计阶段实测：`require('node:sqlite').backup` 是模块级函数；`DatabaseSync.prototype` **不**含 `.backup()` 方法。
+- 决策：主路径 `await sqlite.backup(db, destPath, { rate: 256, progress })`；脚本启动自检 `typeof require('node:sqlite').backup === 'function'`；不可用时 fallback 到 `PRAGMA wal_checkpoint(TRUNCATE) + fs.copyFile`。
+- 后果：备份脚本两条路径一份代码；主路径与 fallback 通过 `event=sqlite.backup.completed` / `event=sqlite.backup.fallback` 在结构化日志区分；设计阶段 smoke 实证已确认主路径在当前 Node 22 实例上可用（详见 §13.4）。
 - 可逆性：高（仅影响脚本内部）。
 
 ### ADR-3 自实现极简 logger / metrics / errorReporter
@@ -424,6 +461,7 @@ export function wrapServerAction<F extends (...args: unknown[]) => unknown>(
 ### ADR-4 `/api/metrics` 在 disabled 时返回 404 由 route handler 内部判断
 - 上下文：CON-002 要求 disabled 时不暴露能力指纹。
 - 决策：route handler 内首条判断 → 直接 `Response.json({ error: 'not_found' }, { status: 404 })`；不通过条件 `export` 玩 module-level 技巧。
+- Trade-off（弱指纹）：route handler 内返回的 404 body 与 Next.js 默认未匹配 404 不完全一致（Next 默认是 HTML `404` 页或 JSON `null`，本设计返回 `{ error: 'not_found' }`），存在弱指纹风险。本增量接受此 trade-off，因为：(a) `/api/metrics` 路径本身在 enabled 时也会被同一 route handler 处理，不存在「Next 自动 404」与「我们 404」的 body 区分；(b) 完全模仿默认 404 需要在 route handler 中 throw `notFound()`（来自 `next/navigation`），这会让 disabled 路径在某些 Next 版本上产生额外的 framework log，带来更大的指纹风险。
 - 后果：与 enabled 但 unauthenticated 的 401 形态视觉接近，但状态码与 body 区分；测试容易覆盖。
 - 可逆性：高。
 
