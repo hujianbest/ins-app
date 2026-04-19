@@ -1,54 +1,78 @@
 import { expect, test, vi } from "vitest";
 
 const {
-  cookiesMock,
   redirectMock,
   getSessionContextMock,
   recordDiscoveryEventMock,
-  cookieStore,
+  getDefaultCommunityRepositoryBundleMock,
+  createOrFindDirectThreadMock,
 } = vi.hoisted(() => ({
-  cookiesMock: vi.fn(),
   redirectMock: vi.fn(),
   getSessionContextMock: vi.fn(),
-  recordDiscoveryEventMock: vi.fn(),
-  cookieStore: {
-    get: vi.fn(),
-    set: vi.fn(),
-  },
+  recordDiscoveryEventMock: vi.fn().mockResolvedValue(undefined),
+  getDefaultCommunityRepositoryBundleMock: vi.fn(),
+  createOrFindDirectThreadMock: vi.fn(),
 }));
 
-vi.mock("next/headers", () => ({
-  cookies: cookiesMock,
-}));
-
-vi.mock("next/navigation", () => ({
-  redirect: redirectMock,
-}));
-
+vi.mock("next/navigation", () => ({ redirect: redirectMock }));
 vi.mock("@/features/auth/session", () => ({
   getSessionContext: getSessionContextMock,
 }));
-
 vi.mock("@/features/discovery/events", () => ({
   buildDiscoveryProfileTargetId: vi.fn(
     (role: string, slug: string) => `${role}:${slug}`,
   ),
   recordDiscoveryEvent: recordDiscoveryEventMock,
 }));
+vi.mock("@/features/community/runtime", () => ({
+  getDefaultCommunityRepositoryBundle: getDefaultCommunityRepositoryBundleMock,
+}));
+vi.mock("@/features/messaging/thread-actions", () => ({
+  createOrFindDirectThread: createOrFindDirectThreadMock,
+}));
 
 import { startContactThreadAction } from "./actions";
-import { contactThreadsCookieName } from "./state";
+import { AppError } from "@/features/observability/errors";
 
-test("startContactThreadAction redirects guests to login", async () => {
+function bundleWithProfile(present: boolean) {
+  return {
+    profiles: {
+      getById: vi.fn(async () =>
+        present
+          ? {
+              id: "photographer:sample-photographer",
+              role: "photographer",
+              slug: "sample-photographer",
+              name: "Sample",
+              city: "shanghai",
+              shootingFocus: "portrait",
+              discoveryContext: "",
+              externalHandoffUrl: "",
+              tagline: "",
+              bio: "",
+              publishedAt: "2026-04-19T00:00:00.000Z",
+            }
+          : null,
+      ),
+    },
+  };
+}
+
+test("startContactThreadAction: guest → redirect /login + failed event", async () => {
+  redirectMock.mockClear();
+  recordDiscoveryEventMock.mockClear();
   getSessionContextMock.mockResolvedValue({
     status: "guest",
     isAuthenticated: false,
     accountId: null,
     primaryRole: null,
   });
-
-  await startContactThreadAction("photographer", "sample-photographer", "profile", "sample-photographer");
-
+  await startContactThreadAction(
+    "photographer",
+    "sample-photographer",
+    "profile",
+    "sample-photographer",
+  );
   expect(recordDiscoveryEventMock).toHaveBeenCalledWith(
     expect.objectContaining({
       eventType: "contact_start",
@@ -59,34 +83,87 @@ test("startContactThreadAction redirects guests to login", async () => {
   expect(redirectMock).toHaveBeenCalledWith("/login");
 });
 
-test("startContactThreadAction stores a thread and redirects to inbox", async () => {
-  redirectMock.mockReset();
-  cookieStore.get.mockReset();
-  cookieStore.set.mockReset();
-  recordDiscoveryEventMock.mockReset();
-  cookiesMock.mockResolvedValue(cookieStore);
+test("startContactThreadAction: recipient_not_found → redirect /inbox?error= + failed event, no thread create", async () => {
+  redirectMock.mockClear();
+  recordDiscoveryEventMock.mockClear();
+  createOrFindDirectThreadMock.mockClear();
   getSessionContextMock.mockResolvedValue({
     status: "authenticated",
     isAuthenticated: true,
-    accountId: "account:test:model",
-    primaryRole: "model",
+    accountId: "account:test:photographer",
+    primaryRole: "photographer",
   });
-  cookieStore.get.mockReturnValue(undefined);
+  getDefaultCommunityRepositoryBundleMock.mockReturnValue(
+    bundleWithProfile(false),
+  );
 
-  await startContactThreadAction("photographer", "sample-photographer", "work", "neon-portrait-study");
-
-  expect(cookieStore.set).toHaveBeenCalledWith(
+  await startContactThreadAction("photographer", "ghost", "profile", "ghost");
+  expect(recordDiscoveryEventMock).toHaveBeenCalledWith(
     expect.objectContaining({
-      name: contactThreadsCookieName,
-      value: expect.stringContaining("neon-portrait-study"),
-    })
+      success: false,
+      failureReason: "recipient_not_found",
+    }),
+  );
+  expect(redirectMock).toHaveBeenCalledWith("/inbox?error=recipient_not_found");
+  expect(createOrFindDirectThreadMock).not.toHaveBeenCalled();
+});
+
+test("startContactThreadAction: happy path → createOrFindDirectThread + success event + redirect /inbox/[threadId]", async () => {
+  redirectMock.mockClear();
+  recordDiscoveryEventMock.mockClear();
+  createOrFindDirectThreadMock.mockClear();
+  getSessionContextMock.mockResolvedValue({
+    status: "authenticated",
+    isAuthenticated: true,
+    accountId: "account:test:photographer",
+    primaryRole: "photographer",
+  });
+  getDefaultCommunityRepositoryBundleMock.mockReturnValue(
+    bundleWithProfile(true),
+  );
+  createOrFindDirectThreadMock.mockResolvedValue({ threadId: "thread-xyz" });
+
+  await startContactThreadAction(
+    "photographer",
+    "sample-photographer",
+    "work",
+    "neon-portrait-study",
+  );
+  expect(createOrFindDirectThreadMock).toHaveBeenCalledWith(
+    "photographer:sample-photographer",
+    "work:neon-portrait-study",
   );
   expect(recordDiscoveryEventMock).toHaveBeenCalledWith(
     expect.objectContaining({
       eventType: "contact_start",
-      actorAccountId: "account:test:model",
       success: true,
     }),
   );
-  expect(redirectMock).toHaveBeenCalledWith("/inbox");
+  expect(redirectMock).toHaveBeenCalledWith("/inbox/thread-xyz");
+});
+
+test("startContactThreadAction: invalid_self_thread → redirect /inbox?error=", async () => {
+  redirectMock.mockClear();
+  recordDiscoveryEventMock.mockClear();
+  createOrFindDirectThreadMock.mockClear();
+  getSessionContextMock.mockResolvedValue({
+    status: "authenticated",
+    isAuthenticated: true,
+    accountId: "account:test:photographer",
+    primaryRole: "photographer",
+  });
+  getDefaultCommunityRepositoryBundleMock.mockReturnValue(
+    bundleWithProfile(true),
+  );
+  createOrFindDirectThreadMock.mockRejectedValue(
+    new AppError({ code: "invalid_self_thread", status: 400 }),
+  );
+
+  await startContactThreadAction(
+    "photographer",
+    "sample-photographer",
+    "profile",
+    "sample-photographer",
+  );
+  expect(redirectMock).toHaveBeenCalledWith("/inbox?error=invalid_self_thread");
 });

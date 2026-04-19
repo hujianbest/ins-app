@@ -1,29 +1,35 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getSessionContext } from "@/features/auth/session";
+import { getDefaultCommunityRepositoryBundle } from "@/features/community/runtime";
 import {
   buildDiscoveryProfileTargetId,
   recordDiscoveryEvent,
 } from "@/features/discovery/events";
+import { createOrFindDirectThread } from "@/features/messaging/thread-actions";
+import { AppError } from "@/features/observability/errors";
 import { wrapServerAction } from "@/features/observability/server-boundary";
 
-import {
-  buildContactThread,
-  contactThreadsCookieName,
-  type ContactSourceType,
-  parseContactThreads,
-  serializeContactThreads,
-  upsertContactThread,
-} from "./state";
+import type { ContactSourceType } from "./state";
+
+function buildContextRef(
+  recipientRole: "photographer" | "model",
+  recipientSlug: string,
+  sourceType: ContactSourceType,
+  sourceId: string,
+): string {
+  if (sourceType === "work") return `work:${sourceId}`;
+  if (sourceType === "opportunity") return `opportunity:${sourceId}`;
+  return `profile:${recipientRole}:${recipientSlug}`;
+}
 
 async function startContactThreadActionImpl(
   recipientRole: "photographer" | "model",
   recipientSlug: string,
   sourceType: ContactSourceType,
-  sourceId: string
+  sourceId: string,
 ) {
   const session = await getSessionContext();
   const targetProfileId = buildDiscoveryProfileTargetId(
@@ -47,36 +53,55 @@ async function startContactThreadActionImpl(
     return;
   }
 
-  const cookieStore = await cookies();
-  const currentThreads = parseContactThreads(cookieStore.get(contactThreadsCookieName)?.value);
-  const nextThread = buildContactThread(
-    session.primaryRole,
+  const bundle = getDefaultCommunityRepositoryBundle();
+  const recipientProfileId = `${recipientRole}:${recipientSlug}`;
+  const recipient = await bundle.profiles.getById(recipientProfileId);
+  if (!recipient) {
+    await recordDiscoveryEvent({
+      eventType: "contact_start",
+      actorAccountId: session.accountId,
+      targetType: "profile",
+      targetId: targetProfileId,
+      targetProfileId,
+      surface: `contact:${sourceType}`,
+      query: "",
+      success: false,
+      failureReason: "recipient_not_found",
+    });
+    redirect("/inbox?error=recipient_not_found");
+    return;
+  }
+
+  const contextRef = buildContextRef(
     recipientRole,
     recipientSlug,
     sourceType,
     sourceId,
   );
 
-  cookieStore.set({
-    name: contactThreadsCookieName,
-    value: serializeContactThreads(upsertContactThread(currentThreads, nextThread)),
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-  });
-
-  await recordDiscoveryEvent({
-    eventType: "contact_start",
-    actorAccountId: session.accountId,
-    targetType: "profile",
-    targetId: targetProfileId,
-    targetProfileId,
-    surface: `contact:${sourceType}`,
-    query: "",
-    success: true,
-  });
-
-  redirect("/inbox");
+  try {
+    const { threadId } = await createOrFindDirectThread(
+      recipientProfileId,
+      contextRef,
+    );
+    await recordDiscoveryEvent({
+      eventType: "contact_start",
+      actorAccountId: session.accountId,
+      targetType: "profile",
+      targetId: targetProfileId,
+      targetProfileId,
+      surface: `contact:${sourceType}`,
+      query: "",
+      success: true,
+    });
+    redirect(`/inbox/${threadId}`);
+  } catch (error) {
+    if (error instanceof AppError && error.code === "invalid_self_thread") {
+      redirect("/inbox?error=invalid_self_thread");
+      return;
+    }
+    throw error;
+  }
 }
 
 export const startContactThreadAction = wrapServerAction(
