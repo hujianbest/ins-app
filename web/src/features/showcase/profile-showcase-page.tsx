@@ -4,6 +4,7 @@ import { EditorialCard } from "@/features/cards/editorial-card";
 import { DiscoveryViewBeacon } from "@/features/discovery/view-beacon";
 import { EditorialVisual } from "@/features/shell/editorial-visual";
 import { startContactThreadAction } from "@/features/contact/actions";
+import { RelatedCreatorsSection } from "@/features/recommendations/related-creators-section";
 import { SectionHeading } from "@/features/shell/section-heading";
 import { toggleProfileFollowAction } from "@/features/social/actions";
 
@@ -163,6 +164,10 @@ export function ProfileShowcasePage({ profile, isSignedIn, isFollowing, returnPa
             </div>
           </div>
         </section>
+
+        <RelatedCreatorsSection
+          seed={{ role: profile.role, slug: profile.slug }}
+        />
       </section>
     </main>
   );
