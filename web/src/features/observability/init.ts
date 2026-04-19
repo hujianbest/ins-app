@@ -9,10 +9,15 @@ import {
   createInMemoryLogger,
   createLogger,
 } from "./logger";
+import {
+  type MetricsRegistry,
+  createMetricsRegistry,
+} from "./metrics";
 
 export type ObservabilityRuntime = {
   logger: Logger;
   errorReporter: ErrorReporter;
+  metrics: MetricsRegistry;
 };
 
 let runtime: ObservabilityRuntime | undefined;
@@ -20,6 +25,7 @@ let runtime: ObservabilityRuntime | undefined;
 export type ObservabilityRuntimeOptions = {
   logger?: Logger | LoggerOptions;
   errorReporter?: ErrorReporter;
+  metrics?: MetricsRegistry;
 };
 
 function instantiate(options: ObservabilityRuntimeOptions = {}): ObservabilityRuntime {
@@ -33,8 +39,9 @@ function instantiate(options: ObservabilityRuntimeOptions = {}): ObservabilityRu
   }
 
   const errorReporter = options.errorReporter ?? createNoopReporter();
+  const metrics = options.metrics ?? createMetricsRegistry();
 
-  return { logger, errorReporter };
+  return { logger, errorReporter, metrics };
 }
 
 export function getObservability(): ObservabilityRuntime {
@@ -62,9 +69,27 @@ export function installInMemoryLogger(options: LoggerOptions = {}): InMemoryLogg
   if (runtime) {
     runtime = { ...runtime, logger };
   } else {
-    runtime = { logger, errorReporter: createNoopReporter() };
+    runtime = {
+      logger,
+      errorReporter: createNoopReporter(),
+      metrics: createMetricsRegistry(),
+    };
   }
   return logger;
+}
+
+export function installFreshMetricsRegistry(): MetricsRegistry {
+  const metrics = createMetricsRegistry();
+  if (runtime) {
+    runtime = { ...runtime, metrics };
+  } else {
+    runtime = {
+      logger: createLogger(),
+      errorReporter: createNoopReporter(),
+      metrics,
+    };
+  }
+  return metrics;
 }
 
 export type InMemoryReporter = ErrorReporter & {
@@ -99,7 +124,11 @@ export function installInMemoryReporter(
   if (runtime) {
     runtime = { ...runtime, errorReporter: reporter };
   } else {
-    runtime = { logger: createLogger(), errorReporter: reporter };
+    runtime = {
+      logger: createLogger(),
+      errorReporter: reporter,
+      metrics: createMetricsRegistry(),
+    };
   }
   return reporter;
 }
