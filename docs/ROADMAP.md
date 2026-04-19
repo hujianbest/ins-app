@@ -52,6 +52,25 @@
 
 **验收 / Acceptance**：管理员可以在不直接操作数据库的情况下完成精选编排、违规处置和账号干预。
 
+**V1 已交付 / V1 delivered（2026-04-19）**
+
+- ✅ 管理员能力：env `ADMIN_ACCOUNT_EMAILS` 白名单 + 纯函数 `createAdminCapabilityPolicy` / `createAdminGuard` + `getRequestAccessControl` 自动注入；名单为空 ⇒ 全链路 fail-closed。
+- ✅ Admin shell：`/studio/admin` dashboard + `/studio/admin/curation` + `/studio/admin/works` + `/studio/admin/audit` 四个 SSR 页面；`metadata.robots = noindex,nofollow`；`/studio` 主页对 admin 显示「进入运营后台」入口卡，非 admin DOM 中不暴露。
+- ✅ Curation：admin 可对 `home` / `discover` 两个 surface 进行 slot 增 / 删 / 重排（`upsertCuratedSlot` / `removeCuratedSlot` / `reorderCuratedSlot` server actions）；目标对象不存在仍允许写库 + audit `note=target_not_found_at_write`。
+- ✅ Work moderation：`CommunityWorkStatus` 联合追加 `"moderated"`；admin `hideWork` (published → moderated) / `restoreWork` (moderated → published) server actions；公开 read model（5 surface：`getPublicWorkPageModel` / `listPublicWorks` / showcase / 推荐 `getRelatedWorks` / 搜索）一律屏蔽 moderated；owner-side `/studio/works` fail-closed（`resolveNextVisibility` throw `moderated_work_owner_locked`，3 种 intent 全拒绝），只有 admin restore 是恢复路径。
+- ✅ Audit log：新 SQLite 表 `audit_log` + `idx_audit_log_created_at_desc` 索引；admin server action 强制 `bundle.audit.record({...})`；写 + audit 同 sqlite 事务（`SqliteCommunityRepositoryBundle.withTransaction` 显式 BEGIN/COMMIT/ROLLBACK）；`/studio/admin/audit` 渲染最新 100 条（按 `created_at desc, id desc`）。
+- ✅ Metrics：`MetricsSnapshot.admin` 顶层加性扩展 6 counter（`curation.{added,removed,reordered}` / `work_moderation.{hidden,restored}` / `audit.appended`）；既有 `http` / `sqlite` / `business` / `recommendations` 命名空间不变。
+- ✅ NFR-001 性能：`listAllForAdmin` (500 works) P95 = 0.03ms；`audit.listLatest(100)` (200 pool) P95 = 0.02ms；远低于 80ms 预算（≈2700× / 4000× 余量）。
+
+**仍未做 / Still deferred to later slices**
+
+- 用户举报队列与处置工作流
+- 账号管理（封禁 / 解封 / 角色变更）
+- Profile / opportunity / 评论维度的违规处置
+- 二次审批 / 双人复核工作流
+- audit log 归档 / 加密 / 滚动；admin 操作 rate limit / 防重放
+- 外部 IAM / SSO 集成
+
 ### 3.3 线程式消息中心 / Threaded messaging
 
 **目标 / Goal**：把 `/inbox` 的最小闭环升级为多线程、未读、附件与系统通知。
@@ -194,7 +213,7 @@
 技术依赖意义上的推进顺序（不带时间估计）：
 
 1. §3.1 生产数据与持久化 → §3.8 可观测性与运维（**任何上量都先做这两件**；§3.8 V1 已交付，§3.1 待启动）。
-2. §3.2 运营后台 V1 → §3.3 线程式消息中心。
+2. §3.2 运营后台 V1 → §3.3 线程式消息中心（§3.2 V1 已交付）。
 3. §3.4 合作线索到履约 → §3.5 支付 / 订单 / 会员（履约语义先于付费语义）。
 4. §3.6 Discovery 智能化 → §3.7 搜索升级（共享相似度与事件管道；§3.6 V1 已交付）。
 5. §3.9 可访问性与国际化（贯穿，与每个新模块同步建设）。
