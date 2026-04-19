@@ -1,6 +1,7 @@
 # Phase 2 — Observability & Ops V1 任务计划
 
-- 状态: 草稿
+- 状态: 已批准
+- 批准记录: `docs/verification/tasks-approval-phase2-observability-ops-v1.md`
 - 主题: Phase 2 — Observability & Ops V1（可观测性与运维 V1）
 - 输入规格: `docs/specs/2026-04-19-observability-ops-v1-srs.md`（已批准）
 - 输入设计: `docs/designs/2026-04-19-observability-ops-v1-design.md`（已批准）
@@ -33,32 +34,32 @@
 ### M1 Walking Skeleton（`T46`）
 
 - 目标：在 Next 16 proxy + boundary wrapper 的协议下，让 `/api/health` 请求带回 `x-trace-id` 头部，并在 logger 中产生一条 `event=http.request.completed` 的 JSON 日志。
-- 退出标准：vitest 测试断言「带入站 `x-trace-id` 的 health 请求 → 响应头一致 + in-memory logger 收到事件」全绿；手工 `curl` 行为一致；`npm run verify` 全绿。
+- 退出标准：vitest 测试断言「带入站 `x-trace-id` 的 health 请求 → 响应头一致 + in-memory logger 收到事件」全绿；手工 `curl` 行为一致；`cd web && npm run test && npm run typecheck && npm run lint && npm run build` 全绿。
 
 ### M2 错误归一化与上报（`T47`）
 
 - 目标：`AppError` 类、`normalizeError` 与 `ErrorReporter` 工厂三组 primitive 完整实现，并用单元测试覆盖 noop / console / sentry-stub 三种 provider 的降级行为。
-- 退出标准：所有相关 unit test 全绿；reporter 默认 `noop`，sentry-stub 在 DSN 已配置时仍降级 + warn；`npm run verify` 全绿。
+- 退出标准：所有相关 unit test 全绿；reporter 默认 `noop`，sentry-stub 在 DSN 已配置时仍降级 + warn；`npm run test` / `npm run typecheck` / `npm run lint` / `npm run build` 全绿。
 
 ### M3 Metrics + 内部出口（`T48`）
 
 - 目标：`MetricsRegistry`（counter / gauge / histogram）+ `/api/metrics` route handler；disabled→404、unauth→401、ok→200。
-- 退出标准：route handler 测试全绿；`/api/metrics` 在 disabled / wrong token / right token 三种状态行为符合验收；`npm run verify` 全绿。
+- 退出标准：route handler 测试全绿；`/api/metrics` 在 disabled / wrong token / right token 三种状态行为符合验收；`npm run test` / `npm run typecheck` / `npm run lint` / `npm run build` 全绿。
 
 ### M4 Server Boundary 接入（`T49`）
 
 - 目标：用 `wrapRouteHandler` / `wrapServerAction` 包装现有 server action / route handler，统一接入 trace / log / metrics / 错误归一化；不改业务行为。
-- 退出标准：现有所有 vitest 测试不变绿（业务行为零变化）；新增 boundary 集成测试覆盖成功 / 失败两条路径下的 logger / metrics / reporter 调用；`npm run verify` 全绿。
+- 退出标准：现有所有 vitest 测试不变绿（业务行为零变化）；新增 boundary 集成测试覆盖成功 / 失败两条路径下的 logger / metrics / reporter 调用；`npm run test` / `npm run typecheck` / `npm run lint` / `npm run build` 全绿。
 
 ### M5 Env 契约 + `/api/health` 扩展（`T50`）
 
 - 目标：`web/src/config/env.ts` 扩展 observability / backup 字段；`/api/health` 新增 `observability` / `backup` 命名空间，保持向后兼容。
-- 退出标准：env 解析的降级 / hard-stop / non-positive `OBSERVABILITY_SLOW_QUERY_MS` 行为均有测试覆盖；扩展后的 `/api/health` 字段断言全绿；`npm run verify` 全绿。
+- 退出标准：env 解析的降级 / hard-stop / non-positive `OBSERVABILITY_SLOW_QUERY_MS` 行为均有测试覆盖；扩展后的 `/api/health` 字段断言全绿；`npm run test` / `npm run typecheck` / `npm run lint` / `npm run build` 全绿。
 
 ### M6 SQLite 备份 / 恢复 CLI（`T51`）
 
 - 目标：`web/scripts/backup-sqlite.mjs` + `web/scripts/restore-sqlite.mjs`；主路径 `sqlite.backup`，fallback `wal_checkpoint + copyFile`；`/api/health.backup` 字段联动。
-- 退出标准：CLI 单元 / 集成测试全绿（包括 `SQLITE_BACKUP_DIR` 缺失的非零退出）；运行 backup → restore 链路在临时目录实测可恢复；`npm run verify` 全绿。
+- 退出标准：CLI 单元 / 集成测试全绿（包括 `SQLITE_BACKUP_DIR` 缺失的非零退出）；运行 backup → restore 链路在临时目录实测可恢复；`npm run test` / `npm run typecheck` / `npm run lint` / `npm run build` 全绿。
 
 ## 3. 文件 / 工件影响图
 
@@ -120,8 +121,8 @@
 | `NFR-002` 无新 runtime 依赖 | 全部任务 + `code-review` 阶段 + `completion-gate` |
 | `NFR-003` 安全边界 | `T46`（logger 白名单）、`T47`（reporter）、`T48`（token / metrics 字段） |
 | `NFR-004` 启动鲁棒性 | `T50` |
-| `NFR-005` 可测试性 | `T46` ~ `T51` 全部任务，必须使用 in-memory primitives |
-| 设计 §11.2 I-1 ~ I-7 不变量 | `T46`（I-3）、`T47`（I-2）、`T48`（I-1, I-5）、`T49`（I-7）、`T50`（I-6） |
+| `NFR-005` 可测试性 | `T46` ~ `T51` 全部任务，必须使用 in-memory primitives（`createInMemoryLogger` / `createInMemoryReporter` / `resetObservabilityForTesting`） |
+| 设计 §11.2 I-1 ~ I-7 不变量 | `T46`（I-3, I-4）、`T47`（I-2）、`T48`（I-1, I-5）、`T49`（I-7）、`T50`（I-6） |
 | 设计 ADR-1 | `T46`、`T49` |
 | 设计 ADR-2 | `T51` |
 | 设计 ADR-3 | `T46` ~ `T48` |
@@ -153,9 +154,10 @@
   - 主行为：health request with `x-trace-id` → 响应头一致 + logger 收到事件（fail-first）
   - 关键边界：proxy 在缺失 / 非法 `x-trace-id` 时 regenerate，下游 logger 体现 `traceIdSource`
   - fail-first 点：logger 接受超集 context key 时丢弃；超 8 KiB log 被截断
+  - 可测试性 (NFR-005)：所有断言必须通过 `createInMemoryLogger()` 与 `resetObservabilityForTesting()` 完成，不允许用全局单例污染
 - Verify: `cd web && npm run test && npm run typecheck && npm run lint && npm run build`（全绿即通过）。
 - 预期证据: `docs/verification/test-design-T46.md`、`docs/verification/implementation-T46.md`、`docs/reviews/bug-patterns-T46.md`、`docs/reviews/test-review-T46.md`、`docs/reviews/code-review-T46.md`、`docs/reviews/traceability-review-T46.md`、`docs/verification/regression-T46.md`、`docs/verification/completion-T46.md`。
-- 完成条件: 所有 unit + integration 测试绿；`npm run verify` 绿；评审链 `bug-patterns → test-review → code-review → traceability-review → regression-gate(任务级 sanity) → completion-gate` 全部通过。
+- 完成条件: 所有 unit + integration 测试绿；`npm run test` / `npm run typecheck` / `npm run lint` / `npm run build` 绿；评审链 `bug-patterns → test-review → code-review → traceability-review → regression-gate(任务级 sanity) → completion-gate` 全部通过。
 
 ---
 
@@ -182,6 +184,7 @@
   - 主行为：原生 Error → AppError 带 traceId / cause（fail-first）
   - 关键边界：sentry-stub 在 DSN-set / DSN-absent 两条路径都降级到 noop
   - fail-first 点：reporter 内部 throw 不冒泡到调用方
+  - 可测试性 (NFR-005)：通过 `createInMemoryReporter()` 注入；测试结束 `resetObservabilityForTesting()`
 - Verify: `cd web && npm run test && npm run typecheck && npm run lint && npm run build`。
 - 预期证据: 同 T46 命名规则下的 `T47` 评审 / 验证文件全套。
 - 完成条件: 同 T46。
@@ -211,6 +214,7 @@
   - 主行为：counter / gauge / histogram 行为正确（fail-first）
   - 关键边界：disabled → 404；unauth → 401；ok → 200 三态
   - fail-first 点：snapshot 不含敏感字段；初次启动 snapshot 字段完整为 0
+  - 可测试性 (NFR-005)：注入独立 `MetricsRegistry` 实例；不允许跨用例共享全局 registry
 - Verify: `cd web && npm run test && npm run typecheck && npm run lint && npm run build`。
 - 预期证据: T48 评审 / 验证文件全套。
 - 完成条件: 同 T46。
@@ -237,6 +241,7 @@
   - 主行为：成功 server action → logger / counter；wrap 不改返回值
   - 关键边界：失败 server action → AppError + reporter + failure counter + 抛出形态保持
   - fail-first 点：I-7 — `wrapServerAction(name, action).length === action.length`、`name === action.name`、async 性质保持
+  - 可测试性 (NFR-005)：boundary 集成测试通过 in-memory logger / reporter / metrics 注入；`resetObservabilityForTesting()` 在 `beforeEach` 调用
   - 业务回归：现有 Vitest 全绿
 - Verify: `cd web && npm run test && npm run typecheck && npm run lint && npm run build`。
 - 预期证据: T49 评审 / 验证文件全套。
@@ -312,7 +317,15 @@ T46 (Walking Skeleton)
        └── T51 (Backup/Restore CLI + health backup 字段)
 ```
 
-关键路径：`T46 → T47 → T48 → T49`（必须串行；T49 是收口大头）。`T50` 在 T46 之后即可启动，但本计划顺序在 T49 之后以避免反复改 `/api/health`。`T51` 严格依赖 T50。
+关键路径（图论依赖）：`T46 → T47 → T49`、`T46 → T48 → T49`、`T46 → T50 → T51`。即 `T49` 严格依赖 `{T46, T47, T48}`；`T51` 严格依赖 `{T46, T50}`；其余节点之间不存在硬依赖。
+
+`Selection Priority` 仅用于在多个 `ready` 候选中决定 `Current Active Task`（详见 §8 选择规则），不构成额外硬性串行约束：
+
+- 当 `T46` completion-gate 通过后，`T47 / T48 / T50` 同时进入 `ready`；按 Selection Priority 升序，默认下一活跃任务为 `T47`。
+- `T49` 仅在 `T46 / T47 / T48` 均 completion-gate 通过后进入 `ready`。
+- `T51` 仅在 `T46 / T50` 均 completion-gate 通过后进入 `ready`。
+
+本计划默认选 `T47 → T48 → T49 → T50 → T51` 顺序推进，是为了让 reviewer 在 cold-read 时看到一条线性叙事；并不禁止 router 在并发授权下让 `T48 / T50` 与 `T47` 并行（实际由父会话编排策略决定）。
 
 ## 7. 完成定义与验证策略
 
