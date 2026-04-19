@@ -8,6 +8,7 @@ import type {
   CommunityWorkRecord,
   CreatorProfileRecord,
   CuratedSlotRecord,
+  DiscoveryEventRecord,
   FollowRelationRecord,
   MessageRecord,
   MessageThreadParticipantRecord,
@@ -22,6 +23,7 @@ type InMemoryCommunityRepositoryFixtures = {
   comments?: WorkCommentRecord[];
   curation?: CuratedSlotRecord[];
   audit?: AuditLogEntry[];
+  discoveryEvents?: DiscoveryEventRecord[];
   messageThreads?: MessageThreadRecord[];
   messageThreadParticipants?: MessageThreadParticipantRecord[];
   messages?: MessageRecord[];
@@ -34,6 +36,7 @@ export function createInMemoryCommunityRepositoryBundle(
   const comments = fixtures.comments ?? [];
   const curation = fixtures.curation ?? [];
   const auditLog: AuditLogEntry[] = [...(fixtures.audit ?? [])];
+  const discoveryEvents: DiscoveryEventRecord[] = [...(fixtures.discoveryEvents ?? [])];
   const messageThreads: MessageThreadRecord[] = [...(fixtures.messageThreads ?? [])];
   const messageThreadParticipants: MessageThreadParticipantRecord[] = [
     ...(fixtures.messageThreadParticipants ?? []),
@@ -201,8 +204,8 @@ export function createInMemoryCommunityRepositoryBundle(
     },
     discovery: {
       async record(input) {
-        return {
-          id: input.id ?? `discovery:${input.eventType}:${input.targetId}`,
+        const event: DiscoveryEventRecord = {
+          id: input.id ?? `discovery:${input.eventType}:${input.targetId}:${discoveryEvents.length}`,
           eventType: input.eventType,
           actorAccountId: input.actorAccountId ?? null,
           targetType: input.targetType,
@@ -214,9 +217,11 @@ export function createInMemoryCommunityRepositoryBundle(
           failureReason: input.failureReason,
           createdAt: input.createdAt ?? new Date().toISOString(),
         };
+        discoveryEvents.push(event);
+        return { ...event };
       },
       async listAll() {
-        return [];
+        return [...discoveryEvents].map((e) => ({ ...e }));
       },
     },
     audit: {
