@@ -68,6 +68,23 @@ test("studio page renders the model studio landing view through shared access co
     })
   ).toBeDefined();
   expect(screen.getByRole("link", { name: /打开收件箱/ }).getAttribute("href")).toBe("/inbox");
+  // Phase 2 §3.2: non-admin users must NOT see the admin entry card (FR-002 #5)
+  expect(screen.queryByRole("link", { name: /进入运营后台/ })).toBeNull();
+});
+
+test("studio page renders the admin entry card for admin users (Phase 2 §3.2 FR-002)", async () => {
+  redirectMock.mockReset();
+  const access = createAuthenticatedAccessControl("photographer");
+  access.adminCapability = { isAdmin: true, email: "admin@example.com" };
+  access.adminGuard = { allowed: true, redirectTo: null, reason: "allowed" };
+  getRequestAccessControlMock.mockResolvedValue(access);
+
+  const page = await StudioPage();
+  render(page);
+
+  expect(
+    screen.getByRole("link", { name: /进入运营后台/ }).getAttribute("href"),
+  ).toBe("/studio/admin");
 });
 
 test("studio page redirects unauthenticated visitors to login", async () => {
