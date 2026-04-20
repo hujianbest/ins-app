@@ -233,6 +233,104 @@ export type CommunityRepositoryBundle = {
    * assert "record then listLatest").
    */
   audit: AuditLogRepository;
+  /**
+   * Phase 2 — Threaded Messaging V1 (FR-001). Three repositories
+   * for direct messaging threads. In Phase 1 the participant
+   * identity key is the creator profile id (`${role}:${slug}`),
+   * not the auth account id (see design §1 + A-007). Admin code
+   * paths MUST NOT consume `bundle.messaging` (privacy boundary
+   * I-6 / NFR-002).
+   */
+  messaging: MessagingRepositoryBundle;
+};
+
+// ---------------------------------------------------------------------------
+// Phase 2 — Threaded Messaging V1: Thread / Message / Participant (FR-001)
+// ---------------------------------------------------------------------------
+
+export type ThreadKind = "direct" | "system_notification";
+export type MessageKind = "text";
+export type ParticipantRole = "initiator" | "recipient";
+
+export type MessageThreadRecord = {
+  id: string;
+  kind: ThreadKind;
+  subject?: string;
+  contextRef?: string;
+  createdAt: string;
+  lastMessageAt?: string;
+};
+
+export type MessageThreadParticipantRecord = {
+  threadId: string;
+  accountId: string;
+  role: ParticipantRole;
+  joinedAt: string;
+  lastReadAt?: string;
+};
+
+export type MessageRecord = {
+  id: string;
+  threadId: string;
+  authorAccountId: string | null;
+  kind: MessageKind;
+  body: string;
+  createdAt: string;
+};
+
+export type CreateDirectThreadInput = {
+  initiatorAccountId: string;
+  recipientAccountId: string;
+  contextRef?: string;
+};
+
+export type AppendMessageInput = {
+  threadId: string;
+  authorAccountId: string;
+  body: string;
+};
+
+export type InboxThreadProjection = {
+  thread: MessageThreadRecord;
+  counterpartAccountId: string;
+  unreadCount: number;
+};
+
+export interface MessageThreadRepository {
+  createDirectThread(input: CreateDirectThreadInput): Promise<MessageThreadRecord>;
+  /**
+   * Equivalent to spec FR-001 `findDirectThreadByContext(initiator,
+   * recipient, contextRef)` but renamed to highlight the (A,B) =
+   * (B,A) unordered semantics.
+   */
+  findDirectThreadByUnorderedPair(
+    accountA: string,
+    accountB: string,
+    contextRef: string | undefined,
+  ): Promise<MessageThreadRecord | null>;
+  getThreadById(id: string): Promise<MessageThreadRecord | null>;
+  updateLastMessageAt(threadId: string, ts: string): Promise<void>;
+  listThreadsForAccount(
+    accountId: string,
+    limit: number,
+  ): Promise<InboxThreadProjection[]>;
+}
+
+export interface MessageRepository {
+  appendMessage(input: AppendMessageInput): Promise<MessageRecord>;
+  listByThreadId(threadId: string, limit: number): Promise<MessageRecord[]>;
+}
+
+export interface ParticipantRepository {
+  listForThread(threadId: string): Promise<MessageThreadParticipantRecord[]>;
+  markRead(threadId: string, accountId: string, ts: string): Promise<void>;
+  getUnreadCountForAccount(accountId: string): Promise<number>;
+}
+
+export type MessagingRepositoryBundle = {
+  threads: MessageThreadRepository;
+  messages: MessageRepository;
+  participants: ParticipantRepository;
 };
 
 export type CommunitySeedSnapshot = {

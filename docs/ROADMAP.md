@@ -84,6 +84,18 @@
 
 **验收 / Acceptance**：用户可以在多个独立会话中持续沟通，未读状态可信，系统通知不会被业务消息淹没。
 
+#### 3.3 V1 已交付 / V1 Delivered (2026-04-19)
+
+- 三表 SQLite schema (`message_threads` / `message_thread_participants` / `messages`) + `bundle.messaging` 三 repository（sqlite + in-memory 等价）+ 索引；`(unordered pair, contextRef)` 直接消息线程唯一性由 `bundle.withTransaction` 包裹的 read-then-write 保证（A-006/A-007）。
+- 3 个 server actions（`createOrFindDirectThread` / `sendMessage` / `markThreadRead`），全部经 `wrapServerAction("messaging/...", fn)` + 新 `runMessagingAction` helper（与 §3.2 V1 admin runtime 同形）；form-action wrappers 在 `forbidden_thread` 时 redirect 到 `/inbox?error=` 防止 thread id 枚举。
+- `/inbox` 升级为「直接消息」+「系统通知」两段；`/inbox/[threadId]` 单线程详情 + 30s 客户端 `<InboxThreadPoll />` 轮询（`useEffect + setInterval + router.refresh()`，无第三方依赖；`intervalMs?: number` 唯一 props，I-9）。
+- 系统通知 read-only 派生自 `discovery_events` (`follow` + `external_handoff_click`) + `work_comments`（owner-side，自评论排除）；不持久化。
+- USER-INPUT 决策（auto mode）：(1) 无序去重（A→B 与 B→A 同 contextRef = 同一 thread）；(2) 未读排除自身消息。
+- 既有 `startContactThreadAction` 迁移到 `createOrFindDirectThread`；signature 不变；旧 cookie 工具与 `getInboxThreadsForRole` / 5 个 cookie 函数全部删除（rg 全仓 0 命中）；公开页面联系按钮 0 修改。
+- `MetricsSnapshot.messaging` 加性扩展（`threads_created` / `messages_sent` / `threads_read` / `system_notifications_listed` 4 counter，启动预注册全 0）；`/api/metrics` 既有消费者向后兼容；admin 后台严格不接触 messaging 数据，I-6 由字符串扫描断言守住。
+- 性能：in-memory 微基准 P95 = 8.06ms / 0.73ms（vs 120ms NFR-001 预算）；vitest 从 281 → 338 passed tests（+12 passed test files）；既有 baseline 18 failed test files 不漂移。
+- 显式留白（V2 评估）：富文本 / 附件（依赖 §3.1）、群聊、SSE/WebSocket、push / desktop notification、通知偏好 / 静音、消息审核 / NSFW / rate limit、admin 可见消息内容（隐私边界拒绝）、归档 / 删除 / 静音、已读回执给对方、持久化系统通知、消息撤回 / 编辑、`/api/messaging/*` REST。
+
 ### 3.4 合作线索到履约 / Collab leads → fulfillment（无支付）
 
 **目标 / Goal**：在不引入支付的前提下，让合作线索具备「双向确认 + 状态推进」能力。
@@ -213,7 +225,7 @@
 技术依赖意义上的推进顺序（不带时间估计）：
 
 1. §3.1 生产数据与持久化 → §3.8 可观测性与运维（**任何上量都先做这两件**；§3.8 V1 已交付，§3.1 待启动）。
-2. §3.2 运营后台 V1 → §3.3 线程式消息中心（§3.2 V1 已交付）。
+2. §3.2 运营后台 V1 → §3.3 线程式消息中心（§3.2 V1 与 §3.3 V1 均已交付）。
 3. §3.4 合作线索到履约 → §3.5 支付 / 订单 / 会员（履约语义先于付费语义）。
 4. §3.6 Discovery 智能化 → §3.7 搜索升级（共享相似度与事件管道；§3.6 V1 已交付）。
 5. §3.9 可访问性与国际化（贯穿，与每个新模块同步建设）。

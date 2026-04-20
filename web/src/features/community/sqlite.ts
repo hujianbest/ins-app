@@ -28,6 +28,9 @@ import type {
   CuratedSlotRecord,
   DiscoveryEventRecord,
   FollowRelationRecord,
+  MessageThreadRecord,
+  MessageThreadParticipantRecord,
+  MessageRecord,
   WorkCommentRecord,
 } from "./types";
 
@@ -149,6 +152,37 @@ type AuditLogRow = {
   note: string | null;
 };
 
+type MessageThreadRow = {
+  id: string;
+  kind: MessageThreadRecord["kind"];
+  subject: string | null;
+  context_ref: string | null;
+  created_at: string;
+  last_message_at: string | null;
+};
+
+type MessageThreadParticipantRow = {
+  thread_id: string;
+  account_id: string;
+  role: MessageThreadParticipantRecord["role"];
+  joined_at: string;
+  last_read_at: string | null;
+};
+
+type MessageRow = {
+  id: string;
+  thread_id: string;
+  author_account_id: string | null;
+  kind: MessageRecord["kind"];
+  body: string;
+  created_at: string;
+};
+
+type ThreadProjectionRow = MessageThreadRow & {
+  counterpart_account_id: string;
+  unread_count: number;
+};
+
 function mapCreatorProfileRow(row: CreatorProfileRow): CreatorProfileRecord {
   return {
     id: row.id,
@@ -230,6 +264,40 @@ function mapAuditLogRow(row: AuditLogRow): AuditLogEntry {
     targetKind: row.target_kind,
     targetId: row.target_id,
     note: row.note ?? undefined,
+  };
+}
+
+function mapMessageThreadRow(row: MessageThreadRow): MessageThreadRecord {
+  return {
+    id: row.id,
+    kind: row.kind,
+    subject: row.subject ?? undefined,
+    contextRef: row.context_ref ?? undefined,
+    createdAt: row.created_at,
+    lastMessageAt: row.last_message_at ?? undefined,
+  };
+}
+
+function mapMessageThreadParticipantRow(
+  row: MessageThreadParticipantRow,
+): MessageThreadParticipantRecord {
+  return {
+    threadId: row.thread_id,
+    accountId: row.account_id,
+    role: row.role,
+    joinedAt: row.joined_at,
+    lastReadAt: row.last_read_at ?? undefined,
+  };
+}
+
+function mapMessageRow(row: MessageRow): MessageRecord {
+  return {
+    id: row.id,
+    threadId: row.thread_id,
+    authorAccountId: row.author_account_id,
+    kind: row.kind,
+    body: row.body,
+    createdAt: row.created_at,
   };
 }
 
@@ -390,6 +458,41 @@ function createSchema(database: DatabaseSync) {
 
     CREATE INDEX IF NOT EXISTS idx_audit_log_created_at_desc
       ON audit_log(created_at DESC, id DESC);
+
+    CREATE TABLE IF NOT EXISTS message_threads (
+      id TEXT PRIMARY KEY,
+      kind TEXT NOT NULL,
+      subject TEXT,
+      context_ref TEXT,
+      created_at TEXT NOT NULL,
+      last_message_at TEXT
+    );
+    CREATE INDEX IF NOT EXISTS idx_threads_last_message_at_desc
+      ON message_threads(last_message_at DESC, id DESC);
+
+    CREATE TABLE IF NOT EXISTS message_thread_participants (
+      thread_id TEXT NOT NULL,
+      account_id TEXT NOT NULL,
+      role TEXT NOT NULL,
+      joined_at TEXT NOT NULL,
+      last_read_at TEXT,
+      PRIMARY KEY (thread_id, account_id),
+      FOREIGN KEY (thread_id) REFERENCES message_threads(id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_thread_participants_account
+      ON message_thread_participants(account_id, last_read_at);
+
+    CREATE TABLE IF NOT EXISTS messages (
+      id TEXT PRIMARY KEY,
+      thread_id TEXT NOT NULL,
+      author_account_id TEXT,
+      kind TEXT NOT NULL,
+      body TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (thread_id) REFERENCES message_threads(id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_messages_thread_created_at
+      ON messages(thread_id, created_at ASC);
   `);
 
   ensureCreatorProfileColumns(database);
@@ -933,6 +1036,165 @@ function createRepositoryBundleFromDatabase(
           .all(limit) as AuditLogRow[];
 
         return rows.map(mapAuditLogRow);
+      },
+    },
+    messaging: {
+      threads: {
+        async createDirectThread(input) {
+          const id = randomUUID();
+          const createdAt = new Date().toISOString();
+          database
+            .prepare(
+              `INSERT INTO message_threads (id, kind, subject, context_ref, created_at, last_message_at)
+               VALUES (?, 'direct', NULL, ?, ?, NULL)`,
+            )
+            .run(id, input.contextRef ?? null, createdAt);
+          database
+            .prepare(
+              `INSERT INTO message_thread_participants (thread_id, account_id, role, joined_at, last_read_at)
+               VALUES (?, ?, 'initiator', ?, NULL)`,
+            )
+            .run(id, input.initiatorAccountId, createdAt);
+          database
+            .prepare(
+              `INSERT INTO message_thread_participants (thread_id, account_id, role, joined_at, last_read_at)
+               VALUES (?, ?, 'recipient', ?, NULL)`,
+            )
+            .run(id, input.recipientAccountId, createdAt);
+          return {
+            id,
+            kind: "direct",
+            subject: undefined,
+            contextRef: input.contextRef,
+            createdAt,
+            lastMessageAt: undefined,
+          };
+        },
+        async findDirectThreadByUnorderedPair(accountA, accountB, contextRef) {
+          const row = database
+            .prepare(
+              `SELECT t.* FROM message_threads t
+               WHERE t.kind = 'direct'
+                 AND ((? IS NULL AND t.context_ref IS NULL) OR t.context_ref = ?)
+                 AND t.id IN (
+                   SELECT thread_id FROM message_thread_participants
+                   WHERE account_id IN (?, ?)
+                   GROUP BY thread_id
+                   HAVING COUNT(DISTINCT account_id) = 2
+                 )
+               LIMIT 1`,
+            )
+            .get(contextRef ?? null, contextRef ?? null, accountA, accountB) as
+            | MessageThreadRow
+            | undefined;
+          return row ? mapMessageThreadRow(row) : null;
+        },
+        async getThreadById(id) {
+          const row = database
+            .prepare(`SELECT * FROM message_threads WHERE id = ?`)
+            .get(id) as MessageThreadRow | undefined;
+          return row ? mapMessageThreadRow(row) : null;
+        },
+        async updateLastMessageAt(threadId, ts) {
+          database
+            .prepare(
+              `UPDATE message_threads SET last_message_at = ? WHERE id = ?`,
+            )
+            .run(ts, threadId);
+        },
+        async listThreadsForAccount(accountId, limit) {
+          const rows = database
+            .prepare(
+              `SELECT
+                 t.id, t.kind, t.subject, t.context_ref, t.created_at, t.last_message_at,
+                 (SELECT p2.account_id FROM message_thread_participants p2
+                  WHERE p2.thread_id = t.id AND p2.account_id <> ?) AS counterpart_account_id,
+                 (SELECT COUNT(*) FROM messages m
+                  WHERE m.thread_id = t.id
+                    AND (m.author_account_id IS NULL OR m.author_account_id <> ?)
+                    AND m.created_at > COALESCE(self.last_read_at, '')
+                 ) AS unread_count
+               FROM message_threads t
+               INNER JOIN message_thread_participants self
+                 ON self.thread_id = t.id AND self.account_id = ?
+               WHERE t.kind = 'direct'
+               ORDER BY COALESCE(t.last_message_at, t.created_at) DESC, t.id DESC
+               LIMIT ?`,
+            )
+            .all(accountId, accountId, accountId, limit) as ThreadProjectionRow[];
+          return rows.map((row) => ({
+            thread: mapMessageThreadRow(row),
+            counterpartAccountId: row.counterpart_account_id,
+            unreadCount: row.unread_count,
+          }));
+        },
+      },
+      messages: {
+        async appendMessage(input) {
+          const id = randomUUID();
+          const createdAt = new Date().toISOString();
+          database
+            .prepare(
+              `INSERT INTO messages (id, thread_id, author_account_id, kind, body, created_at)
+               VALUES (?, ?, ?, 'text', ?, ?)`,
+            )
+            .run(id, input.threadId, input.authorAccountId, input.body, createdAt);
+          return {
+            id,
+            threadId: input.threadId,
+            authorAccountId: input.authorAccountId,
+            kind: "text",
+            body: input.body,
+            createdAt,
+          };
+        },
+        async listByThreadId(threadId, limit) {
+          const rows = database
+            .prepare(
+              `SELECT * FROM messages
+               WHERE thread_id = ?
+               ORDER BY created_at ASC, id ASC
+               LIMIT ?`,
+            )
+            .all(threadId, limit) as MessageRow[];
+          return rows.map(mapMessageRow);
+        },
+      },
+      participants: {
+        async listForThread(threadId) {
+          const rows = database
+            .prepare(
+              `SELECT * FROM message_thread_participants WHERE thread_id = ?`,
+            )
+            .all(threadId) as MessageThreadParticipantRow[];
+          return rows.map(mapMessageThreadParticipantRow);
+        },
+        async markRead(threadId, accountId, ts) {
+          database
+            .prepare(
+              `UPDATE message_thread_participants
+               SET last_read_at = ?
+               WHERE thread_id = ? AND account_id = ?`,
+            )
+            .run(ts, threadId, accountId);
+        },
+        async getUnreadCountForAccount(accountId) {
+          const row = database
+            .prepare(
+              `SELECT COALESCE(SUM(unread), 0) AS total FROM (
+                 SELECT (
+                   SELECT COUNT(*) FROM messages m
+                   WHERE m.thread_id = self.thread_id
+                     AND (m.author_account_id IS NULL OR m.author_account_id <> ?)
+                     AND m.created_at > COALESCE(self.last_read_at, '')
+                 ) AS unread
+                 FROM message_thread_participants self
+                 WHERE self.account_id = ?
+               )`,
+            )
+            .get(accountId, accountId) as { total: number };
+          return row.total;
+        },
       },
     },
     async withTransaction(fn) {

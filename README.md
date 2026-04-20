@@ -90,13 +90,13 @@ Lens Archive 是一个面向**摄影师 / 模特双主身份**的创作者社区
 | 创作者主页 / 作品详情 | 阶段 1 + Discovery Quality | 已完成 | 新增发现语境字段与外部 handoff |
 | 工作台资料 / 作品 / 诉求 | 阶段 1 | 已完成 | repository-backed，已发布作品保存不会误回退草稿 |
 | 关注 / 评论 / 点赞 / 收藏 | 阶段 1 | 已完成 | 评论最新优先 + 校验 |
-| 合作线索入口 + 站内联系 / inbox | 阶段 1 | 入口与最小闭环已完成 | 线程演进归阶段 2 |
+| 合作线索入口 + 站内联系 / inbox | 阶段 1 + 阶段 2 §3.3 V1 | 已完成 | inbox 升级为持久化一对一线程 + 系统通知（read-only 派生）+ 30s 客户端轮询；详见 `RELEASE_NOTES.md` 2026-04-19 §3.3 章节 |
 | Discovery 最小事件记录 | Discovery Quality | 已完成 | 不依赖推荐算法 |
 | 规则化「相关创作者」「相关作品」 | 阶段 2 §3.6 V1 | 已完成 | `RelatedCreatorsSection` 挂在创作者主页底部、`RelatedWorksSection` 挂在作品详情页评论区上方；P95 ≤ 30ms |
 | 可观测性 / 备份恢复 / 内部 metrics | 阶段 2 §3.8 V1 | 已完成 | 详见 `RELEASE_NOTES.md` 2026-04-19 §3.8 章节 |
 | 运营 / 审核后台 V1（精选位维护 + 作品违规处置 + 审计日志） | 阶段 2 §3.2 V1 | 已完成 | `/studio/admin/{,curation,works,audit}` 四页 + admin 名单 env + audit_log 表；详见 `RELEASE_NOTES.md` 2026-04-19 §3.2 章节 |
 | 初始引流内容 | 阶段 1 | 已完成 | 授权来源 + 本地化 |
-| 消息中心 / 支付 / 向量检索 / 账号管理 | 阶段 2 | 未开始 | 显式延后 |
+| 支付 / 向量检索 / 账号管理 | 阶段 2 | 未开始 | 显式延后 |
 
 总体：**阶段 1 + Discovery Quality 已 finalized**（详见 `docs/verification/finalize-lens-archive-discovery-quality.md` 与 `RELEASE_NOTES.md`），可作为可云端部署的产品基线。
 

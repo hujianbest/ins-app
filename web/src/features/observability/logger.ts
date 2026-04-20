@@ -24,6 +24,7 @@ export type AllowedContextKey =
   | "creatorId"
   | "postId"
   | "threadId"
+  | "recipientAccountId"
   | "slowQueryMs"
   | "queryName"
   | "backupFile"
@@ -44,6 +45,7 @@ const ALLOWED_KEYS: ReadonlySet<string> = new Set<AllowedContextKey>([
   "creatorId",
   "postId",
   "threadId",
+  "recipientAccountId",
   "slowQueryMs",
   "queryName",
   "backupFile",
