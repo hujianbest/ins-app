@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C .claude/skills log --oneline -1)",
+      "Bash(cat .claude/skills/harness-flow*/package.json)",
+      "WebSearch",
+      "Bash(*)"
+    ]
+  }
+}
