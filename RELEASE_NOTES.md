@@ -1,5 +1,77 @@
 # Release Notes
 
+## 2026-05-10 — Lens Archive v1.0.0 (Major Release)
+
+First major stable release establishing a production-ready baseline for the photography community platform. This release aggregates Phase 1 (Hybrid Platform Relaunch + Lens Archive Discovery Quality) and four Phase 2 increments (Observability & Ops V1, Discovery Intelligence V1, Ops Back Office V1, Threaded Messaging V1).
+
+**Core Product Capabilities:**
+- Real email/password authentication replacing demo cookies
+- High-fit discovery platform with related creators and works
+- Public portfolio pages with discovery context fields
+- Work publishing and management with draft/published states
+- Social interactions (follows, comments, likes, favorites)
+- Persistent one-to-one messaging threads with unified inbox
+- Direct messaging with 30s client-side polling
+- Collaboration opportunities posting
+- Basic search across works, creators, and opportunities
+- External link handoff with event tracking
+
+**Operations & Observability:**
+- Admin back office (`/studio/admin`) with curation and moderation
+- Email-based admin allowlist (fail-closed)
+- Curation slot maintenance (upsert/remove/reorder)
+- Work moderation (hide/restore with `moderated` status)
+- Audit logging with atomic transactions
+- Structured request-scoped tracing with AsyncLocalStorage
+- JSON-mode structured logger with controlled-key whitelist
+- In-memory metrics registry with internal `/api/metrics` endpoint
+- SQLite backup/restore CLI scripts
+- Extended health check with observability and backup status
+
+**Performance Benchmarks (all under NFR budgets):**
+- API health check: 3.1 ms (38% headroom under 5 ms budget)
+- Related content orchestration: <0.05 ms (99.8% headroom under 30 ms budget)
+- Admin operations: <0.03 ms (99.96% headroom under 80 ms budget)
+- Inbox thread listing: 8.1 ms (93% headroom under 120 ms budget)
+- System notifications: 0.73 ms (99.4% headroom under 120 ms budget)
+
+**Quality Assurance:**
+- 69 tasks completed with full evidence chain (T1-T18, T22-T69)
+- 338 passing Vitest tests (unit, integration, component)
+- All code reviews, test reviews, and traceability reviews passed
+- All regression gates passed
+- All completion gates passed
+- All finalize records written
+
+**Deployment Readiness:**
+- Multi-stage Dockerfile with standalone output and health checks
+- Environment variable contracts documented
+- Backup/restore automation included
+- Structured logging and metrics implemented
+- Error reporting infrastructure ready
+
+**Release Artifacts:**
+- `docs/release-v1.0.0/release-pack.md` — Comprehensive release documentation
+- `docs/release-v1.0.0/RELEASE_SUMMARY.md` — Executive summary
+- All verification records under `docs/verification/`
+
+**Known Limitations:**
+- SQLite only (PostgreSQL migration planned for v1.1)
+- Local image assets (object storage planned for v1.1)
+- 30s polling for messaging (real-time updates planned for v1.2)
+- 18 pre-existing test failures due to vite/node:sqlite test environment limitation (not blocking)
+
+**Out of Scope (Deferred to v1.1+):**
+- Managed PostgreSQL / object storage migration (Phase 2 §3.1)
+- Collaboration lead fulfillment workflow (Phase 2 §3.4)
+- Rich messaging features (attachments, group chat, SSE/WebSocket)
+- Payments, orders, memberships
+- Vector retrieval / ML ranking
+- Advanced search with faceted filters
+- Admin abuse reports queue and account management
+
+See [Release Pack](./docs/release-v1.0.0/release-pack.md) for complete technical documentation.
+
 ## 2026-04-05
 
 - Localized the homepage baseline into Chinese, including the root `lang`, homepage discovery copy, and homepage-facing card labels, so the site now starts from a Chinese-first entry experience.
