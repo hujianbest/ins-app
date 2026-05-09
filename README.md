@@ -47,8 +47,8 @@ Lens Archive is a creator-community platform built around the dual primary ident
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/lens-archive.git
-cd lens-archive
+git clone https://github.com/hujianbest/ins-app.git
+cd ins-app
 
 # Build image
 docker build -t lens-archive:v1.0.0 .
@@ -181,7 +181,7 @@ RECOMMENDATIONS_RELATED_ENABLED=true
 - 📦 [v1.0.0 Release Pack](./docs/release-v1.0.0/release-pack.md)
 - 📝 [Changelog](./RELEASE_NOTES.md)
 - 🗺️ [Roadmap](./docs/ROADMAP.md)
-- 🐛 [Issue Tracker](https://github.com/your-org/lens-archive/issues)
+- 🐛 [Issue Tracker](https://github.com/hujianbest/ins-app/issues)
 
 ## 📄 License
 

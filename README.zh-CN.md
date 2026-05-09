@@ -47,8 +47,8 @@ Lens Archive 是一个面向**摄影师 / 模特双主身份**的创作者社区
 
 ```bash
 # 克隆仓库
-git clone https://github.com/your-org/lens-archive.git
-cd lens-archive
+git clone https://github.com/hujianbest/ins-app.git
+cd ins-app
 
 # 构建镜像
 docker build -t lens-archive:v1.0.0 .
@@ -181,7 +181,7 @@ RECOMMENDATIONS_RELATED_ENABLED=true
 - 📦 [v1.0.0 发布包](./docs/release-v1.0.0/release-pack.md)
 - 📝 [版本更新日志](./RELEASE_NOTES.md)
 - 🗺️ [发展路线图](./docs/ROADMAP.md)
-- 🐛 [问题反馈](https://github.com/your-org/lens-archive/issues)
+- 🐛 [问题反馈](https://github.com/hujianbest/ins-app/issues)
 
 ## 📄 许可证
 
